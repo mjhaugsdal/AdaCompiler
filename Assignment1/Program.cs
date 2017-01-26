@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
+
 namespace Assignment1
 {
     class Program
@@ -13,8 +15,8 @@ namespace Assignment1
             //variables
             string fileName;
             string token;
-            //classes
-            lexicalScanner lx = new lexicalScanner();
+           
+
 
             //if not two arguments
             if (args.Length != 2)
@@ -23,10 +25,17 @@ namespace Assignment1
             }
             fileName = args[2];
 
-            lx.openFile(fileName);
+            //classes
+            lexicalScanner lx = new lexicalScanner(fileName);
 
+            while (lexicalScanner.token != "eoft")
+            {
+                lx.getNextToken();
+
+            }
+            
             /*
-            //While not eof...
+            //While n..........loooooooooooooooooooooookot eof...
             while(token != "eoft")
             {
                 token = lx.getNextToken();
@@ -34,8 +43,6 @@ namespace Assignment1
                 Console.WriteLine(token);
             
             }
-
-
             */
         }
     }
