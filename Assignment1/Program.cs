@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,35 +19,23 @@ namespace Assignment1
 
             fileName = "test.txt";
 
-            /*
+            StreamReader sr = new StreamReader(fileName);
 
             //if not two arguments
             if (args.Length != 2)
             {
                 Console.WriteLine("Usage: program name, filename");
             }
-            fileName = args[2];
-            */
 
             //classes
-            lexicalScanner lx = new lexicalScanner(fileName);
+            lexicalScanner lx = new lexicalScanner(fileName, sr);
 
-            while (lexicalScanner.token != "eoft")
-            {
+           // while (lexicalScanner.token != "eoft")
+           // {
                 lx.getNextToken();
 
-            }
-            
-            /*
-            //While n..........loooooooooooooooooooooookot eof...
-            while(token != "eoft")
-            {
-                token = lx.getNextToken();
+           // }
 
-                Console.WriteLine(token);
-            
-            }
-            */
         }
     }
 }
