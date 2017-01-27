@@ -15,6 +15,7 @@ namespace Assignment1
         string lexeme;
         private string fileName;
         private StreamReader sr;
+    
 
         public lexicalScanner(string fileName)
         {
@@ -36,36 +37,39 @@ namespace Assignment1
             //if... something about the next char
             return ch;
         }
+        public char peekNextChar()
+        {
+            ch = (char)sr.Peek();
+
+            return ch;
+        }
 
         public string getNextToken()
         {
 
-            //StreamReader sr = openFile();
-
-            while(Char.IsWhiteSpace(ch) == true)
+            while (!sr.EndOfStream)
             {
                 ch = getNextChar();
-                if(!sr.EndOfStream)
+                if (Char.IsWhiteSpace(ch) != true)
                 {
-                    token = processToken(ch);
+                    
+                    processToken(ch);
                 }
                 else
                 {
-                    token = "eoft";
-                }
+                    return token;
 
+                }
             }
 
-
             return token;
-
         }
 
         public string processToken(char ch)
         {
             lexeme = ch.ToString();
-            Console.WriteLine(lexeme);
-            ch = getNextChar();
+            Console.Write(lexeme);
+            ch = peekNextChar();
             //peek?
 
             if (Char.IsLetter(lexeme[0])) //IF LETTER
@@ -81,7 +85,7 @@ namespace Assignment1
             {
                 //processComment
             }
-            else if(lexeme[0] == 58 || lexeme[0] == 60 || lexeme[0] == 62 || lexeme[0] == )
+            else if(lexeme[0] == 58 || lexeme[0] == 60 || lexeme[0] == 62 )
             {
 
             }
@@ -89,8 +93,18 @@ namespace Assignment1
 
             return lexeme;
 
-
+            
         }
+
+        public void processWordToken()
+        {
+        
+            while(Char.IsWhiteSpace(ch) != true)
+            {
+
+            }
+        }
+
 
     }
 }

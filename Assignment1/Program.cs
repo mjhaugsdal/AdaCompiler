@@ -30,11 +30,12 @@ namespace Assignment1
             //classes
             lexicalScanner lx = new lexicalScanner(fileName, sr);
 
-           // while (lexicalScanner.token != "eoft")
-           // {
+            while (lexicalScanner.token != "eoft")
+            {
+                //Console.WriteLine("s");
                 lx.getNextToken();
 
-           // }
+            }
 
         }
     }
