@@ -15,15 +15,18 @@ namespace Assignment1
             //variables
             string fileName;
             string token;
-           
 
+            fileName = "test.txt";
+
+            /*
 
             //if not two arguments
             if (args.Length != 2)
             {
-                Console.WriteLine("Usage: " + args[0] + " filename");
+                Console.WriteLine("Usage: program name, filename");
             }
             fileName = args[2];
+            */
 
             //classes
             lexicalScanner lx = new lexicalScanner(fileName);

@@ -19,40 +19,47 @@ namespace Assignment1
             this.fileName = fileName;
         }
 
-        public void openFile()
+        public StreamReader openFile()
         {
             //So i dont need to enter filename every time xD
             fileName = "test.txt";
-            
-            try
-            {
-                
-                using (StreamReader sr = new StreamReader(fileName))
-                {
-                    getNextChar(sr);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Error with reading file");
-                Console.WriteLine(e.Message);
-            }
+
+
+            StreamReader sr = new StreamReader(fileName);
+            return sr;
+
         }//End openFile
 
     
-        public void getNextChar(StreamReader sr)
+        public char getNextChar(StreamReader sr)
         {
+
             ch = (char)sr.Read();
             Console.WriteLine(ch); //check for testing
-            sr.Peek();
-
-
+            sr.Peek(); // peek at next char
+            //if... something about the next char
+            return ch;
         }
 
-        public void getNextToken()
+        public string getNextToken()
         {
 
-     
+            StreamReader sr = openFile();
+
+            //while !EOF
+            while (!sr.EndOfStream)
+            {
+                ch = getNextChar(sr);
+                if (Char.IsWhiteSpace(ch) != false)
+                {
+                    token += ch;
+                }
+                else
+                    return token;
+            }
+
+            return "Debug token?";
+
         }
         public void processToken()
         {
