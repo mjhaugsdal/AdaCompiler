@@ -11,10 +11,22 @@ namespace Assignment1
     {
         //variables
         char ch;
-        public static string token;
+        //public static string token;
         string lexeme;
         private string fileName;
         private StreamReader sr;
+
+        public class Token
+        {
+            public string token;
+            public string lexeme;
+            public int value;
+            public float valueR;
+            public string literal;
+
+        }
+
+
 
         Dictionary<string, string> reswords = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -33,9 +45,7 @@ namespace Assignment1
         {
 
             ch = (char)sr.Read();
-            
-            //sr.Peek(); // peek at next char
-            //if... something about the next char
+
             return ch;
         }
         public char peekNextChar()
@@ -45,27 +55,28 @@ namespace Assignment1
             return ch;
         }
 
-        public string getNextToken()
+        public Token getNextToken()
         {
+            Token token = new Token();
 
             while (!sr.EndOfStream)
             {
                 ch = getNextChar();
                 if (Char.IsWhiteSpace(ch) != true)
                 {
-                    processToken(ch);
+                    processToken(ch, token);
                 }
                 else
                 {
                     return token;
                 }
-            }
-            //Console.WriteLine("Wooptidoo!");
-            token = "eoft";
+            }//end while eof
+
+            token.token = "eoft";
             return token;
         }
 
-        public string processToken(char ch)
+        public void processToken(char ch, Token token)
         {
             lexeme = ch.ToString();
             //Console.Write(lexeme);
@@ -74,7 +85,7 @@ namespace Assignment1
 
             if (Char.IsLetter(lexeme[0])) //IF LETTER
             {
-                processWordToken(lexeme);
+                processWordToken(lexeme, token);
 
             }
             else if (Char.IsDigit(lexeme[0])) //IF NUMBER
@@ -96,27 +107,68 @@ namespace Assignment1
             }
             
 
-            return lexeme;
+           // return lexeme;
 
             
         }
 
-        public void processWordToken(string lexeme)
+        public void processWordToken(string lexeme, Token token)
         {
         
             while(Char.IsWhiteSpace(ch) != true) // read the rest of the lexeme
             {
-                ch = getNextChar();
-                lexeme = lexeme + ch;
+                if (sr.Peek() > -1)
+                {
+                    ch = getNextChar();
+                    lexeme = lexeme + ch;
+                }
+                else
+                    break;  
             }
-            //Console.WriteLine(lexeme); //GOT IT!
+            Console.WriteLine(lexeme); //GOT IT!
             if(reswords.ContainsKey(lexeme))
             {
+                reswords.TryGetValue(lexeme, out token.lexeme);
 
             }
+            else
+            {
+                token.lexeme = "idt";
+            }
+
 
             //If lexeme is a reserved word
 
+        }
+        public void processNumToken (Token token)
+        {
+            bool hasFraction = false;
+            // read rest of line
+            // look for . 
+
+            while (Char.IsWhiteSpace(ch) != true) // read the rest of the lexeme
+            {
+
+
+                if (sr.Peek() > -1)
+                {
+                    ch = getNextChar();
+                    if (hasFraction == false)
+                    {
+                        token.value = token.value + ch;
+                    }
+                    else
+                    {
+                        token.valueR = token.valueR + ch;
+
+                    }
+                }
+                else
+                    break;
+            }
+
+            // if '.' store as float, if not store as int
+            //check for min max for int and float
 
 
 
@@ -143,5 +195,8 @@ namespace Assignment1
             reswords.Add("end", "endt");
 
         }
+
+     
+
     }
 }

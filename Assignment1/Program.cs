@@ -15,7 +15,7 @@ namespace Assignment1
         {
             //variables
             string fileName;
-            string token;
+            //string token;
 
             fileName = "test.txt";
 
@@ -27,18 +27,24 @@ namespace Assignment1
                 Console.WriteLine("Usage: program name, filename");
             }
 
-            //classes
+           // else
+           // {
+
+          
+                 //classes
             lexicalScanner lx = new lexicalScanner(fileName, sr);
-            lx.createDictionary();
-            while (lexicalScanner.token != "eoft")
-            {
-                //Console.WriteLine("s");
-                lx.getNextToken();
 
-               
+            lexicalScanner.Token token = new lexicalScanner.Token();
 
-            }
+                lx.createDictionary();
+                while (token.token != "eoft")
+                {
+                    //Console.WriteLine("s");
+                    token = lx.getNextToken();
 
-        }
+                Console.WriteLine(token.token);
+                }
+            //}
+        }   
     }
 }
