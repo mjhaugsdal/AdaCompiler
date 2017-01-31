@@ -44,27 +44,32 @@ namespace Assignment1
         public char getNextChar()
         {
 
-            ch = (char)sr.Read();
-
+            ch =(char)sr.Read();
             return ch;
         }
         public char peekNextChar()
         {
-            ch = (char)sr.Peek();
-
-            return ch;
+            return (char)sr.Peek();
         }
 
         public Token getNextToken()
         {
+
             Token token = new Token();
 
             while (!sr.EndOfStream)
             {
-                ch = getNextChar();
-                if (Char.IsWhiteSpace(ch) != true)
+
+                ch = peekNextChar();
+                if (!Char.IsWhiteSpace(ch) && String.IsNullOrWhiteSpace(token.token))
                 {
-                    processToken(ch, token);
+                    ch = getNextChar();
+                    processToken(token);
+
+                }
+                if (ch == 10 || Char.IsWhiteSpace(ch)) 
+                {
+                    ch = getNextChar();
                 }
                 else
                 {
@@ -76,15 +81,16 @@ namespace Assignment1
             return token;
         }
 
-        public void processToken(char ch, Token token)
+        public void processToken(Token token)
         {
             lexeme = ch.ToString();
-            //Console.Write(lexeme);
+
             ch = peekNextChar();
             //peek?
 
             if (Char.IsLetter(lexeme[0])) //IF LETTER
             {
+
                 processWordToken(lexeme, token);
 
             }
@@ -92,54 +98,157 @@ namespace Assignment1
             {
                 //processNumToken
             }
-            else if(lexeme[0] == 123) //IF LEFT CURLY BRACE (COMMENT)
+            else if (lexeme[0] == 45) //IF DOUBLE MINUS (COMMENT)
             {
-                //processComment
-            }
-            //IF ':', '<', '>', 
-            else if(lexeme[0] == 58 || lexeme[0] == 60 || lexeme[0] == 62 )
-            {
-                //check next token for =
-                if(ch == 61)
+                if (ch == 45)//processComment
                 {
+                    sr.ReadLine();
 
+                }
+                else
+                {
+                    token.token = "unkownt";
                 }
             }
             
+            //IF single and or double
+            else if (lexeme[0] == 60 || lexeme[0] == 62 || lexeme[0] == 61 || lexeme[0] == 47 || lexeme[0] == 58 )
+            {
+                //check next token for =
+                if (ch == 61)
+                {
+                    //process double token
+                    processDoubleToken(token);
 
-           // return lexeme;
+                }
+                else 
+                {
+                    //Process Single token
+                    processSingleToken(token);
+                }
+            }
 
+
+            // return lexeme;
+
+
+        }
+
+        private void processDoubleToken(Token token)
+        {
+
+            lexeme = lexeme + ch.ToString();
+            token.lexeme = lexeme;
+            getNextChar();
+
+            if (lexeme[0] == 47 || lexeme[0] == 60 || lexeme[0] == 62)
+            {
+                token.token = "relopt";
+            }
+            else if(lexeme[0] == 58)
+            {
+                token.token = "assignopt";
+            }
+        }
+
+        private void processSingleToken(Token token)
+        {
+            
+            //if =, >, <
+       
+            token.lexeme = lexeme;
+            if (lexeme[0] == 61 || lexeme[0] == 60 || lexeme[0] == 62)
+            {
+                token.token = "relopt";
+                
+            }
+            else if (lexeme[0] == 43 || lexeme[0] == 45)
+            {
+                token.token = "addopt";
+                
+            }
+            else if(lexeme[0] == 42 || lexeme[0] == 47)
+            {
+                token.token = "multopt";
+                
+            }
             
         }
 
         public void processWordToken(string lexeme, Token token)
         {
-        
-            while(Char.IsWhiteSpace(ch) != true) // read the rest of the lexeme
+            //Console.WriteLine();
+            while(sr.Peek() > -1) // read the rest of the lexeme
             {
-                if (sr.Peek() > -1)
+                char c = peekNextChar();
+                //idt can be letters, underscore and/or digits
+                if (!Char.IsLetterOrDigit(c) && c != 95)
+                    break;
+
+                if (sr.Peek() == 32 || sr.Peek() == 10)
+                {
+                    break;
+                }
+                else
                 {
                     ch = getNextChar();
                     lexeme = lexeme + ch;
                 }
-                else
-                    break;  
-            }
-            Console.WriteLine(lexeme); //GOT IT!
+
+            }//end while
+            token.lexeme = lexeme;
+//            Console.WriteLine("Lexeme: "+lexeme); //GOT IT!
+            
+            
             if(reswords.ContainsKey(lexeme))
             {
-                reswords.TryGetValue(lexeme, out token.lexeme);
-
+                //Console.WriteLine("Reserved" );
+                //If lexeme is reserved word, used reserved token tag
+                reswords.TryGetValue(lexeme, out token.token);
+                //Console.WriteLine(token.token);
             }
             else
             {
-                token.lexeme = "idt";
+
+                token.token = "idt";
+            }
+            //If lexeme is a reserved word
+            if (token.token == "putt")
+            {
+                processStringLiteral(token);
             }
 
 
-            //If lexeme is a reserved word
 
         }
+
+        private void processStringLiteral(Token token)
+        {
+            string literal ="";
+
+            while(sr.Peek() != 34)
+            {
+                ch = getNextChar();
+            }
+            //Look for opening literal
+            //found!
+            //literal = ch.ToString();
+
+            //ch = getNextChar(); // set ch to '"'
+            getNextChar();
+            while(sr.Peek() != 34)
+            {
+                literal = literal + ch;
+                getNextChar();
+                
+            }
+            literal = literal + ch;
+            ch = getNextChar();
+            literal = literal + ch;
+            
+            token.literal = literal;
+        }
+
         public void processNumToken (Token token)
         {
             bool hasFraction = false;

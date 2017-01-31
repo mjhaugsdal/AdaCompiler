@@ -17,7 +17,7 @@ namespace Assignment1
             string fileName;
             //string token;
 
-            fileName = "test.txt";
+            fileName = "test6.adb";
 
             StreamReader sr = new StreamReader(fileName);
 
@@ -32,17 +32,28 @@ namespace Assignment1
 
           
                  //classes
-            lexicalScanner lx = new lexicalScanner(fileName, sr);
+                 lexicalScanner lx = new lexicalScanner(fileName, sr);
 
-            lexicalScanner.Token token = new lexicalScanner.Token();
+                 lexicalScanner.Token token = new lexicalScanner.Token();
 
-                lx.createDictionary();
+                 lx.createDictionary();
+                 Console.WriteLine("Token\t\tlexeme\t\tLiteral");
+
+            
+
                 while (token.token != "eoft")
                 {
-                    //Console.WriteLine("s");
-                    token = lx.getNextToken();
 
-                Console.WriteLine(token.token);
+                    token = lx.getNextToken();
+                    
+                    
+                    if(!String.IsNullOrEmpty(token.token))
+                    {
+                    //Console.WriteLine(token.token + "\t\t" + token.lexeme + "\t\t\t" + token.value + "\t\t" + token.literal);
+                    Console.WriteLine(token.token + "\t\t" + token.lexeme + "\t\t" + token.literal);
+                    }
+                    //Console.WriteLine(token.token +"\t\t"+ token.lexeme + "\t\t\t" +token.value + "\t\t"+token.literal);
+                    
                 }
             //}
         }   
