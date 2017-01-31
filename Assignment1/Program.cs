@@ -17,7 +17,7 @@ namespace Assignment1
             string fileName;
             //string token;
 
-            fileName = "test6.adb";
+            fileName = "test.adb";
 
             StreamReader sr = new StreamReader(fileName);
 
@@ -37,7 +37,7 @@ namespace Assignment1
                  lexicalScanner.Token token = new lexicalScanner.Token();
 
                  lx.createDictionary();
-                 Console.WriteLine("Token\t\tlexeme\t\tLiteral");
+                 Console.WriteLine("Token\t\tlexeme\t\tAttribute");
 
             
 
@@ -49,12 +49,26 @@ namespace Assignment1
                     
                     if(!String.IsNullOrEmpty(token.token))
                     {
-                    //Console.WriteLine(token.token + "\t\t" + token.lexeme + "\t\t\t" + token.value + "\t\t" + token.literal);
-                    Console.WriteLine(token.token + "\t\t" + token.lexeme + "\t\t" + token.literal);
-                    }
-                    //Console.WriteLine(token.token +"\t\t"+ token.lexeme + "\t\t\t" +token.value + "\t\t"+token.literal);
-                    
-                }
+                        if(token.token == "numt")
+                        {
+                            if (lexicalScanner.hasDot == false)
+                            {
+                                Console.WriteLine(token.token + "\t\t" + token.lexeme + "\t\t" + token.value);
+                            }
+                            else
+                                Console.WriteLine(token.token + "\t\t" + token.lexeme + "\t\t" + token.valueR);
+                            }
+                        else if(token.token == "literalt")
+                        {
+                            Console.WriteLine(token.token + "\t\t" + token.lexeme + "\t\t" + token.literal);
+
+                        }
+                        else
+                            Console.WriteLine(token.token + "\t\t" + token.lexeme );
+
+                   }
+
+            }
             //}
         }   
     }

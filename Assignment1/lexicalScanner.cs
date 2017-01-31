@@ -15,7 +15,7 @@ namespace Assignment1
         string lexeme;
         private string fileName;
         private StreamReader sr;
-
+        public static bool hasDot = false;
         public class Token
         {
             public string token;
@@ -91,12 +91,12 @@ namespace Assignment1
             if (Char.IsLetter(lexeme[0])) //IF LETTER
             {
 
-                processWordToken(lexeme, token);
+                processWordToken( token);
 
             }
             else if (Char.IsDigit(lexeme[0])) //IF NUMBER
             {
-                //processNumToken
+                processNumToken(token);
             }
             else if (lexeme[0] == 45) //IF DOUBLE MINUS (COMMENT)
             {
@@ -134,6 +134,8 @@ namespace Assignment1
 
         }
 
+
+
         private void processDoubleToken(Token token)
         {
 
@@ -149,6 +151,7 @@ namespace Assignment1
             {
                 token.token = "assignopt";
             }
+
         }
 
         private void processSingleToken(Token token)
@@ -175,9 +178,11 @@ namespace Assignment1
             
         }
 
-        public void processWordToken(string lexeme, Token token)
+        public void processWordToken( Token token)
         {
             //Console.WriteLine();
+            
+
             while(sr.Peek() > -1) // read the rest of the lexeme
             {
                 char c = peekNextChar();
@@ -196,6 +201,7 @@ namespace Assignment1
                 }
 
             }//end while
+
             token.lexeme = lexeme;
 //            Console.WriteLine("Lexeme: "+lexeme); //GOT IT!
             
@@ -217,7 +223,10 @@ namespace Assignment1
             {
                 processStringLiteral(token);
             }
-
+            if(token.lexeme.Length > 17)
+            {
+                token.token = "unkownt";
+            }
 
 
         }
@@ -245,41 +254,39 @@ namespace Assignment1
             literal = literal + ch;
             ch = getNextChar();
             literal = literal + ch;
-            
+            token.token = "literalt";
             token.literal = literal;
         }
 
         public void processNumToken (Token token)
         {
-            bool hasFraction = false;
+            
+            string num = "";
             // read rest of line
             // look for . 
-
-            while (Char.IsWhiteSpace(ch) != true) // read the rest of the lexeme
+            char c = peekNextChar();
+            if (Char.IsDigit(c))
             {
-
-
-                if (sr.Peek() > -1)
+                while (sr.Peek() > -1 && Char.IsDigit(c)) // read the rest of the lexeme
                 {
                     ch = getNextChar();
-                    if (hasFraction == false)
-                    {
-                        token.value = token.value + ch;
-                    }
-                    else
-                    {
-                        token.valueR = token.valueR + ch;
-
-                    }
+                    num = num + ch;
                 }
-                else
-                    break;
             }
+            else
+            {
+                int numb = Int32.Parse(lexeme);
+                token.value = numb;
+                //Console.WriteLine(numb);
+
+            }
+
+            token.token = "numt";
+
+           // Console.WriteLine(num);
 
             // if '.' store as float, if not store as int
             //check for min max for int and float
-
-
 
         }
 
@@ -302,6 +309,11 @@ namespace Assignment1
             reswords.Add("get", "gett");
             reswords.Add("put", "putt");
             reswords.Add("end", "endt");
+            reswords.Add("or", "ort");
+            reswords.Add("rem", "remt");
+            reswords.Add("mod", "modt");
+            reswords.Add("and", "andt");
+
 
         }
 
