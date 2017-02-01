@@ -4,11 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Globalization;
+
 
 namespace Assignment1
 {
     public class lexicalScanner
     {
+        
         //variables
         char ch;
         //public static string token;
@@ -16,6 +19,8 @@ namespace Assignment1
         private string fileName;
         private StreamReader sr;
         public static bool hasDot = false;
+
+
         public class Token
         {
             public string token;
@@ -25,6 +30,7 @@ namespace Assignment1
             public string literal;
 
         }
+        
 
 
 
@@ -107,12 +113,15 @@ namespace Assignment1
                 }
                 else
                 {
-                    token.token = "unkownt";
+                    processSingleToken(token);
                 }
             }
             
             //IF single and or double
-            else if (lexeme[0] == 60 || lexeme[0] == 62 || lexeme[0] == 61 || lexeme[0] == 47 || lexeme[0] == 58 )
+            else if (lexeme[0] == 60 || lexeme[0] == 62 || lexeme[0] == 61 || lexeme[0] == 47 || lexeme[0] == 58 ||
+                     lexeme[0] == 40 || lexeme[0] == 41 || lexeme[0] == 44 || lexeme[0] == 59 || lexeme[0] == 34 ||
+                     lexeme[0] == 46   )
+                
             {
                 //check next token for =
                 if (ch == 61)
@@ -128,7 +137,11 @@ namespace Assignment1
                 }
             }
 
-
+            else
+            {
+                token.token = "unkownt";
+                token.lexeme = lexeme;
+            }
             // return lexeme;
 
 
@@ -175,7 +188,36 @@ namespace Assignment1
                 token.token = "multopt";
                 
             }
-            
+            else if(lexeme[0] == 40)
+            {
+                token.token = "lparent";
+            }
+            else if (lexeme[0] == 41)
+            {
+                token.token = "rparent";
+            }
+            else if (lexeme[0] == 44)
+            {
+                token.token = "commat";
+            }
+            else if (lexeme[0] == 58)
+            {
+                token.token = "colont";
+            }
+            else if (lexeme[0] == 59)
+            {
+                token.token = "semicolont";
+            }
+            else if (lexeme[0] == 46)
+            {
+                token.token = "periodt";
+            }
+            else if (lexeme[0] == 34)
+            {
+                processStringLiteral(token);
+            }
+
+
         }
 
         public void processWordToken( Token token)
@@ -190,7 +232,7 @@ namespace Assignment1
                 if (!Char.IsLetterOrDigit(c) && c != 95)
                     break;
 
-                if (sr.Peek() == 32 || sr.Peek() == 10)
+                else if (sr.Peek() == 32 || sr.Peek() == 10)
                 {
                     break;
                 }
@@ -219,10 +261,7 @@ namespace Assignment1
                 token.token = "idt";
             }
             //If lexeme is a reserved word
-            if (token.token == "putt")
-            {
-                processStringLiteral(token);
-            }
+          
             if(token.lexeme.Length > 17)
             {
                 token.token = "unkownt";
@@ -233,60 +272,120 @@ namespace Assignment1
 
         private void processStringLiteral(Token token)
         {
-            string literal ="";
+            string literal = "\"";
 
-            while(sr.Peek() != 34)
+            /*while(sr.Peek() != 34)
             {
                 ch = getNextChar();
-            }
+            }*/
             //Look for opening literal
             //found!
             //literal = ch.ToString();
 
             //ch = getNextChar(); // set ch to '"'
             getNextChar();
-            while(sr.Peek() != 34)
+
+
+            while (sr.Peek() != 34 && sr.Peek() != 10)
             {
+
                 literal = literal + ch;
                 getNextChar();
                 
-            }
-            literal = literal + ch;
-            ch = getNextChar();
-            literal = literal + ch;
-            token.token = "literalt";
-            token.literal = literal;
-        }
 
-        public void processNumToken (Token token)
-        {
-            
-            string num = "";
-            // read rest of line
-            // look for . 
-            char c = peekNextChar();
-            if (Char.IsDigit(c))
+            }
+
+            if (sr.Peek() != 10)
             {
-                while (sr.Peek() > -1 && Char.IsDigit(c)) // read the rest of the lexeme
-                {
-                    ch = getNextChar();
-                    num = num + ch;
-                }
+                literal = literal + ch;
+                ch = getNextChar();
+                literal = literal + ch;
+                token.token = "literalt";
+                token.literal = literal;
+                token.lexeme = literal;
             }
             else
             {
-                int numb = Int32.Parse(lexeme);
-                token.value = numb;
-                //Console.WriteLine(numb);
-
+                
+                token.token = "unkownt";
+              
+                token.literal = literal;
+                token.lexeme = literal;
             }
 
+        }
+
+
+        public void processNumToken(Token token)
+        {
+           // getNextChar();
+            hasDot = false;
+            string nums = lexeme[0].ToString();
             token.token = "numt";
+            char p;
+            if (char.IsWhiteSpace(ch)) // only one char
+            {
+                Int32.TryParse(nums, out token.value);
+            }
+            else
+            { 
 
-           // Console.WriteLine(num);
+                //char p = peekNextChar(); // peek at next position
+                while (sr.Peek() > -1)
+                {
+                    p = peekNextChar();
+                    if (char.IsDigit(p) || p == 46)
+                    {
+                        getNextChar();
+                        
 
-            // if '.' store as float, if not store as int
-            //check for min max for int and float
+                        nums = nums + ch;
+                        if (char.IsWhiteSpace(p))
+                        {
+                            break;
+                        }
+                        if (ch == 46 || p == 46)
+                        {
+                            hasDot = true;
+                        }
+                        
+                    }
+                    else
+                    {
+                        //Check for 
+                        //token.token = "unkownt";
+                        break;
+                    }
+
+
+                }//end while
+         
+
+
+                if (hasDot == true)
+                {
+                    if (ch == 46) // if last char of number is .
+                    {
+                        token.token = "unkownt";
+                        token.lexeme = nums;
+                    }
+                    else
+                        token.valueR = float.Parse(nums);
+                }
+
+                else
+                {
+
+                    //Int32.TryParse(nums, out token.value);
+                    token.value = Int32.Parse(nums);
+
+                }
+                
+                         
+    }
+
+
+
 
         }
 
@@ -317,7 +416,45 @@ namespace Assignment1
 
         }
 
-     
+        public void printToken(Token token)
+        {
+            string output = "";
+           /* Tuple<string, string, int, float, string> tuple=
+                new Tuple<string, string, int, float, string>(token.token, token.lexeme,token.value, token.valueR, token.literal);
+                */
+            if (!String.IsNullOrEmpty(token.token))
+            {
+
+                if (token.token == "numt")
+                {
+                    if (lexicalScanner.hasDot == false)
+                    {
+                        output = string.Format("{0,-15}  {1,-15} {2,-15}", token.token, token.lexeme, token.value);
+                        // Console.WriteLine(token.token + "\t\t" + token.lexeme + "\t\t" + token.value);
+                    }
+
+                    else
+                        //Console.WriteLine(token.token + "\t\t" + token.lexeme + "\t\t" + token.valueR);
+                        output = string.Format("{0,-15}  {1,-15} {2,-15}", token.token, token.lexeme,token.valueR);
+                }
+                else if (token.token == "literalt")
+                {
+                    //Console.WriteLine(token.token + "\t\t" + token.lexeme + "\t\t" + token.literal);
+                    output = string.Format("{0,-15}  {1,-15} {2,-15}", token.token, token.lexeme, token.literal);
+
+                }
+                else
+                {
+                     output = string.Format("{0,-15}  {1,-15}", token.token , token.lexeme);
+                        //Console.WriteLine( token.token + "\t\t" + token.lexeme);
+                     //Console.WriteLine(output);
+
+                }
+
+                Console.WriteLine(output);
+            }
+
+        } // end print token
 
     }
 }

@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Threading;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Globalization;
 
 
 
@@ -13,11 +15,14 @@ namespace Assignment1
     {
         public static void Main(string[] args)
         {
+            CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("us-US");
+            CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("us-US");
+
             //variables
             string fileName;
             //string token;
 
-            fileName = "test.adb";
+            fileName = "test2.adb";
 
             StreamReader sr = new StreamReader(fileName);
 
@@ -37,38 +42,25 @@ namespace Assignment1
                  lexicalScanner.Token token = new lexicalScanner.Token();
 
                  lx.createDictionary();
-                 Console.WriteLine("Token\t\tlexeme\t\tAttribute");
+                 string output = String.Format("{0,-15}  {1,-15} {2,-15}", "Token", "Lexeme", "Attribute");
+                 //Console.WriteLine("Token\t\tlexeme\t\tAttribute");
+                 Console.WriteLine(output);
 
-            
+
+            int i = 0;
 
                 while (token.token != "eoft")
                 {
+                    
 
                     token = lx.getNextToken();
-                    
-                    
-                    if(!String.IsNullOrEmpty(token.token))
-                    {
-                        if(token.token == "numt")
-                        {
-                            if (lexicalScanner.hasDot == false)
-                            {
-                                Console.WriteLine(token.token + "\t\t" + token.lexeme + "\t\t" + token.value);
-                            }
-                            else
-                                Console.WriteLine(token.token + "\t\t" + token.lexeme + "\t\t" + token.valueR);
-                            }
-                        else if(token.token == "literalt")
-                        {
-                            Console.WriteLine(token.token + "\t\t" + token.lexeme + "\t\t" + token.literal);
 
-                        }
-                        else
-                            Console.WriteLine(token.token + "\t\t" + token.lexeme );
+                lx.printToken(token);
+                i++;
 
-                   }
 
             }
+            Console.WriteLine("Tokens: " + i);
             //}
         }   
     }
