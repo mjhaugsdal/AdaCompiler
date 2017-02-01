@@ -32,15 +32,18 @@ namespace Assignment1
         public static bool hasDot = false;
 
 
-        public enum SYMBOL { none, begint, modult, constt, proct, ist, ift, thent, elset, elseift, whilet, loopt,
-                             floatt, integert, chart, gett, putt, endt, ort, remt, modt, andt, eoft, unkownt,
-                             relopt, addopt, assignopt, multopt, lparent, rparent,commat,colont,semicolont,
-                             periodt,idt,literalt,numt };
+        public enum SYMBOL { begint, modult, constt, proct, ist,
+            ift, thent, elset, elseift, whilet, loopt,
+            floatt, integert, chart, gett, putt, endt, ort,
+            remt, modt, andt, eoft, unkownt,
+            relopt, addopt, assignopt, multopt, lparent,
+            rparent,commat,colont,semicolont,
+            periodt,idt,literalt,numt };
 
         //Token object for token building
         public class Token
         {
-            public SYMBOL token = SYMBOL.none;
+            public SYMBOL token = SYMBOL.unkownt;
             public string lexeme;
             public int value;
             public float valueR;
@@ -51,7 +54,8 @@ namespace Assignment1
 
 
         //Dictionary for checking reserved word tokens
-        Dictionary<string, SYMBOL> reswords = new Dictionary<string, SYMBOL>(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, SYMBOL> reswords = 
+            new Dictionary<string, SYMBOL>(StringComparer.OrdinalIgnoreCase);
 
         public lexicalScanner(string fileName)
         {
@@ -89,11 +93,14 @@ namespace Assignment1
             {
                 //Only peek! 
                 ch = peekNextChar();
-                if (!Char.IsWhiteSpace(ch) )
+                if (!Char.IsWhiteSpace(ch) && Enum.IsDefined
+                    (typeof(SYMBOL), SYMBOL.unkownt))
                 {
                     //If peek was successful, get next char
                     ch = getNextChar();
                     processToken(token); //Process the token
+
+                    return token;
 
                 }
                 //If newline or whitespace
@@ -106,13 +113,14 @@ namespace Assignment1
                     return token;
                 }
             }//end while eof
-
-            token.token = SYMBOL.eoft; //Final token to signify that eof was reached. (Maybe not necessary)
+             //Final token to signify that eof was reached. (Maybe not necessary)
+            token.token = SYMBOL.eoft; 
             return token;
         }
         /// <summary>
         /// ProcessToken. 
-        /// Creates the lexeme. Checks first position of lexeme to determine what to do.
+        /// Creates the lexeme. Checks first position 
+        /// of lexeme to determine what to do.
         /// </summary>
         /// <param name="token"></param>
         public void processToken(Token token)
@@ -146,8 +154,11 @@ namespace Assignment1
             }
             
             //IF single and or double
-            else if (lexeme[0] == 60 || lexeme[0] == 62 || lexeme[0] == 61 || lexeme[0] == 47 || lexeme[0] == 58 ||
-                     lexeme[0] == 40 || lexeme[0] == 41 || lexeme[0] == 44 || lexeme[0] == 59 || lexeme[0] == 34 ||
+            else if (lexeme[0] == 60 || lexeme[0] == 62 || 
+                     lexeme[0] == 61 || lexeme[0] == 47 ||
+                     lexeme[0] == 58 || lexeme[0] == 40 || 
+                     lexeme[0] == 41 || lexeme[0] == 44 || 
+                     lexeme[0] == 59 || lexeme[0] == 34 ||
                      lexeme[0] == 46   )
                 
             {
@@ -368,6 +379,7 @@ namespace Assignment1
             char p;
             if (char.IsWhiteSpace(ch)) // only one char
             {
+                token.lexeme = nums;
                 Int32.TryParse(nums, out token.value);
             }
             else
@@ -413,13 +425,18 @@ namespace Assignment1
                         token.lexeme = nums;
                     }
                     else
+                    {
+                        token.lexeme = nums;
                         token.valueR = float.Parse(nums);
+                    }
+                        
                 }
 
                 else
                 {
 
                     //Int32.TryParse(nums, out token.value);
+                    token.lexeme = nums;
                     token.value = Int32.Parse(nums);
 
                 }
@@ -470,34 +487,32 @@ namespace Assignment1
         {
             string output = "";
             
-            if (Enum.IsDefined(SYMBOL, )
+
+            if (!String.IsNullOrEmpty(token.lexeme))
             {
 
                 i++;
-                if (token.token == "numt")
+                if (token.token == SYMBOL.numt)
                 {
                     if (lexicalScanner.hasDot == false)
                     {
                         output = string.Format("{0,-15}  {1,-15}", token.token, token.value);
-                        // Console.WriteLine(token.token + "\t\t" + token.lexeme + "\t\t" + token.value);
+                       
                     }
 
                     else
-                        //Console.WriteLine(token.token + "\t\t" + token.lexeme + "\t\t" + token.valueR);
+                       
                         output = string.Format("{0,-15}  {1,-15} ", token.token, token.valueR);
                 }
-                else if (token.token == "literalt")
+                else if (token.token == SYMBOL.literalt)
                 {
-                    //Console.WriteLine(token.token + "\t\t" + token.lexeme + "\t\t" + token.literal);
+                    
                     output = string.Format("{0,-15}  {1,-15} ", token.token, token.lexeme);
 
                 }
                 else
                 {
                      output = string.Format("{0,-15}  {1,-15}", token.token , token.lexeme);
-                        //Console.WriteLine( token.token + "\t\t" + token.lexeme);
-                     //Console.WriteLine(output);
-
                 }
 
                 Console.WriteLine(output);
