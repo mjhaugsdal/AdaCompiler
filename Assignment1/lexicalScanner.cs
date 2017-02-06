@@ -33,9 +33,9 @@ namespace Assignment1
 
 
         public enum SYMBOL { begint, modult, constt, proct, ist,
-            ift, thent, elset, elseift, whilet, loopt,
-            floatt, integert, chart, gett, putt, endt, ort,
-            remt, modt, andt, eoft, unkownt,
+            ift, thent, elset, elsift, whilet, loopt,
+            floatt, integert, chart, gett, putt, endt, 
+            andt, eoft, unkownt,
             relopt, addopt, assignopt, multopt, lparent,
             rparent,commat,colont,semicolont,
             periodt,idt,literalt,numt };
@@ -159,7 +159,8 @@ namespace Assignment1
                      lexeme[0] == 58 || lexeme[0] == 40 || 
                      lexeme[0] == 41 || lexeme[0] == 44 || 
                      lexeme[0] == 59 || lexeme[0] == 34 ||
-                     lexeme[0] == 46   )
+                     lexeme[0] == 46 || lexeme[0] == 43 ||
+                     lexeme[0] == 42 )
                 
             {
                 //check next token for =
@@ -462,7 +463,7 @@ namespace Assignment1
             reswords.Add("if", SYMBOL.ift);
             reswords.Add("then", SYMBOL.thent);
             reswords.Add("else", SYMBOL.elset);
-            reswords.Add("elseif", SYMBOL.elseift);
+            reswords.Add("elsif", SYMBOL.elsift);
             reswords.Add("while", SYMBOL.whilet);
             reswords.Add("loop", SYMBOL.loopt);
             reswords.Add("float", SYMBOL.floatt);
@@ -471,10 +472,10 @@ namespace Assignment1
             reswords.Add("get", SYMBOL.gett);
             reswords.Add("put", SYMBOL.putt);
             reswords.Add("end", SYMBOL.endt);
-            reswords.Add("or", SYMBOL.ort);
-            reswords.Add("rem", SYMBOL.remt);
-            reswords.Add("mod", SYMBOL.modt);
-            reswords.Add("and", SYMBOL.andt);
+            reswords.Add("or", SYMBOL.addopt);
+            reswords.Add("rem", SYMBOL.multopt);
+            reswords.Add("mod", SYMBOL.multopt);
+            reswords.Add("and", SYMBOL.multopt);
 
 
         }

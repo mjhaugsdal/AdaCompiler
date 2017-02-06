@@ -36,14 +36,15 @@ namespace Assignment1
 
            
             //if not two arguments
-            if (args.Length != 1)
+            if (args.Length == 1)
             {
                 Console.WriteLine("Usage: \"program name\".exe, \"filename\"");
             }
 
             else
             {
-                fileName = args[0]; // args
+                //fileName = args[0]; // args
+                fileName = "tokens.ada";
                 StreamReader sr = new StreamReader(fileName);
                 //classes
                 lexicalScanner lx = new lexicalScanner(fileName, sr);
