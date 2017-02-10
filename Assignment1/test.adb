@@ -1,0 +1,4 @@
+PROCEDURE ONE IS;
+BEGIN
+     PUT("Hello World");
+END ONE;

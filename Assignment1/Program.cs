@@ -44,39 +44,42 @@ namespace Assignment1
             else
             {
                 //fileName = args[0]; // args
-                fileName = "tokens.ada";
+                fileName = "vtoken2.txt";
                 StreamReader sr = new StreamReader(fileName);
                 //classes
-                lexicalScanner lx = new lexicalScanner(fileName, sr);
                 //for return
                 lexicalScanner.Token token = new lexicalScanner.Token();
 
+                lexicalScanner lx = new lexicalScanner(fileName, sr);
+                rdp rdp = new rdp(token, lx,sr);
+
                 lx.createDictionary();
-                string output = String.Format("{0,-15}  {1,-15} ", "Token"
+               /* string output = String.Format("{0,-15}  {1,-15} ", "Token"
                      , "Lexeme");
               
                 Console.WriteLine(output);
 
                 int j = 0;
-
+                */
                 //While NOT eoft
                 while (token.token != lexicalScanner.SYMBOL.eoft )
                 {
                     
 
-                    token = lx.getNextToken();
-
-                    if(j > 20)
+                   // token = lx.getNextToken();
+                    token = rdp.parse();
+                    Console.WriteLine("Reached eof");
+                  /*  if(j > 20)
                     {
                         Console.WriteLine("Press any key to continue...");
                         Console.ReadKey();
                         j = 0;    
                     }
-                    lx.printToken(token);
+                    //lx.printToken(token);
                    
-                    j++;
+                    j++;*/
                 }// end while NOT eoft
-                Console.WriteLine("Tokens processed: " + lexicalScanner.i); 
+                //Console.WriteLine("Tokens processed: " + lexicalScanner.i); 
             }
         }   
     }

@@ -25,6 +25,7 @@ namespace Assignment1
         //variables
         char ch;
         public static int i = 0;
+        public static int ln = 1;
         //public static string token;
         string lexeme;
         private string fileName;
@@ -106,6 +107,8 @@ namespace Assignment1
                 //If newline or whitespace
                 if (ch == 10 || Char.IsWhiteSpace(ch)) 
                 {
+                    if (ch == 10)
+                        ln += 1;
                     ch = getNextChar();
                 }
                 else 
