@@ -222,7 +222,7 @@ namespace Assignment1
             {            
                 if (desiredToken != token.token)
                 {
-
+                     
                     //Console.WriteLine(lexicalScanner.ln);
                     //sr.ReadToEnd();
                     //throw new Exception("Error in line " + lexicalScanner.ln + ". Expected token: " + desiredToken + ", Recieved: " + token.token);
