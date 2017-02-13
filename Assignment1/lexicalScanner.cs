@@ -9,8 +9,8 @@ using System.Globalization;
 /// <summary>
 /// Name: Markus Johan Haugsdal
 /// Class: CSC 446 Compiler Construction
-/// Assignment: 1
-/// Due Date: 01.02.2017
+/// Assignment: 2
+/// Due Date: 13.02.2017
 /// Instructor: Hamer
 /// 
 /// Description: Lexical scanner for determining tokens
@@ -36,10 +36,11 @@ namespace Assignment1
         public enum SYMBOL { begint, modult, constt, proct, ist,
             ift, thent, elset, elsift, whilet, loopt,
             floatt, integert, chart, gett, putt, endt, 
-            andt, eoft, unkownt,
-            relopt, addopt, assignopt, multopt, lparent,
-            rparent,commat,colont,semicolont,
-            periodt,idt,literalt,numt };
+            andt, eoft, unkownt, relopt, addopt, assignopt,
+            multopt, lparent, rparent,commat,colont,semicolont,
+            periodt,idt,literalt,numt, intt, outt, inoutt, commentt,
+            realt
+        };
 
         //Token object for token building
         public class Token
@@ -95,17 +96,17 @@ namespace Assignment1
                 //Only peek! 
                 ch = peekNextChar();
                 if (!Char.IsWhiteSpace(ch) && Enum.IsDefined
-                    (typeof(SYMBOL), SYMBOL.unkownt))
+                    (typeof(SYMBOL), SYMBOL.unkownt) )
                 {
                     //If peek was successful, get next char
                     ch = getNextChar();
                     processToken(token); //Process the token
 
-                    return token;
+                   return token;
 
                 }
                 //If newline or whitespace
-                if (ch == 10 || Char.IsWhiteSpace(ch)) 
+                if (ch == 10 || Char.IsWhiteSpace(ch) ) 
                 {
                     if (ch == 10)
                         ln += 1;
@@ -148,6 +149,12 @@ namespace Assignment1
                 if (ch == 45)//processComment
                 {
                     sr.ReadLine();
+                    token.token = SYMBOL.commentt;
+                    ln += 1;
+                    //Token nToken = getNextToken();
+                    //token = getNextToken();
+
+                    //Console.WriteLine(token.token);
 
                 }
                 else
@@ -329,10 +336,6 @@ namespace Assignment1
         {
             string literal = "\"";
 
-            /*while(sr.Peek() != 34)
-            {
-                ch = getNextChar();
-            }*/
             //Look for opening literal
             //found!
             //literal = ch.ToString();
@@ -480,6 +483,11 @@ namespace Assignment1
             reswords.Add("mod", SYMBOL.multopt);
             reswords.Add("and", SYMBOL.multopt);
 
+            //Assignment 2
+            reswords.Add("in", SYMBOL.intt);
+            reswords.Add("out", SYMBOL.outt);
+            reswords.Add("inout", SYMBOL.inoutt);
+            reswords.Add("real", SYMBOL.realt);
 
         }
 

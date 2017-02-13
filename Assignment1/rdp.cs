@@ -5,12 +5,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+/// <summary>
+/// Name: Markus Johan Haugsdal
+/// Class: CSC 446 Compiler Construction
+/// Assignment: 2
+/// Due Date: 13.02.2017
+/// Instructor: Hamer
+/// 
+/// Description: Recursive descent parser. Determines if the source file follows correct grammar.
+/// 
+/// </summary>
+
 namespace Assignment1
 {
     class rdp
     {
    
-        bool error = false;
+        public static bool error = false;
         private lexicalScanner.Token token;
         private lexicalScanner lx;
         private StreamReader sr;
@@ -31,27 +42,24 @@ namespace Assignment1
         }
 
         //Parse
-        internal lexicalScanner.Token parse()
+        /// <summary>
+        /// Prog -> ..
+        /// Parses a program starting with procedure
+        /// </summary>
+        /// <param name="firstToken"></param>
+        /// <returns>A eoft</returns>
+        internal lexicalScanner.Token parse(lexicalScanner.Token firstToken)
         {
-            token = lx.getNextToken();
-            //Got the tokens!
-            /* START FOLLOWING THE GRAMMAR RULES!
-             * 
-             * prog
-             * ->
-             * proct, idt, Args, is
-             * DeclerativePart
-             * Procedures
-             * begin
-             * SeqOfStatements
-             * end, idt.
-             * 
-             * NOTE: Changes will come after friday the 10th
-             */
+            //Sets the first token
+            token.token = firstToken.token;
+            while (token.token == lexicalScanner.SYMBOL.commentt)
+            {
+                token = lx.getNextToken();
+            }
             //proct
             //
-            
-           
+
+
             match(lexicalScanner.SYMBOL.proct);
             //idt
             match(lexicalScanner.SYMBOL.idt);
@@ -79,27 +87,46 @@ namespace Assignment1
             return token;
 
         }
-
+        /// <summary>
+        /// NOT IMPLEMENTED YET
+        /// </summary>
         private void seqOfStatements()
         {
             //EMPTY
             //throw new NotImplementedException();
         }
-
+        /// <summary>
+        /// Procedure grammar rule, calls new parse.
+        /// </summary>
         private void procedures()
         {
+
             //-> Prog Procedures | e
-            //throw new NotImplementedException();
+            switch (token.token)
+            {
+                case (lexicalScanner.SYMBOL.proct):
+                    if(error != true)
+                        parse(token);
+                    break;
+                default:
+                    //Lambda / empty
+                    break;
+            }
+
         }
 
+        /// <summary>
+        /// DeclerativePart grammar rule. 
+        /// </summary>
         private void declPart()
         {
             switch(token.token)
             {
                 case (lexicalScanner.SYMBOL.idt):
                     if (error != true)
+                    {
                         idList();
-                    //match(lexicalScanner.SYMBOL.idt);
+                    }
                     match(lexicalScanner.SYMBOL.colont);
                     if (error != true)
                         typeMark();
@@ -108,13 +135,13 @@ namespace Assignment1
                         declPart();
                     break;
                 default:
-                    Console.WriteLine("empty");
+                    //Lambda / empty
                     break;
             }
-
-            //throw new NotImplementedException();
         }
-
+        /// <summary>
+        /// TypeMark Grammar rule
+        /// </summary>
         private void typeMark()
         {
             switch(token.token)
@@ -122,33 +149,39 @@ namespace Assignment1
                 case (lexicalScanner.SYMBOL.integert):
                     match(lexicalScanner.SYMBOL.integert);
                     break;
-                case (lexicalScanner.SYMBOL.floatt):
+                /*case (lexicalScanner.SYMBOL.floatt):
                     match(lexicalScanner.SYMBOL.floatt);
+                    break;*/
+                case (lexicalScanner.SYMBOL.realt):
+                    match(lexicalScanner.SYMBOL.realt);
                     break;
                 case (lexicalScanner.SYMBOL.chart):
                     match(lexicalScanner.SYMBOL.chart);
                     break;
                 case (lexicalScanner.SYMBOL.constt):
 
-                    throw new NotImplementedException();
                     match(lexicalScanner.SYMBOL.constt);
                     match(lexicalScanner.SYMBOL.assignopt);
-                    value();
+                    if(error != true)
+                        value();
+
                     break;
             }
         }
 
+        /// <summary>
+        /// Checks if token has value (number token)
+        /// </summary>
         private void value()
         {
             //Numberical Literal
-
             match(lexicalScanner.SYMBOL.numt);
-
-
-
-            //throw new NotImplementedException();
+            
         }
 
+        /// <summary>
+        /// Function for grammar rule Args -> ( ArgList ) | e
+        /// </summary>
         private void pArgs()
         {
 
@@ -162,52 +195,94 @@ namespace Assignment1
                     break;
                 default:
                     //empty 
-                    Console.WriteLine("empty");
+                    
 
                     break;
 
             }
         }
-
+        /// <summary>
+        /// ArgList grammar rule
+        /// </summary>
         private void argList()
         {
             if (error != true)
                 mode();
-            //call idList()
+            if(error != true)
+                idList();
+            match(lexicalScanner.SYMBOL.colont);
 
-            //match colont
-            // match(lexicalScanner.SYMBOL.colont);
-            //call TypeMark()
-            //Call MoreArgs()
-            // throw new NotImplementedException();
+            if (error != true)
+                typeMark();
+            if (error != true)
+                moreArgs();
         }
 
+        private void moreArgs()
+        {
+            switch(token.token)
+            { 
+                case (lexicalScanner.SYMBOL.semicolont):
+                    match(lexicalScanner.SYMBOL.semicolont);
+                    if(error!= true)
+                        argList();
+                    break;
+                default:
+                    //empty / lambda
+                    break;
+            }
+        }
+        /// <summary>
+        /// IdList grammar rule
+        /// </summary>
         private void idList()
         {
-
+            match(lexicalScanner.SYMBOL.idt);
+            idListTail();
 
             //
             //throw new NotImplementedException();
         }
-
+        /// <summary>
+        /// Trailing IdList to remove left recursion
+        /// </summary>
+        private void idListTail()
+        {
+            switch(token.token)
+                {
+                case (lexicalScanner.SYMBOL.commat):
+                    match(lexicalScanner.SYMBOL.commat);
+                    match(lexicalScanner.SYMBOL.idt);
+                    if(error != true)
+                        idListTail();
+                    break;
+                default:
+                    //Empty / lambda
+                    break;
+                }
+        }
+        /// <summary>
+        /// Mode grammar rule
+        /// </summary>
         private void mode()
-        {/*
+        {
             switch (token.token)
             {
-                case ():
-                    match(lexicalScanner.SYMBOL.lparent);
-                    if (error != true)
-                        argList();
-                    match(lexicalScanner.SYMBOL.rparent);
+                case (lexicalScanner.SYMBOL.intt):
+                    match(lexicalScanner.SYMBOL.intt);
+                    break;
+                case (lexicalScanner.SYMBOL.outt):
+                    match(lexicalScanner.SYMBOL.outt);
+                    break;
+                case (lexicalScanner.SYMBOL.inoutt):
+                    match(lexicalScanner.SYMBOL.inoutt);
                     break;
                 default:
                     //empty 
-                    Console.WriteLine("empty");
-
+              
                     break;
-
             }
-            */
+            
         }
         
 
@@ -233,8 +308,14 @@ namespace Assignment1
 
                 else
                 {
-                    Console.WriteLine("MATCHED " + desiredToken + " AND " + token.token);
+                    //Console.WriteLine("MATCHED " + desiredToken + " AND " + token.token);
                     token = lx.getNextToken();
+                    while(token.token == lexicalScanner.SYMBOL.commentt)
+                    {
+                        token = lx.getNextToken();
+                    }
+
+                   
                 }
             }
             else
