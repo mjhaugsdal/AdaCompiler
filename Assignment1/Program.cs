@@ -60,13 +60,13 @@ namespace Assignment1
                 Console.WriteLine(output);
                 */
                 int j = 0;
-                
+                token = lx.getNextToken();
                 //While NOT eoft
-                while (token.token != lexicalScanner.SYMBOL.eoft )
-                {
+               // while (token.token != lexicalScanner.SYMBOL.eoft )
+             //   {
                     
 
-                    token = lx.getNextToken();
+                    
                     
                     token = rdp.parse(token);
 
@@ -74,6 +74,12 @@ namespace Assignment1
                     if(rdp.error != true)
                         Console.WriteLine("Program is Valid!");
                     
+                if(token.token != lexicalScanner.SYMBOL.eoft)
+                {
+                    Console.WriteLine("ERROR: EOF Expected, found: " + token.token);
+
+                }
+
                    /* if(j > 20)
                     {
                         Console.WriteLine("Press any key to continue...");
@@ -83,7 +89,7 @@ namespace Assignment1
                     lx.printToken(token);
                    
                     j++;*/
-                }// end while NOT eoft
+               // }// end while NOT eoft
                // Console.WriteLine("Tokens processed: " + lexicalScanner.i); 
             }
         }   
