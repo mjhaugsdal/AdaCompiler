@@ -54,11 +54,9 @@ namespace Assignment1
             token.token = firstToken.token;
             while (token.token == lexicalScanner.SYMBOL.commentt)
             {
+                //Ignore the comments!
                 token = lx.getNextToken();
             }
-            //proct
-            //
-
 
             match(lexicalScanner.SYMBOL.proct);
             //idt
@@ -79,6 +77,7 @@ namespace Assignment1
             //Not implemented. Sequence of statements.
             if (error != true)
                 seqOfStatements();
+
             match(lexicalScanner.SYMBOL.endt);
             match(lexicalScanner.SYMBOL.idt);
             match(lexicalScanner.SYMBOL.semicolont);
@@ -92,7 +91,7 @@ namespace Assignment1
         /// </summary>
         private void seqOfStatements()
         {
-            //EMPTY
+            //EMPTY, for next assignment!
             //throw new NotImplementedException();
         }
         /// <summary>
@@ -149,12 +148,12 @@ namespace Assignment1
                 case (lexicalScanner.SYMBOL.integert):
                     match(lexicalScanner.SYMBOL.integert);
                     break;
-                /*case (lexicalScanner.SYMBOL.floatt):
+                case (lexicalScanner.SYMBOL.floatt):
                     match(lexicalScanner.SYMBOL.floatt);
-                    break;*/
-                case (lexicalScanner.SYMBOL.realt):
-                    match(lexicalScanner.SYMBOL.realt);
                     break;
+               /* case (lexicalScanner.SYMBOL.realt):
+                    match(lexicalScanner.SYMBOL.realt);
+                    break;*/
                 case (lexicalScanner.SYMBOL.chart):
                     match(lexicalScanner.SYMBOL.chart);
                     break;
@@ -298,8 +297,7 @@ namespace Assignment1
                 if (desiredToken != token.token)
                 {
                      
-                    //Console.WriteLine(lexicalScanner.ln);
-                    //sr.ReadToEnd();
+                    //Alternative to using bool error for every match... not suitable for grading
                     //throw new Exception("Error in line " + lexicalScanner.ln + ". Expected token: " + desiredToken + ", Recieved: " + token.token);
                     Console.WriteLine("Error in line " + lexicalScanner.ln + ". Expected token: " + desiredToken + ", Recieved: " + token.token);
 
@@ -308,14 +306,13 @@ namespace Assignment1
 
                 else
                 {
-                    //Console.WriteLine("MATCHED " + desiredToken + " AND " + token.token);
+                    
                     token = lx.getNextToken();
+                    //Ignore the comments!
                     while(token.token == lexicalScanner.SYMBOL.commentt)
                     {
                         token = lx.getNextToken();
                     }
-
-                   
                 }
             }
             else
@@ -323,7 +320,5 @@ namespace Assignment1
                 token.token = lexicalScanner.SYMBOL.eoft;
             }
         }
-
-       
     }//End class RDP
 }

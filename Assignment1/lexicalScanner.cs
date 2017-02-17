@@ -102,7 +102,8 @@ namespace Assignment1
                     ch = getNextChar();
                     processToken(token); //Process the token
 
-                   return token;
+                   if(token.token != SYMBOL.commentt)
+                     return token;
 
                 }
                 //If newline or whitespace
@@ -117,7 +118,7 @@ namespace Assignment1
                     return token;
                 }
             }//end while eof
-             //Final token to signify that eof was reached. (Maybe not necessary)
+             //Final token to signify that eof was reached. (Maybe not necessary?)
             token.token = SYMBOL.eoft; 
             return token;
         }
@@ -132,7 +133,7 @@ namespace Assignment1
             lexeme = ch.ToString();
 
             ch = peekNextChar();
-            //peek?
+            
 
             if (Char.IsLetter(lexeme[0])) //IF LETTER
             {
@@ -146,15 +147,13 @@ namespace Assignment1
             }
             else if (lexeme[0] == 45) //IF DOUBLE MINUS (COMMENT)
             {
+
+                //Could be fixed, should not return a token!
                 if (ch == 45)//processComment
                 {
                     sr.ReadLine();
                     token.token = SYMBOL.commentt;
                     ln += 1;
-                    //Token nToken = getNextToken();
-                    //token = getNextToken();
-
-                    //Console.WriteLine(token.token);
 
                 }
                 else
