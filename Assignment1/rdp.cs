@@ -104,8 +104,12 @@ namespace Assignment1
             switch (token.token)
             {
                 case (lexicalScanner.SYMBOL.proct):
-                    if(error != true)
+                    if (error != true)
+                    {
                         parse(token);
+                        procedures();
+                    }
+
                     break;
                 default:
                     //Lambda / empty
