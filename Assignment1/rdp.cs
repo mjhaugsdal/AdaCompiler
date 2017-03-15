@@ -111,7 +111,7 @@ namespace Assignment1
 
         }
 
-
+         
         private void declPart()
         {
             switch(token.token)
