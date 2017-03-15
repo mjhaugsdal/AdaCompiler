@@ -36,15 +36,15 @@ namespace Assignment1
 
            
             //if not two arguments
-            if (args.Length == 1)
+            if (args.Length != 1)
             {
                 Console.WriteLine("Usage: \"program name\".exe, \"filename\"");
             }
 
             else
             {
-                //fileName = args[0]; // args
-                fileName = "vtoken2.txt";
+                fileName = args[0]; // args
+                //fileName = "parse8.ada";
                 StreamReader sr = new StreamReader(fileName);
                 //classes
                 //for return
@@ -54,32 +54,37 @@ namespace Assignment1
                 rdp rdp = new rdp(token, lx,sr);
 
                 lx.createDictionary();
-               /* string output = String.Format("{0,-15}  {1,-15} ", "Token"
+                /*string output = String.Format("{0,-15}  {1,-15} ", "Token"
                      , "Lexeme");
               
                 Console.WriteLine(output);
-
-                int j = 0;
                 */
+                int j = 0;
+                
                 //While NOT eoft
                 while (token.token != lexicalScanner.SYMBOL.eoft )
                 {
                     
 
-                   // token = lx.getNextToken();
-                    token = rdp.parse();
-                    Console.WriteLine("Reached eof");
-                  /*  if(j > 20)
+                    token = lx.getNextToken();
+                    
+                    token = rdp.parse(token);
+
+                    //Console.WriteLine("Reached eof");
+                    if(rdp.error != true)
+                        Console.WriteLine("Program is Valid!");
+                    
+                   /* if(j > 20)
                     {
                         Console.WriteLine("Press any key to continue...");
                         Console.ReadKey();
                         j = 0;    
                     }
-                    //lx.printToken(token);
+                    lx.printToken(token);
                    
                     j++;*/
                 }// end while NOT eoft
-                //Console.WriteLine("Tokens processed: " + lexicalScanner.i); 
+               // Console.WriteLine("Tokens processed: " + lexicalScanner.i); 
             }
         }   
     }
