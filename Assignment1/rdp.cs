@@ -292,7 +292,7 @@ namespace Assignment1
 
                 else
                 {
-                    //Console.WriteLine("MATCHED " + desiredToken + " AND " + token.token);
+                    Console.WriteLine("MATCHED " + desiredToken + " AND " + token.token);
                     token = lx.getNextToken();
                     while(token.token == lexicalScanner.SYMBOL.commentt)
                     {

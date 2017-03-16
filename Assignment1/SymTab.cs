@@ -1,154 +1,101 @@
 ﻿
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-
-
-
 namespace Assignment1
 {
-    class SymTab<T>
+    public class SymTab
     {
-        public class Node
-        {
-            private Node next;
-            private T data;
-            public Node(T t)
-            {
-                next = null;
-                data = t;
-            }
+        const int tableSize = 10;
+        public enum varType { charType, intType, floatType, def }
 
-            public Node Next
-            {
-                get { return next; }
-                set { next = value; }
-            }
-            public T Data
-            {
-                get { return data; }
-                set { data = value; }
-            }
+        public class entry
+        {
+            public lexicalScanner.SYMBOL token = lexicalScanner.SYMBOL.unkownt;
+            public string lexeme = "";
+            public int depth = 0; 
 
         }
 
-        private Node head;
-        public SymTab()
+         class var : entry
         {
-            head = null;
+            public varType typeOfVar = varType.def;
+            public int Offset = 0;
+            public int size = 0 ;
         }
 
-        public void addHead(T t)
+         class constant : entry
         {
-            Node n = new Node(t);
-            n.Next = head;
-            head = n;
+            public varType typeOfConstant = varType.def;
+             class intConstant : constant
+            {
+                public int value=0;
+
+            }
+             class floatConstant : constant
+            {
+                public float valueR =0;
+            }
+        } // end constant
+
+         class function : entry 
+        {
+            public int sizeOfLocal =0;
+            public  int numberOfParams =0;
+            public varType returnType = varType.def;
+            public LinkedList<varType> paramList = new LinkedList<varType>();
+
+            public function()
+            {
+
+            }
 
         }
+        
+                LinkedList<entry> hashTable = new LinkedList<entry>();
 
-    }
+                public  SymTab()
+                {
+
+                    for(int i =0; i<tableSize; i++)
+                    { 
+                        hashTable.AddLast(new entry());
+                    }
+
+                }
+
+
+                public void writeTable()
+                {
+                    for(int i = 0; i<hashTable.Count; i++)
+                    {
+                        Console.WriteLine(hashTable.ElementAt(i).token);
+                    }
+                }
+                public void insert(string lexeme, lexicalScanner.SYMBOL token, int depth)
+                {
+                    switch(token)
+                    {
+                        case (lexicalScanner.SYMBOL.proct):
+                   
+
+                            //entry.function temp = new entry.function();
+                            hashTable.AddFirst(new function());
+
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+                
+
+
+    }// emd class symTab
 }
 
 
-
-
-
-/*
-    class SymbTab<T>
-    {
-
-        public enum varType { charType, intType, floatType }
-
-        class paramNode
-        {
-            public varType typeOfParam;
-            public paramNode next;
-        }
-        public class paramList
-        {
-            private paramNode head;
-
-            public void addFirst(varType typeOfVar)
-            {
-                paramNode newNode = new paramNode();
-
-                newNode.typeOfParam = typeOfVar;
-                newNode.next = head;
-
-            }
-        }
-
-        public class Node
-        {
-
-            private Node next;
-            private T entryType;
-
-            public Node (T t)
-            {
-                next = null;
-                entryType = t;
-            }
-
-            struct var
-            {
-                lexicalScanner.SYMBOL token;
-                string lexeme;
-                int depth;
-                varType typeOfVar;
-                int Offset;
-                int size;
-            }
-            struct realConstant
-            {
-                lexicalScanner.SYMBOL token;
-                string lexeme;
-                int depth;
-                varType typeOfVar;
-                int Offset;
-                float valueR;
-            }
-            struct intConstant
-            {
-                lexicalScanner.SYMBOL token;
-                string lexeme;
-                int depth;
-                varType typeOfVar;
-                int Offset;
-                int value;
-            }
-            struct function
-            {
-                lexicalScanner.SYMBOL token;
-                string lexeme;
-                int depth;
-                int sizeOfLocal;
-                int numberOfParameters;
-                varType returnType;
-                paramList prList;
-
-            }
-        }
-
-        private Node head;
-        //Constructor
-        public SymbTab()
-        {
-            head = null;
-
-        }
-
-        public void insert(T t)
-        {
-            Node n = new Node(t);
-
-        }
-
-
-    }
-}*/
 

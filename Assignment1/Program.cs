@@ -43,6 +43,17 @@ namespace Assignment1
 
             else
             {
+
+                //SymTab ht = new SymTab();
+                // LinkedList<SymTab.entry> myList = new LinkedList<SymTab.entry>();
+
+                
+
+                SymTab ht = new SymTab();
+                ht.insert("a", lexicalScanner.SYMBOL.proct, 1);
+                ht.writeTable();
+
+
                 fileName = args[0]; // args
                 //fileName = "parse8.ada";
                 StreamReader sr = new StreamReader(fileName);
