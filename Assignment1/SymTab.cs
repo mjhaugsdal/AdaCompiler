@@ -54,43 +54,89 @@ namespace Assignment1
             }
 
         }
-        
-                LinkedList<entry> hashTable = new LinkedList<entry>();
 
-                public  SymTab()
-                {
-
-                    for(int i =0; i<tableSize; i++)
-                    { 
-                        hashTable.AddLast(new entry());
-                    }
-
-                }
+        LinkedList<entry>[] hashTable = new LinkedList<entry> [tableSize];
 
 
-                public void writeTable()
-                {
-                    for(int i = 0; i<hashTable.Count; i++)
-                    {
-                        Console.WriteLine(hashTable.ElementAt(i).token);
-                    }
-                }
-                public void insert(string lexeme, lexicalScanner.SYMBOL token, int depth)
-                {
-                    switch(token)
-                    {
-                        case (lexicalScanner.SYMBOL.proct):
-                   
+       // LinkedList<entry> hashTable = new LinkedList<entry>();
 
-                            //entry.function temp = new entry.function();
-                            hashTable.AddFirst(new function());
+        public  SymTab()
+        {
 
-                            break;
+            for(int i =0; i<tableSize; i++)
+            {
+                //hashTable[i].AddFirst(new entry()); 
 
-                        default:
-                            break;
-                    }
-                }
+        //hashTable.AddLast(new entry());
+            }
+
+        }
+
+
+        public void writeTable()
+        {
+            for(int i = 0; i<hashTable.Length; i++)
+            {
+                for(int j=0; j<hashTable[i].Count; j++)
+                Console.WriteLine(hashTable[i].ElementAt(j));
+            }
+        }
+
+
+        public void insert(string lexeme, lexicalScanner.SYMBOL token, int depth)
+        {
+                
+
+
+        }
+
+        public void lookUp()
+        {
+
+        }
+        public void deleteDepth()
+        {
+
+        }
+        public void hash()
+        {
+
+        }
+            
+            
+            /*
+        switch(token)
+        {
+                case (lexicalScanner.SYMBOL.proct):
+                    Console.Write("FUNCTION");
+
+                    function tFunc = new function();
+                    tFunc.depth = depth;
+                    tFunc.lexeme = lexeme;
+                    tFunc.token = lexicalScanner.SYMBOL.proct;
+                    
+
+                    hashTable.AddFirst(tFunc);
+
+                    break;
+                //entry.function temp = new entry.function();
+               
+
+                case(lexicalScanner.SYMBOL.integert):
+
+                    var tVar = new var();
+                    tVar.depth = depth;
+                    tVar.token = lexicalScanner.SYMBOL.integert;
+                    tVar.typeOfVar = varType.intType;
+                    hashTable.AddFirst(tVar);
+                    break;
+
+                case (lexicalScanner.SYMBOL.constt):
+
+                default:
+                    break;
+        }*/
+        //}
                 
 
 
