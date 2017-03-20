@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
 //using System.Threading.Tasks;
 using System.Globalization;
 
@@ -22,7 +23,7 @@ namespace Assignment1
 {
     class Program
     {
-        public static void Main(string[] args)
+        unsafe public static void Main(string[] args)
         {
             //Because my computer is european, and we use , and not . for numbers!
             CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("us-US");
@@ -47,10 +48,25 @@ namespace Assignment1
                 //SymTab ht = new SymTab();
                 // LinkedList<SymTab.entry> myList = new LinkedList<SymTab.entry>();
 
-                
+
 
                 SymTab ht = new SymTab();
-                ht.insert("a", lexicalScanner.SYMBOL.proct, 1);
+
+                // SymTab ht = new SymTab()
+
+
+                //SymTab ht = new SymTab(hashTable);
+
+                ht.insert("GLOL", lexicalScanner.SYMBOL.idt, 1);
+                ht.insert("GLOL", lexicalScanner.SYMBOL.idt, 2);
+                ht.insert("GLOL", lexicalScanner.SYMBOL.idt, 3);
+                ht.insert("GLOL", lexicalScanner.SYMBOL.idt, 4);
+
+                ht.deleteDepth(3);
+
+                SymTab.entry e = ht.lookUp("GLOL");
+                Console.WriteLine(e.depth);
+
                 ht.writeTable();
 
 
@@ -71,6 +87,7 @@ namespace Assignment1
                 Console.WriteLine(output);
                 */
                 int j = 0;
+               
                 
                 //While NOT eoft
                 while (token.token != lexicalScanner.SYMBOL.eoft )
