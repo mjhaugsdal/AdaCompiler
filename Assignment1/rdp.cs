@@ -11,9 +11,11 @@ namespace Assignment1
     {
    
         public static bool error = false;
+        public int depth = 1;
         private lexicalScanner.Token token;
         private lexicalScanner lx;
         private StreamReader sr;
+        private SymTab st;
 
         public rdp(lexicalScanner.Token token)
         {
@@ -29,6 +31,12 @@ namespace Assignment1
         {
             this.sr = sr;
         }
+
+        public rdp(lexicalScanner.Token token, lexicalScanner lx, StreamReader sr, SymTab st) : this(token, lx, sr)
+        {
+            this.st = st;
+        }
+
 
         //Parse
         internal lexicalScanner.Token parse(lexicalScanner.Token firstToken)
@@ -61,6 +69,8 @@ namespace Assignment1
 
 
             match(lexicalScanner.SYMBOL.proct);
+            st.insert(token.lexeme, lexicalScanner.SYMBOL.proct, depth);
+            
             //idt
             match(lexicalScanner.SYMBOL.idt);
             //Args

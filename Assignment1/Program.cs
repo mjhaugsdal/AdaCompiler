@@ -45,29 +45,7 @@ namespace Assignment1
             else
             {
 
-                //SymTab ht = new SymTab();
-                // LinkedList<SymTab.entry> myList = new LinkedList<SymTab.entry>();
-
-
-
-                SymTab ht = new SymTab();
-
-                // SymTab ht = new SymTab()
-
-
-                //SymTab ht = new SymTab(hashTable);
-
-                ht.insert("GLOL", lexicalScanner.SYMBOL.idt, 1);
-                ht.insert("GLOL", lexicalScanner.SYMBOL.idt, 2);
-                ht.insert("GLOL", lexicalScanner.SYMBOL.idt, 3);
-                ht.insert("GLOL", lexicalScanner.SYMBOL.idt, 4);
-
-                ht.deleteDepth(3);
-
-                SymTab.entry e = ht.lookUp("GLOL");
-                Console.WriteLine(e.depth);
-
-                ht.writeTable();
+                SymTab st = new SymTab();
 
 
                 fileName = args[0]; // args
@@ -78,12 +56,14 @@ namespace Assignment1
                 lexicalScanner.Token token = new lexicalScanner.Token();
 
                 lexicalScanner lx = new lexicalScanner(fileName, sr);
-                rdp rdp = new rdp(token, lx,sr);
+                rdp rdp = new rdp(token, lx, sr, st );
 
                 lx.createDictionary();
                 /*string output = String.Format("{0,-15}  {1,-15} ", "Token"
                      , "Lexeme");
               
+                
+
                 Console.WriteLine(output);
                 */
                 int j = 0;
@@ -97,9 +77,9 @@ namespace Assignment1
                     token = lx.getNextToken();
                     
                     token = rdp.parse(token);
-
+                    st.writeTable();
                     //Console.WriteLine("Reached eof");
-                    if(rdp.error != true)
+                    if (rdp.error != true)
                         Console.WriteLine("Program is Valid!");
                     
                    /* if(j > 20)
@@ -112,6 +92,7 @@ namespace Assignment1
                    
                     j++;*/
                 }// end while NOT eoft
+
                // Console.WriteLine("Tokens processed: " + lexicalScanner.i); 
             }
         }   
