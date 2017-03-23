@@ -30,7 +30,7 @@ namespace Assignment1
     
 
         public enum varType { charType, intType, floatType, def }
-
+        public enum entryType { constEntry, varEntry, functionEntry }
 
         /// <summary>
         /// Polymorphic structure for entries to symbol table
@@ -40,12 +40,14 @@ namespace Assignment1
             public lexicalScanner.SYMBOL token = lexicalScanner.SYMBOL.unkownt;
             public string lexeme = " ";
             public int depth = 0;
+            public entryType typeOfEntry;
 
-            public entry(lexicalScanner.SYMBOL a, string b, int c)
+            public entry(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry)
             {
-                token = a;
-                lexeme = b;
-                depth = c;
+                this.token = token;
+                this.lexeme = lexeme;
+                this.depth = depth;
+                this.typeOfEntry = typeOfEntry;
 
             }
 
@@ -54,14 +56,15 @@ namespace Assignment1
         public class var : entry
         {
             public varType typeOfVar;
-            public int Offset;
+            public int offset;
             public int size;
 
-            public var(lexicalScanner.SYMBOL a, string b, int c, varType d, int e, int f) : base(a, b, c)
+            public var(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, varType typeOfVar, int offset, int size) : base(token, lexeme, depth, typeOfEntry)
             {
-                typeOfVar = d;
-                Offset = e;
-                size = f;
+                
+                this.typeOfVar = typeOfVar;
+                this.offset = offset;
+                this.size = size;
 
             }
         }
@@ -70,18 +73,18 @@ namespace Assignment1
         {
             public varType typeOfConstant;
 
-            public constant(lexicalScanner.SYMBOL a, string b, int c, varType d) : base(a, b, c)
+            public constant(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, varType typeOfConstant) : base(token, lexeme, depth, typeOfEntry)
             {
-                typeOfConstant = d;
+                this.typeOfConstant = typeOfConstant;
             }
 
             public class intConstant : constant
             {
                 public int value;
 
-                public intConstant(lexicalScanner.SYMBOL a, string b, int c, varType d, int e) : base(a, b, c, d)
+                public intConstant(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry,  varType typeOfConstant, int value) : base(token, lexeme, depth, typeOfEntry, typeOfConstant)
                 {
-                    value = e;
+                    this.value = value;
 
                 }
             }
@@ -89,9 +92,9 @@ namespace Assignment1
             {
                 public float valueR;
 
-                public floatConstant(lexicalScanner.SYMBOL a, string b, int c, varType d, int e) : base(a, b, c, d)
+                public floatConstant(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, varType typeOfConstant, int valueR) : base(token, lexeme, depth, typeOfEntry, typeOfConstant)
                 {
-                    valueR = e;
+                    this.valueR = valueR;
                 }
             }
         } // end constant
@@ -102,13 +105,15 @@ namespace Assignment1
             public int numberOfParams;
             public varType returnType;
             public LinkedList<varType> paramList = new LinkedList<varType>();
+            lexicalScanner.SYMBOL mode = lexicalScanner.SYMBOL.intt;
 
-            public function(lexicalScanner.SYMBOL a, string b, int c, int d, int e, varType f, LinkedList<varType> g) : base(a, b, c)
+            public function(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, int sizeOfLocal, int numberOfParams, varType returnType, LinkedList<varType> paramList, lexicalScanner.SYMBOL mode) : base(token, lexeme, depth, typeOfEntry)
             {
-                sizeOfLocal = d;
-                numberOfParams = e;
-                returnType = f;
-                paramList = g;
+                this.sizeOfLocal = sizeOfLocal;
+                this.numberOfParams = numberOfParams;
+                this.returnType = returnType;
+                this.paramList = paramList;
+                this.mode = mode;
             }
         }
 
@@ -129,7 +134,7 @@ namespace Assignment1
 
             for(int i = 0; i<tableSize; i++)
             {
-                hashTable[i].AddFirst(new entry(lexicalScanner.SYMBOL.unkownt, "", 0));
+                hashTable[i].AddFirst(new entry(lexicalScanner.SYMBOL.unkownt, "", 0, entryType.varEntry));
             }
         }
 
@@ -172,7 +177,7 @@ namespace Assignment1
             //int h = hash(convertStringToCharP(lexeme)); // Get hash
             uint h = hash(lexeme);
 
-            entry temp = new entry(token, lexeme, depth); //Create new record
+            entry temp = new entry(token, lexeme, depth, entryType.varEntry); //Create new record
            
 
             
@@ -190,7 +195,7 @@ namespace Assignment1
         {
             int i = 0;
             int j = 0;
-            entry temp = new entry(lexicalScanner.SYMBOL.unkownt, "", 0);
+            entry temp = new entry(lexicalScanner.SYMBOL.unkownt, "", 0, entryType.varEntry);
 
             for (i=0; i<tableSize; i++)
             {
@@ -242,7 +247,7 @@ namespace Assignment1
             uint h = 0, g;
             uint prime = tableSize;
 
-            for(int i =0; i<s.Length; i++)
+            for (int i = 0; i < s.Length; i++)
             {
                 h = (h << 4) + s[i];
                 g = h & 0xF0000000;
@@ -253,10 +258,8 @@ namespace Assignment1
                 }
             }
 
-            return h%prime;
+            return h % prime;
         }
-
-
 
     /*
         unsafe public int hash(char * s)

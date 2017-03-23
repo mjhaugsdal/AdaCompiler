@@ -16,6 +16,9 @@ namespace Assignment1
         private lexicalScanner lx;
         private StreamReader sr;
         private SymTab st;
+        SymTab.entryType et;
+        SymTab.entry ptr;
+   
 
         public rdp(lexicalScanner.Token token)
         {
@@ -41,6 +44,7 @@ namespace Assignment1
         //Parse
         internal lexicalScanner.Token parse(lexicalScanner.Token firstToken)
         {
+            
             //Sets the first token
             token.token = firstToken.token;
             while (token.token == lexicalScanner.SYMBOL.commentt)
@@ -67,10 +71,30 @@ namespace Assignment1
             //proct
             //
 
-
             match(lexicalScanner.SYMBOL.proct);
-            st.insert(token.lexeme, lexicalScanner.SYMBOL.proct, depth);
+
+           // et = SymTab.entryType.functionEntry;// We are entering a function to the table!
+
+            //Check for duplicates!!!
+            ptr = st.lookUp(token.lexeme);
+            //If dup is found... multiple declaration!
             
+            //else If NOT found
+            st.insert(token.lexeme, lexicalScanner.SYMBOL.proct, depth);
+            ptr = st.lookUp(token.lexeme);
+
+            Console.WriteLine(ptr.depth);
+            Console.WriteLine(ptr.lexeme);
+            Console.WriteLine(ptr.token);
+
+            //Start entering a function!
+            SymTab.function t = new SymTab.function();
+
+
+
+
+
+
             //idt
             match(lexicalScanner.SYMBOL.idt);
             //Args
@@ -131,9 +155,9 @@ namespace Assignment1
                     {
                         idList();
                     }
-                    match(lexicalScanner.SYMBOL.colont);
+                    /*match(lexicalScanner.SYMBOL.colont);
                     if (error != true)
-                        typeMark();
+                        typeMark();*/
                     match(lexicalScanner.SYMBOL.semicolont);
                     if (error != true)
                         declPart();
@@ -151,12 +175,12 @@ namespace Assignment1
                 case (lexicalScanner.SYMBOL.integert):
                     match(lexicalScanner.SYMBOL.integert);
                     break;
-                /*case (lexicalScanner.SYMBOL.floatt):
+                case (lexicalScanner.SYMBOL.floatt):
                     match(lexicalScanner.SYMBOL.floatt);
-                    break;*/
-                case (lexicalScanner.SYMBOL.realt):
-                    match(lexicalScanner.SYMBOL.realt);
                     break;
+               /* case (lexicalScanner.SYMBOL.realt):
+                    match(lexicalScanner.SYMBOL.realt);
+                    break;*/
                 case (lexicalScanner.SYMBOL.chart):
                     match(lexicalScanner.SYMBOL.chart);
                     break;
@@ -208,14 +232,13 @@ namespace Assignment1
         {
             if (error != true)
                 mode();
-            if(error != true)
-                idList();
-            match(lexicalScanner.SYMBOL.colont);
+            //match(lexicalScanner.SYMBOL.idt);
 
             if (error != true)
-                typeMark();
+                idList();
             if (error != true)
                 moreArgs();
+
         }
 
         private void moreArgs()
@@ -235,8 +258,23 @@ namespace Assignment1
 
         private void idList()
         {
-            match(lexicalScanner.SYMBOL.idt);
-            idListTail();
+            switch(token.token)
+            {
+                case (lexicalScanner.SYMBOL.idt):
+
+                    match(lexicalScanner.SYMBOL.idt);
+                    if (error != true)
+                        idListTail();
+                    if (error != true)
+                        idList();
+                    break;
+
+                default:
+                    //empty
+                    break;
+            }
+
+
 
             //
             //throw new NotImplementedException();
@@ -252,8 +290,11 @@ namespace Assignment1
                     if(error != true)
                         idListTail();
                     break;
-                default:
-                    //Empty / lambda
+                case(lexicalScanner.SYMBOL.colont):
+                    match(lexicalScanner.SYMBOL.colont);    
+                    if (error != true)
+                        typeMark();
+
                     break;
                 }
         }
@@ -302,7 +343,7 @@ namespace Assignment1
 
                 else
                 {
-                    //Console.WriteLine("MATCHED " + desiredToken + " AND " + token.token);
+                   // Console.WriteLine("MATCHED " + desiredToken + " AND " + token.token);
                     token = lx.getNextToken();
                     while(token.token == lexicalScanner.SYMBOL.commentt)
                     {
