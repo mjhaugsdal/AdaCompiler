@@ -46,8 +46,7 @@ namespace Assignment1
             {
 
                 SymTab st = new SymTab();
-
-
+                
                 fileName = args[0]; // args
                 //fileName = "parse8.ada";
                 StreamReader sr = new StreamReader(fileName);
@@ -66,7 +65,7 @@ namespace Assignment1
 
                 Console.WriteLine(output);
                 */
-                int j = 0;
+               
                
                 
                 //While NOT eoft
@@ -77,7 +76,9 @@ namespace Assignment1
                     token = lx.getNextToken();
                     
                     token = rdp.parse(token);
-                    st.writeTable();
+                    st.writeTable(1);
+                    st.deleteDepth(1);
+                   // st.writeTable(1);
                     //Console.WriteLine("Reached eof");
                     if (rdp.error != true)
                         Console.WriteLine("Program is Valid!");

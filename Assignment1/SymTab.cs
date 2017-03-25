@@ -42,80 +42,120 @@ namespace Assignment1
             public int depth = 0;
             public entryType typeOfEntry;
 
-            public entry(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry)
+
+            public entry()
+            {
+
+            }
+
+            /*public entry(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry)
             {
                 this.token = token;
                 this.lexeme = lexeme;
                 this.depth = depth;
                 this.typeOfEntry = typeOfEntry;
 
-            }
-
-        }
-
-        public class var : entry
-        {
-            public varType typeOfVar;
-            public int offset;
-            public int size;
-
-            public var(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, varType typeOfVar, int offset, int size) : base(token, lexeme, depth, typeOfEntry)
+            }*/
+            public class var : entry
             {
-                
-                this.typeOfVar = typeOfVar;
-                this.offset = offset;
-                this.size = size;
+                public varType typeOfVar;
+                public int offset;
+                public int size;
 
-            }
-        }
-
-        public class constant : entry
-        {
-            public varType typeOfConstant;
-
-            public constant(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, varType typeOfConstant) : base(token, lexeme, depth, typeOfEntry)
-            {
-                this.typeOfConstant = typeOfConstant;
-            }
-
-            public class intConstant : constant
-            {
-                public int value;
-
-                public intConstant(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry,  varType typeOfConstant, int value) : base(token, lexeme, depth, typeOfEntry, typeOfConstant)
+                public var()
                 {
-                    this.value = value;
 
                 }
-            }
-            public class floatConstant : constant
-            {
-                public float valueR;
 
-                public floatConstant(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, varType typeOfConstant, int valueR) : base(token, lexeme, depth, typeOfEntry, typeOfConstant)
+                /*public var(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, varType typeOfVar, int offset, int size) : base(token, lexeme, depth, typeOfEntry)
                 {
-                    this.valueR = valueR;
-                }
+
+                    this.typeOfVar = typeOfVar;
+                    this.offset = offset;
+                    this.size = size;
+
+                }*/
             }
-        } // end constant
 
-        public class function : entry 
-        {
-            public int sizeOfLocal;
-            public int numberOfParams;
-            public varType returnType;
-            public LinkedList<varType> paramList = new LinkedList<varType>();
-            lexicalScanner.SYMBOL mode = lexicalScanner.SYMBOL.intt;
-
-            public function(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, int sizeOfLocal, int numberOfParams, varType returnType, LinkedList<varType> paramList, lexicalScanner.SYMBOL mode) : base(token, lexeme, depth, typeOfEntry)
+            public class constant : entry
             {
-                this.sizeOfLocal = sizeOfLocal;
-                this.numberOfParams = numberOfParams;
-                this.returnType = returnType;
-                this.paramList = paramList;
-                this.mode = mode;
+                public varType typeOfConstant;
+
+                public constant()
+                {
+
+                }
+
+              /*  public constant(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, varType typeOfConstant) : base(token, lexeme, depth, typeOfEntry)
+                {
+                    this.typeOfConstant = typeOfConstant;
+                }
+*/
+                public class intConstant : constant
+                {
+                    public int value;
+
+
+                    public intConstant()
+                    {
+
+                    }
+
+                   /* public intConstant(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, varType typeOfConstant, int value) : base(token, lexeme, depth, typeOfEntry, typeOfConstant)
+                    {
+                        this.value = value;
+
+                    }
+                    */
+                }
+                public class floatConstant : constant
+                {
+                    public float valueR;
+
+
+                    public floatConstant()
+                    {
+
+                    }
+
+                    /*public floatConstant(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, varType typeOfConstant, int valueR) : base(token, lexeme, depth, typeOfEntry, typeOfConstant)
+                    {
+                        this.valueR = valueR;
+                    }*/
+                }
+            } // end constant
+
+            public class function : entry
+            {
+                public int sizeOfLocal ;
+                public int numberOfParams ;
+                public varType returnType ;
+                public LinkedList<varType> paramList = new LinkedList<varType>();
+                public lexicalScanner.SYMBOL mode = lexicalScanner.SYMBOL.intt;
+
+
+                public function() 
+                {
+
+                }
+/*
+                public function(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, int sizeOfLocal, int numberOfParams, varType returnType, LinkedList<varType> paramList, lexicalScanner.SYMBOL mode) : base(token, lexeme, depth, typeOfEntry)
+                {
+                    this.sizeOfLocal = sizeOfLocal;
+                    this.numberOfParams = numberOfParams;
+                    this.returnType = returnType;
+                    this.paramList = paramList;
+                    this.mode = mode;
+                }
+
+*/
+
             }
-        }
+
+            public entry Next;
+        }// end entry
+
+
 
         //HashTable
 
@@ -134,7 +174,7 @@ namespace Assignment1
 
             for(int i = 0; i<tableSize; i++)
             {
-                hashTable[i].AddFirst(new entry(lexicalScanner.SYMBOL.unkownt, "", 0, entryType.varEntry));
+                hashTable[i].AddFirst(new entry());
             }
         }
 
@@ -142,23 +182,38 @@ namespace Assignment1
         /// <summary>
         /// Writes the contents of the table. Skips empty lists
         /// </summary>
-        public void writeTable()
+        public void writeTable(int depth)
         {
-            for(int i=0; i<hashTable.Length;i++)
+
+            Console.WriteLine("Following symbols are at depth " + depth);
+            for (int i=0; i<hashTable.Length;i++)
             {
                 try
                 {
-                    for (int j = 0; j < hashTable[i].Count; j++)
+                    //Console.WriteLine(depth);
+
+                    entry temp = hashTable[i].ElementAt(0);
+
+                    // Console.WriteLine(temp.Next.lexeme);
+                    //Console.WriteLine("HELLO");
+
+
+                    while (temp.Next != null)
                     {
-                        if(hashTable[i].ElementAt(j).depth != 0)
-                        Console.Write(hashTable[i].ElementAt(j).lexeme + " " + hashTable[i].ElementAt(j).token + " " + hashTable[i].ElementAt(j).depth+ "  " );
+                        //Console.WriteLine("Hey");
+
+                        if (temp.Next.depth == depth)
+                            Console.WriteLine(temp.Next.lexeme + " " + temp.Next.token + " " + temp.Next.depth);
+                           // Console.WriteLine("FOUND!");
+
+                        if(temp.Next != null)
+                            temp = temp.Next;
                     }
 
-                    if (hashTable[i].ElementAt(0).depth != 0)
-                        Console.WriteLine();
                 }
-                catch(NullReferenceException)
+                catch (NullReferenceException)
                 {
+                    //Console.WriteLine("NULL REFERENCE!");
                     //Empty entry
                 }
             }
@@ -177,11 +232,24 @@ namespace Assignment1
             //int h = hash(convertStringToCharP(lexeme)); // Get hash
             uint h = hash(lexeme);
 
-            entry temp = new entry(token, lexeme, depth, entryType.varEntry); //Create new record
-           
+            entry temp = new entry(); //Create new record
 
-            
-            hashTable[h].AddFirst(temp); // Enter record at location in symbol table
+            //Console.WriteLine(hashTable[h].Count);
+
+            if (hashTable[h].Count > 2)
+            {
+                temp.Next = hashTable[h].ElementAt(0).Next.Next;
+                hashTable[h].ElementAt(0).Next = temp; // Enter record to ht
+                
+            }
+            else
+            {
+              
+                hashTable[h].ElementAt(0).Next = temp;
+
+            }
+
+            //hashTable[h].AddFirst(temp); // Enter record at location in symbol table
 
         }
         
@@ -195,20 +263,27 @@ namespace Assignment1
         {
             int i = 0;
             int j = 0;
-            entry temp = new entry(lexicalScanner.SYMBOL.unkownt, "", 0, entryType.varEntry);
 
-            for (i=0; i<tableSize; i++)
+            uint h = hash(lexeme);
+            entry temp = new entry();
+
+
+            temp = hashTable[h].ElementAt(0);
+
+            if(temp != null)
             {
-                for (j = 0; j < hashTable[j].Count; j++)
+                while (temp.Next != null)
                 {
-                    if(hashTable[i].ElementAt(j).lexeme == lexeme)
+                    if (temp.lexeme == lexeme)
                     {
-                         temp = hashTable[i].ElementAt(j);
                         return temp;
                     }
 
+                    else if (temp.Next != null)
+                        temp = temp.Next;
                 }
             }
+
             return temp;
 
         }
@@ -221,16 +296,33 @@ namespace Assignment1
         {
             for(int i =0; i<hashTable.Length; i++)
             {
-                for(int j= 0; j<hashTable[i].Count; j++)
-                {
-                    if (hashTable[i].ElementAt(j).depth == depth)
-                    {
-                        hashTable[i].ElementAt(j).depth = 0;
-                        hashTable[i].ElementAt(j).lexeme = "";
-                        hashTable[i].ElementAt(j).token = lexicalScanner.SYMBOL.unkownt;
-                    }
+                entry temp = hashTable[i].ElementAt(0); // Create temp and point to head
 
+                if (temp != null) // If element is not empty.
+                {
+                    while (temp.Next != null) //Iterate list
+                    {
+                        if (temp.Next.depth == depth) //found!
+                        {
+                            if (temp.Next.Next != null) //If there is at least two elements
+                            {
+                                temp.Next = temp.Next.Next; // Remove reference to middle node
+
+                            }
+                            else // only one element
+                            {
+                                temp.Next = null; // delete
+
+                            }
+
+                        }
+
+                        else if (temp.Next != null)
+                            temp = temp.Next;
+                    }
                 }
+
+
 
             }
         }

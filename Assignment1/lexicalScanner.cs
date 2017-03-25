@@ -48,7 +48,7 @@ namespace Assignment1
             public SYMBOL token = SYMBOL.unkownt;
             public string lexeme;
             public int value;
-            public float valueR;
+            public float? valueR;
             public string literal;
 
         }
@@ -387,6 +387,8 @@ namespace Assignment1
             if (char.IsWhiteSpace(ch)) // only one char
             {
                 token.lexeme = nums;
+
+                //int t = token.value;
                 Int32.TryParse(nums, out token.value);
             }
             else
