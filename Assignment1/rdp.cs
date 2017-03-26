@@ -114,32 +114,62 @@ namespace Assignment1
 
             //Console.WriteLine("I should only be here two times");
             st.writeTable(depth);
-
+            
            
             return token;
 
         }
-        private void insertVar(SymTab.entry.var v)
+
+        private void insertVar(SymTab.entry ptr, SymTab.varType typ, SymTab.entryType eTyp)
         {
-            
-            //Console.WriteLine("Entering: " + v.lexeme);
-            
-            SymTab.entry eptr;
-            eptr = st.lookUp(v.lexeme);
-            v.typeOfEntry = SymTab.entryType.varEntry;
-                
-            if (eptr.Next != null)
+            switch(eTyp)
             {
-                v.Prev = eptr.Prev;
-                v.Next = eptr.Next;
-                eptr.Prev.Next = v;
-                v.Next.Prev = v;
+                case (SymTab.entryType.constEntry):
+                    SymTab.entry.constant ce = new SymTab.entry.constant();
+                    ce.lexeme = ptr.lexeme;
+                    ce.token = ptr.token;
+                    ce.typeOfConstant = typ;
+                    ce.typeOfEntry = SymTab.entryType.constEntry;
+
+                    if (ptr.Next != null)
+                    {
+                        ce.Prev = ptr.Prev;
+                        ce.Next = ptr.Next;
+                        ptr.Prev.Next = ce;
+                        ce.Next.Prev = ce;
+                    }
+                    else
+                    {
+                        ce.Prev = ptr.Prev;
+                        ptr.Prev.Next = ce;
+                    }
+
+
+                    break;
+                case (SymTab.entryType.varEntry):
+                    Console.WriteLine("VARENTRY");
+                    SymTab.entry.var v = new SymTab.entry.var();
+                    v.lexeme = ptr.lexeme;
+                    v.token = ptr.token;
+                    v.depth = ptr.depth;
+                    v.typeOfVar = typ;
+                    v.typeOfEntry = eTyp;
+
+                    if (ptr.Next != null)
+                    {
+                        v.Prev = ptr.Prev;
+                        v.Next = ptr.Next;
+                        ptr.Prev.Next = v;
+                        v.Next.Prev = v;
+                    }
+                    else
+                    {
+                        v.Prev = ptr.Prev;
+                        ptr.Prev.Next = v;
+                    }
+                    break;
             }
-            else
-            {
-                v.Prev = eptr.Prev;
-                eptr.Prev.Next = v;
-            }
+
 
         }
 
@@ -214,25 +244,23 @@ namespace Assignment1
             }
         }
 
-        private void typeMark(SymTab.varType typ)
+        private void typeMark(ref SymTab.varType typ, ref SymTab.entryType eTyp)
         {
             
             switch (token.token)
             {
                 case (lexicalScanner.SYMBOL.integert):
                     
-                    v.typeOfEntry = SymTab.entryType.varEntry;
-                    v.typeOfVar = SymTab.varType.intType;
-                    v.size = 2;
-                    v.offset = v.offset + 2;
+                    eTyp = SymTab.entryType.varEntry;
+                    typ= SymTab.varType.intType;
+
                     match(lexicalScanner.SYMBOL.integert);
                     
                     break;
                 case (lexicalScanner.SYMBOL.floatt):
-                    v.typeOfEntry = SymTab.entryType.varEntry;
-                    v.typeOfVar = SymTab.varType.floatType;
-                    v.size = 4;
-                    v.offset = v.offset + 4;
+                    eTyp  = SymTab.entryType.varEntry;
+                    typ= SymTab.varType.floatType;
+
                     match(lexicalScanner.SYMBOL.floatt);
                 
                     break;
@@ -240,22 +268,21 @@ namespace Assignment1
                     match(lexicalScanner.SYMBOL.realt);
                     break;*/
                 case (lexicalScanner.SYMBOL.chart):
-                    v.typeOfEntry = SymTab.entryType.varEntry;
-                    v.typeOfVar = SymTab.varType.charType;
-                    v.size = 1;
-                    v.offset = v.offset + 1;
+                    eTyp  = SymTab.entryType.varEntry;
+                    typ = SymTab.varType.charType;
+
                     match(lexicalScanner.SYMBOL.chart);
                   
 
                     break;
                 case (lexicalScanner.SYMBOL.constt):
-                    v.typeOfEntry = SymTab.entryType.constEntry;
+                    eTyp  = SymTab.entryType.constEntry;
                     match(lexicalScanner.SYMBOL.constt);
                     match(lexicalScanner.SYMBOL.assignopt);
                     
 
                     if (error != true)
-                        value( v.typeOfVar);
+                        value(ref typ);
                     
                     break;
             }
@@ -269,7 +296,7 @@ namespace Assignment1
         /// <summary>
         /// Checks if token has value (number token)
         /// </summary>
-        private void value( SymTab.varType typeOfVar)
+        private void value( ref SymTab.varType typeOfVar)
         {
             //Numberical Literal
             if(token.valueR.HasValue)
@@ -352,32 +379,29 @@ namespace Assignment1
             switch (token.token)
             {
                 case (lexicalScanner.SYMBOL.idt):
-
-                    SymTab.entry.var v = new SymTab.entry.var();
-                    
+    
                     // { 1 }                   
                     checkForDups();
                     st.insert(token.lexeme, token.token, depth);
                     SymTab.entry ptr = st.lookUp(token.lexeme);
                     SymTab.varType typ = new SymTab.varType();
-                    //Copy data
-                    v.lexeme = ptr.lexeme;
-                    v.token = ptr.token;
-                    v.depth = ptr.depth;
-                    
+                    SymTab.entryType eTyp = new SymTab.entryType();
 
                     match(lexicalScanner.SYMBOL.idt);
                     if (error != true)
-                        idListTail(typ, ref ll);
+                        idListTail(ref typ , ref eTyp , ref ll);
 
-                    Console.WriteLine("Variable info: " + v.lexeme +" "  + v.typeOfVar);
+
+                    /* Console.WriteLine("Here");
+                     Console.WriteLine(eTyp);
+                     Console.WriteLine(typ);*/
+
+                    insertVar(ptr, typ, eTyp);
+                    //st.writeTable(2);
 
                     if (error != true)
                         idList(ref ll);
-                    Console.WriteLine("Variable info: " + v.lexeme + " " + v.typeOfVar);
 
-
-                    // insertVar(v);
                     break;
                 default:
                     
@@ -388,49 +412,84 @@ namespace Assignment1
             
 
         }
-        private void idListTail(SymTab.varType typ, ref LinkedList<SymTab.varType> ll)
+        private void idListTail(ref SymTab.varType typ, ref SymTab.entryType eTyp, ref LinkedList<SymTab.varType> ll)
         {
             switch(token.token)
                 {
                 case (lexicalScanner.SYMBOL.commat):
                     match(lexicalScanner.SYMBOL.commat);
 
-                    SymTab.entry.var var = new SymTab.entry.var();
-
                     // { 1 } 
                     checkForDups();
                     st.insert(token.lexeme, token.token, depth);
                     SymTab.entry ptr  = st.lookUp(token.lexeme);
-
-                    //Copy to variable var
-                    var.lexeme = ptr.lexeme;
-                    var.token = ptr.token;
-                    var.depth = ptr.depth;
-                    
+              
                     match(lexicalScanner.SYMBOL.idt);
 
                     if (error != true)
-                        idListTail(typ, ref ll);
+                        idListTail(ref typ, ref eTyp, ref ll);
 
-                    //var.typeOfVar = v.typeOfVar;
-                    //Console.WriteLine(var.typeOfVar);
-                    //ll.AddFirst(v.typeOfVar);
-                    Console.WriteLine("Variable info: " + var.lexeme + " " + var.typeOfVar);
-                    insertVar(var);
+                    // insertToSymbolTable(ptr, typ, eTyp, ll);
+
+                    //processVar(ref var, typ);
+
+           
+                    insertVar(ptr, typ, eTyp);
                     break;
                 case(lexicalScanner.SYMBOL.colont):
 
                     match(lexicalScanner.SYMBOL.colont);    
                     if (error != true)
-                        typeMark(typ);
+                        typeMark(ref typ, ref eTyp);
 
-
-                   // Console.Write("HERE NOW: ");
-                    //Console.WriteLine("Variable info after type: " + v.lexeme + " " + v.typeOfVar);
-                    //insertVar(v);
-                    break;
+                    break; 
                 }
 
+        }
+
+        private void insertToSymbolTable( SymTab.entry ptr, SymTab.varType typ, SymTab.entryType eTyp, LinkedList<SymTab.varType> ll)
+        {
+            switch(eTyp)
+            {
+                case (SymTab.entryType.functionEntry):
+
+                    SymTab.entry.function f = new SymTab.entry.function();
+                    //SymTab.entry eptr;
+                    f.typeOfEntry = eTyp;
+                    f.paramList = ll;
+                    f.lexeme = ptr.lexeme;
+                    f.token = ptr.token;
+                    //f.mode 
+
+
+/*
+                    for (int i = 0; i < f.paramList.Count; i++)
+                        // Console.WriteLine(f.paramList.ElementAt(i));
+
+                        if (eptr.Next != null)
+                        {
+                            f.Prev = eptr.Prev;
+                            f.Next = eptr.Next;
+                            eptr.Prev.Next = f;
+                            f.Next.Prev = f;
+                        }
+                        else
+                        {
+                            f.Prev = eptr.Prev;
+                            eptr.Prev.Next = f;
+                        }
+*/
+                    break;
+            }
+        }
+
+        private void processVar(ref SymTab.entry.var var, SymTab.varType typ)
+        {
+            switch (typ)
+            {
+                case (SymTab.varType.intType):
+                    break;
+            }
         }
 
         private void mode(ref SymTab.entry.function f)
