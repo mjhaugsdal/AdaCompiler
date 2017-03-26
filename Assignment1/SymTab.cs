@@ -48,14 +48,14 @@ namespace Assignment1
 
             }
 
-            /*public entry(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry)
+            public entry(lexicalScanner.SYMBOL token, string lexeme, int depth )
             {
                 this.token = token;
                 this.lexeme = lexeme;
                 this.depth = depth;
-                this.typeOfEntry = typeOfEntry;
+                //this.typeOfEntry = typeOfEntry;
 
-            }*/
+            }
             public class var : entry
             {
                 public varType typeOfVar;
@@ -129,7 +129,7 @@ namespace Assignment1
             {
                 public int sizeOfLocal ;
                 public int numberOfParams ;
-                public varType returnType ;
+                //public varType returnType ;
                 public LinkedList<varType> paramList = new LinkedList<varType>();
                 public lexicalScanner.SYMBOL mode = lexicalScanner.SYMBOL.intt;
 
@@ -153,6 +153,7 @@ namespace Assignment1
             }
 
             public entry Next;
+            public entry Prev;
         }// end entry
 
 
@@ -194,21 +195,96 @@ namespace Assignment1
 
                     entry temp = hashTable[i].ElementAt(0);
 
+                    while (temp.Next != null)
+                    {
+                        if(temp.Next.depth == depth)
+                        {
+                            switch (temp.Next.typeOfEntry)
+                            {
+                                case (SymTab.entryType.functionEntry):
+                                    SymTab.entry.function t1 = temp.Next as SymTab.entry.function;
+                                    Console.WriteLine();
+                                    Console.WriteLine("Procedure: " + t1.lexeme + " With the following data: ");
+                                    Console.WriteLine("Token: " + t1.token);
+                                    Console.WriteLine("Depth: " + t1.depth);
+                                    Console.WriteLine("Mode: " + t1.mode);
+                                    Console.WriteLine("Number of Parameters: " + t1.numberOfParams);
+                                    Console.WriteLine("Size of local params: " + t1.sizeOfLocal);
+                                    Console.Write("The parameters: ");
+
+                                    if (t1.numberOfParams > 0)
+                                        for (int j = 1; j <= t1.paramList.Count; j++)
+                                            Console.Write(t1.paramList.ElementAt(j-1)+ "   " );
+                                    else
+                                        Console.WriteLine(" none");
+
+                                     Console.WriteLine();
+                                    break;
+
+                                case (SymTab.entryType.constEntry):
+
+                                    SymTab.entry.constant t2 = new entry.constant();
+                                    break;
+
+                                case (SymTab.entryType.varEntry):
+                                    SymTab.entry.var t3 = temp.Next as SymTab.entry.var;
+                                    Console.WriteLine();
+                                    Console.WriteLine("Variable: " + t3.lexeme + " With the following data: ");
+                                    Console.WriteLine("Token: " + t3.token);
+                                    Console.WriteLine("Type: " + t3.typeOfVar);
+                                    Console.WriteLine("Depth: " + t3.depth);
+                                    Console.WriteLine("Size: " + t3.size);
+                                    Console.WriteLine("Offset: " + t3.offset);
+
+
+                                    break;
+
+                            }
+                        }
+                        //Console.WriteLine(temp.Next.lexeme);
+                        //Console.WriteLine(temp.Next.typeOfEntry);
+
+
+                        if(temp.Next != null)
+                        {
+                            temp = temp.Next;
+                        }
+                    }
+                    
+
+
+                    
+                    /*
+
                     // Console.WriteLine(temp.Next.lexeme);
                     //Console.WriteLine("HELLO");
-
 
                     while (temp.Next != null)
                     {
                         //Console.WriteLine("Hey");
 
-                        if (temp.Next.depth == depth)
-                            Console.WriteLine(temp.Next.lexeme + " " + temp.Next.token + " " + temp.Next.depth);
-                           // Console.WriteLine("FOUND!");
+                        //Console.WriteLine(depth);
+                        //Console.WriteLine(temp.Next.depth);
 
-                        if(temp.Next != null)
+                        if (temp.Next.depth == depth)
+                        {
+                            Console.WriteLine(temp.Next.lexeme + " " + temp.Next.token + " " + temp.Next.depth);
+                            Console.WriteLine(temp.GetType());
+                           // break;
+                        }
+
+                                
+                        // Console.WriteLine("FOUND!");
+
+                        if (temp.Next != null)
+                        {
                             temp = temp.Next;
+                        }
+                                
                     }
+                 
+
+                    */
 
                 }
                 catch (NullReferenceException)
@@ -232,24 +308,34 @@ namespace Assignment1
             //int h = hash(convertStringToCharP(lexeme)); // Get hash
             uint h = hash(lexeme);
 
-            entry temp = new entry(); //Create new record
+            entry temp = new entry(token,lexeme, depth); //Create new record
 
             //Console.WriteLine(hashTable[h].Count);
 
-            if (hashTable[h].Count > 2)
+           
+            //If there are elements in the list
+            if (hashTable[h].ElementAt(0).Next != null)
             {
-                temp.Next = hashTable[h].ElementAt(0).Next.Next;
-                hashTable[h].ElementAt(0).Next = temp; // Enter record to ht
-                
+                temp.Next = hashTable[h].ElementAt(0).Next;
+                hashTable[h].ElementAt(0).Next = temp;
+
+                temp.Next.Prev = temp;
+                temp.Prev = hashTable[h].ElementAt(0);
+
             }
+            //If there are no elements in the list
             else
             {
               
                 hashTable[h].ElementAt(0).Next = temp;
+                temp.Prev = hashTable[h].ElementAt(0);
+
+                //Console.WriteLine(temp.Prev);
+                //Console.WriteLine("Inserted " + temp.lexeme + " and ptrs prev " + temp.Prev + " and next " + temp.Next);
 
             }
 
-            //hashTable[h].AddFirst(temp); // Enter record at location in symbol table
+            
 
         }
         
@@ -261,29 +347,34 @@ namespace Assignment1
 
         unsafe public entry lookUp(string lexeme) //Lookup using the lexeme
         {
-            int i = 0;
-            int j = 0;
 
             uint h = hash(lexeme);
             entry temp = new entry();
 
 
             temp = hashTable[h].ElementAt(0);
+           
 
-            if(temp != null)
+            while (temp.Next != null)
             {
-                while (temp.Next != null)
+
+               // Console.WriteLine("First it ");
+                    
+                if (temp.lexeme == lexeme)
                 {
-                    if (temp.lexeme == lexeme)
-                    {
-                        return temp;
-                    }
+                   // Console.WriteLine("Found the lexeme!");
+                    //Console.WriteLine("Returning: " + lexeme + " With the data " + temp.token + " ptrs: Prev " + temp.Prev +" And " + temp.Next);
 
-                    else if (temp.Next != null)
-                        temp = temp.Next;
+                    return temp;
+
                 }
-            }
 
+                if (temp.Next != null)
+                    temp = temp.Next;
+            }
+            
+            
+            //Console.WriteLine("I shouldnt be here! ");
             return temp;
 
         }
