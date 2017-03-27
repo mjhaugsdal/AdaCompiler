@@ -80,7 +80,8 @@ namespace Assignment1
             public class constant : entry
             {
                 public varType typeOfConstant;
-
+                public int offset;
+                public int size;
                 public constant()
                 {
 
@@ -94,7 +95,6 @@ namespace Assignment1
                 public class intConstant : constant
                 {
                     public int value;
-
 
                     public intConstant()
                     {
@@ -132,7 +132,7 @@ namespace Assignment1
                 //public varType returnType ;
                 public LinkedList<varType> paramList = new LinkedList<varType>();
                 public lexicalScanner.SYMBOL mode = lexicalScanner.SYMBOL.intt;
-
+                public int sizeOfParams;
 
                 public function() 
                 {
@@ -194,6 +194,7 @@ namespace Assignment1
                     //Console.WriteLine(depth);
 
                     entry temp = hashTable[i].ElementAt(0);
+                   
 
                     while (temp.Next != null)
                     {
@@ -209,7 +210,8 @@ namespace Assignment1
                                     Console.WriteLine("Depth: " + t1.depth);
                                     Console.WriteLine("Mode: " + t1.mode);
                                     Console.WriteLine("Number of Parameters: " + t1.numberOfParams);
-                                    Console.WriteLine("Size of local params: " + t1.sizeOfLocal);
+                                    Console.WriteLine("Size of local variables and consts: " + t1.sizeOfLocal);
+                                    Console.WriteLine("Size of parameters: " + t1.sizeOfParams);
                                     Console.Write("The parameters: ");
 
                                     if (t1.numberOfParams > 0)
@@ -236,55 +238,17 @@ namespace Assignment1
                                     Console.WriteLine("Size: " + t3.size);
                                     Console.WriteLine("Offset: " + t3.offset);
 
-
                                     break;
-
                             }
                         }
                         //Console.WriteLine(temp.Next.lexeme);
                         //Console.WriteLine(temp.Next.typeOfEntry);
-
-
                         if(temp.Next != null)
                         {
                             temp = temp.Next;
                         }
                     }
                     
-
-
-                    
-                    /*
-
-                    // Console.WriteLine(temp.Next.lexeme);
-                    //Console.WriteLine("HELLO");
-
-                    while (temp.Next != null)
-                    {
-                        //Console.WriteLine("Hey");
-
-                        //Console.WriteLine(depth);
-                        //Console.WriteLine(temp.Next.depth);
-
-                        if (temp.Next.depth == depth)
-                        {
-                            Console.WriteLine(temp.Next.lexeme + " " + temp.Next.token + " " + temp.Next.depth);
-                            Console.WriteLine(temp.GetType());
-                           // break;
-                        }
-
-                                
-                        // Console.WriteLine("FOUND!");
-
-                        if (temp.Next != null)
-                        {
-                            temp = temp.Next;
-                        }
-                                
-                    }
-                 
-
-                    */
 
                 }
                 catch (NullReferenceException)
@@ -311,8 +275,8 @@ namespace Assignment1
             entry temp = new entry(token,lexeme, depth); //Create new record
 
             //Console.WriteLine(hashTable[h].Count);
+           //S Console.WriteLine(token);
 
-           
             //If there are elements in the list
             if (hashTable[h].ElementAt(0).Next != null)
             {
@@ -330,9 +294,7 @@ namespace Assignment1
                 hashTable[h].ElementAt(0).Next = temp;
                 temp.Prev = hashTable[h].ElementAt(0);
 
-                //Console.WriteLine(temp.Prev);
-                //Console.WriteLine("Inserted " + temp.lexeme + " and ptrs prev " + temp.Prev + " and next " + temp.Next);
-
+             
             }
 
             

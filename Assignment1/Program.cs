@@ -76,7 +76,7 @@ namespace Assignment1
                     token = lx.getNextToken();
                     
                     token = rdp.parse(token);
-
+                    st.writeTable(1);
                     //Console.WriteLine("Reached eof");
                     if (rdp.error != true)
                         Console.WriteLine("Program is Valid!");

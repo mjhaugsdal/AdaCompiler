@@ -70,17 +70,18 @@ namespace Assignment1
 
             match(lexicalScanner.SYMBOL.proct);
 
-
+   
             checkForDups();
-            st.insert(token.lexeme, lexicalScanner.SYMBOL.proct, depth);
+            st.insert(token.lexeme, token.token, depth);
 
             SymTab.entry ptr = new SymTab.entry();
             ptr = st.lookUp(token.lexeme);
-
+            //Console.WriteLine(token.token);
             match(lexicalScanner.SYMBOL.idt);
 
             //Create f for functionEntry
             SymTab.entry.function f = new SymTab.entry.function();
+            
             f.lexeme = ptr.lexeme;
             f.depth = ptr.depth;
             f.token = ptr.token;
@@ -90,15 +91,17 @@ namespace Assignment1
                 pArgs(ref f);
             //is
 
-
-            insertFunction(f);
+           // Console.WriteLine(f.lexeme);
+            
+           
             match(lexicalScanner.SYMBOL.ist);
             depth++;
-            
+
 
             //DeclarativePart
+            int offset = 0;
             if (error != true)
-                declPart();
+                declPart(ref f, ref offset);
             //Procedures
             if (error != true)
                 procedures();
@@ -107,30 +110,49 @@ namespace Assignment1
             //Not implemented. Sequence of statements.
             if (error != true)
                 seqOfStatements();
+
+            insertFunction(f);
             match(lexicalScanner.SYMBOL.endt);
             match(lexicalScanner.SYMBOL.idt);
             match(lexicalScanner.SYMBOL.semicolont);
+            st.writeTable(depth);
             depth--;
 
             //Console.WriteLine("I should only be here two times");
-            st.writeTable(depth);
-            
-           
+
+            //st.writeTable(depth);
+
             return token;
 
         }
 
-        private void insertVar(SymTab.entry ptr, SymTab.varType typ, SymTab.entryType eTyp)
+        private void insertVar(SymTab.entry ptr, SymTab.varType typ, SymTab.entryType eTyp, ref int offset)
         {
+           // Console.WriteLine("Inserting : " + ptr.lexeme);
             switch(eTyp)
             {
                 case (SymTab.entryType.constEntry):
-                    SymTab.entry.constant ce = new SymTab.entry.constant();
+                    SymTab.entry.constant.floatConstant ce = new SymTab.entry.constant.floatConstant();
                     ce.lexeme = ptr.lexeme;
                     ce.token = ptr.token;
                     ce.typeOfConstant = typ;
                     ce.typeOfEntry = SymTab.entryType.constEntry;
+                    if (typ == SymTab.varType.floatType)
+                    { 
 
+                        ce.size = 4;
+                        offset = offset + ce.size;
+                        ce.offset = offset;
+                    }
+
+                    else if (typ == SymTab.varType.intType)
+                    {
+                        ce.size = 2;
+                        offset = offset + ce.size;
+                        ce.offset = offset;
+
+                    }
+                       
                     if (ptr.Next != null)
                     {
                         ce.Prev = ptr.Prev;
@@ -142,18 +164,45 @@ namespace Assignment1
                     {
                         ce.Prev = ptr.Prev;
                         ptr.Prev.Next = ce;
+
+
                     }
 
 
                     break;
+
+
                 case (SymTab.entryType.varEntry):
-                    Console.WriteLine("VARENTRY");
+                    //Console.WriteLine("VARENTRY");
                     SymTab.entry.var v = new SymTab.entry.var();
                     v.lexeme = ptr.lexeme;
                     v.token = ptr.token;
                     v.depth = ptr.depth;
                     v.typeOfVar = typ;
                     v.typeOfEntry = eTyp;
+
+                    if (typ == SymTab.varType.floatType)
+                    {
+
+                        v.size = 4;
+                        offset = offset + v.size;
+                        v.offset = offset;
+                    }
+
+                    else if (typ == SymTab.varType.intType)
+                    {
+                        v.size = 2;
+                        offset = offset + v.size;
+                        v.offset = offset;
+
+                    }
+                    else if(typ == SymTab.varType.charType)
+                    {
+                        v.size = 1;
+                        offset = offset + v.size;
+                        v.offset = offset;
+                    }
+
 
                     if (ptr.Next != null)
                     {
@@ -166,6 +215,7 @@ namespace Assignment1
                     {
                         v.Prev = ptr.Prev;
                         ptr.Prev.Next = v;
+
                     }
                     break;
             }
@@ -177,11 +227,12 @@ namespace Assignment1
         {
             SymTab.entry eptr;
             eptr = st.lookUp(f.lexeme);
+            //Console.WriteLine(f.token);
+
             f.typeOfEntry = SymTab.entryType.functionEntry;
             f.numberOfParams = f.paramList.Count;
+            f.typeOfEntry = SymTab.entryType.functionEntry;
 
-            for (int i = 0; i < f.paramList.Count; i++)
-               // Console.WriteLine(f.paramList.ElementAt(i));
 
             if(eptr.Next != null)
             {
@@ -221,22 +272,28 @@ namespace Assignment1
         }
 
          
-        private void declPart()
+        private void declPart(ref SymTab.entry.function f, ref int offset)
         {
             switch(token.token)
             {
+
                 case (lexicalScanner.SYMBOL.idt):
+                    
                     if (error != true)
                     {
                         LinkedList<SymTab.varType> ll = new LinkedList<SymTab.varType>();
-                        idList(ref ll);
+                        idList(ref ll, ref offset);
                     }
                     /*match(lexicalScanner.SYMBOL.colont);
                     if (error != true)
                         typeMark();*/
+                    f.sizeOfLocal = offset;
                     match(lexicalScanner.SYMBOL.semicolont);
                     if (error != true)
-                        declPart();
+                        declPart(ref f, ref offset);
+
+                   // f.sizeOfLocal = offset;
+
                     break;
                 default:
                     //Lambda / empty
@@ -319,15 +376,17 @@ namespace Assignment1
         /// </summary>
         private void pArgs(ref SymTab.entry.function f)
         {
-            //f.token = token.token;
-            //Console.WriteLine(f.token);
-            switch(token.token)
+
+            int offset = 0;
+            switch (token.token)
             {
+                
                 case (lexicalScanner.SYMBOL.lparent):
                     match(lexicalScanner.SYMBOL.lparent);
                     //We have variables!
                     if (error != true)
-                        argList(ref f);
+                        argList(ref f, offset);
+                    
                     match(lexicalScanner.SYMBOL.rparent);
                     break;
                 default:
@@ -339,34 +398,37 @@ namespace Assignment1
 
         }
 
-        private void argList(ref SymTab.entry.function f)
+        private void argList(ref SymTab.entry.function f,  int offset)
         {
-            
-            //SymTab.entry.var v = new SymTab.entry.var();
 
+            //SymTab.entry.var v = new SymTab.entry.var();
+            
             if (error != true)
                 mode(ref f);
             //match(lexicalScanner.SYMBOL.idt);
 
             if (error != true)
             {
-                idList(ref f.paramList);
+                idList(ref f.paramList, ref offset);
 
             }
-                
+            //Console.WriteLine(offset);
+            f.sizeOfParams = offset;
             if (error != true)
-                moreArgs(ref f);
+                moreArgs(ref f, ref offset);
 
+            //Console.WriteLine(offset);
+           
         }
 
-        private void moreArgs(ref SymTab.entry.function f)
+        private void moreArgs(ref SymTab.entry.function f, ref int offset)
         {
             switch(token.token)
             { 
                 case (lexicalScanner.SYMBOL.semicolont):
                     match(lexicalScanner.SYMBOL.semicolont);
                     if(error!= true)
-                        argList(ref f);
+                        argList(ref f, offset);
                     break;
                 default:
                     //empty / lambda
@@ -374,7 +436,7 @@ namespace Assignment1
             }
         }
 
-        private void idList(ref LinkedList<SymTab.varType> ll)
+        private void idList(ref LinkedList<SymTab.varType> ll,  ref int offset)
         {
             switch (token.token)
             {
@@ -389,18 +451,14 @@ namespace Assignment1
 
                     match(lexicalScanner.SYMBOL.idt);
                     if (error != true)
-                        idListTail(ref typ , ref eTyp , ref ll);
+                        idListTail(ref typ , ref eTyp , ref ll, ref offset);
 
-
-                    /* Console.WriteLine("Here");
-                     Console.WriteLine(eTyp);
-                     Console.WriteLine(typ);*/
-
-                    insertVar(ptr, typ, eTyp);
+                    insertVar(ptr, typ, eTyp, ref offset);
+                    ll.AddLast(typ);
                     //st.writeTable(2);
 
                     if (error != true)
-                        idList(ref ll);
+                        idList(ref ll, ref offset);
 
                     break;
                 default:
@@ -412,7 +470,7 @@ namespace Assignment1
             
 
         }
-        private void idListTail(ref SymTab.varType typ, ref SymTab.entryType eTyp, ref LinkedList<SymTab.varType> ll)
+        private void idListTail(ref SymTab.varType typ, ref SymTab.entryType eTyp, ref LinkedList<SymTab.varType> ll, ref int offset)
         {
             switch(token.token)
                 {
@@ -427,14 +485,14 @@ namespace Assignment1
                     match(lexicalScanner.SYMBOL.idt);
 
                     if (error != true)
-                        idListTail(ref typ, ref eTyp, ref ll);
+                        idListTail(ref typ, ref eTyp, ref ll, ref offset);
 
                     // insertToSymbolTable(ptr, typ, eTyp, ll);
-
                     //processVar(ref var, typ);
-
            
-                    insertVar(ptr, typ, eTyp);
+                    insertVar(ptr, typ, eTyp, ref offset);
+
+                    ll.AddLast(typ);
                     break;
                 case(lexicalScanner.SYMBOL.colont):
 
@@ -447,41 +505,7 @@ namespace Assignment1
 
         }
 
-        private void insertToSymbolTable( SymTab.entry ptr, SymTab.varType typ, SymTab.entryType eTyp, LinkedList<SymTab.varType> ll)
-        {
-            switch(eTyp)
-            {
-                case (SymTab.entryType.functionEntry):
 
-                    SymTab.entry.function f = new SymTab.entry.function();
-                    //SymTab.entry eptr;
-                    f.typeOfEntry = eTyp;
-                    f.paramList = ll;
-                    f.lexeme = ptr.lexeme;
-                    f.token = ptr.token;
-                    //f.mode 
-
-
-/*
-                    for (int i = 0; i < f.paramList.Count; i++)
-                        // Console.WriteLine(f.paramList.ElementAt(i));
-
-                        if (eptr.Next != null)
-                        {
-                            f.Prev = eptr.Prev;
-                            f.Next = eptr.Next;
-                            eptr.Prev.Next = f;
-                            f.Next.Prev = f;
-                        }
-                        else
-                        {
-                            f.Prev = eptr.Prev;
-                            eptr.Prev.Next = f;
-                        }
-*/
-                    break;
-            }
-        }
 
         private void processVar(ref SymTab.entry.var var, SymTab.varType typ)
         {
