@@ -301,7 +301,7 @@ namespace Assignment1
                     if (error != true)
                     {
                         LinkedList<SymTab.varType> ll = new LinkedList<SymTab.varType>();
-                        idList(ref ll, ref offset);
+                        idList(ref ll,  ref offset);
                     }
                     /*match(lexicalScanner.SYMBOL.colont);
                     if (error != true)
@@ -363,9 +363,6 @@ namespace Assignment1
                     
                     break;
             }
-            //Console.Write("HERE: ");
-           // Console.WriteLine("Variable info: " + v.lexeme + " " + v.typeOfVar);
-
 
         }
 
@@ -405,7 +402,7 @@ namespace Assignment1
                     match(lexicalScanner.SYMBOL.lparent);
                     //We have variables!
                     if (error != true)
-                        argList(ref f, offset);
+                        argList(ref f, ref offset);
                     
                     match(lexicalScanner.SYMBOL.rparent);
                     break;
@@ -418,7 +415,7 @@ namespace Assignment1
 
         }
 
-        private void argList(ref SymTab.entry.function f,  int offset)
+        private void argList(ref SymTab.entry.function f,  ref int offset)
         {
 
             //SymTab.entry.var v = new SymTab.entry.var();
@@ -434,8 +431,8 @@ namespace Assignment1
             }
             //Console.WriteLine(offset);
             f.sizeOfParams = offset-2;
-            if (error != true)
-                moreArgs(ref f, ref offset);
+            //if (error != true)
+              //  moreArgs(ref f, ref offset);
 
             //Console.WriteLine(offset);
            
@@ -448,7 +445,7 @@ namespace Assignment1
                 case (lexicalScanner.SYMBOL.semicolont):
                     match(lexicalScanner.SYMBOL.semicolont);
                     if(error!= true)
-                        argList(ref f, offset);
+                        argList(ref f, ref offset);
                     break;
                 default:
                     //empty / lambda
@@ -456,7 +453,7 @@ namespace Assignment1
             }
         }
 
-        private void idList(ref LinkedList<SymTab.varType> ll,  ref int offset)
+        private void idList(ref LinkedList<SymTab.varType> ll, ref int offset)
         {
             switch (token.token)
             {
@@ -475,12 +472,21 @@ namespace Assignment1
                     if (error != true)
                         idListTail(ref typ , ref eTyp , ref ll, ref offset);
 
-                    insertVar(ptr, typ, eTyp, ref offset);
-                    ll.AddLast(typ);
+
                     //st.writeTable(2);
 
-                    if (error != true)
+                  /*  if (error != true)
                         idList(ref ll, ref offset);
+*/
+                    insertVar(ptr, typ, eTyp, ref offset);
+                    ll.AddLast(typ);
+                    break;
+             /*   case (lexicalScanner.SYMBOL.semicolont):
+                    match(lexicalScanner.SYMBOL.semicolont);
+                    if(error != true)
+                        idList(ref ll, ref offset);
+
+    */
 
                     break;
                 default:
@@ -489,7 +495,7 @@ namespace Assignment1
                     break;
             }
 
-            
+
 
         }
         private void idListTail(ref SymTab.varType typ, ref SymTab.entryType eTyp, ref LinkedList<SymTab.varType> ll, ref int offset)
@@ -522,8 +528,16 @@ namespace Assignment1
                     if (error != true)
                         typeMark(ref typ, ref eTyp);
 
-                    break; 
-                }
+                    if (error != true)
+                        idListTail(ref typ, ref eTyp, ref ll, ref offset);
+
+                    break;
+                case (lexicalScanner.SYMBOL.semicolont):
+                    match(lexicalScanner.SYMBOL.semicolont);
+                    if (error != true)
+                        idList(ref ll, ref offset);
+                    break;
+            }
 
         }
 
