@@ -119,7 +119,7 @@ namespace Assignment1
 
         private void insertVar(SymTab.entry ptr, SymTab.varType typ, SymTab.entryType eTyp, ref int offset)
         {
-
+            Console.WriteLine(eTyp);
            
             switch (eTyp)
             {
@@ -128,8 +128,7 @@ namespace Assignment1
 
                     if (typ == SymTab.varType.floatType)
                     {
-
-                        Console.WriteLine(ptr.lexeme);
+                        //Console.WriteLine("he");
                         SymTab.entry.constant.floatConstant ce = new SymTab.entry.constant.floatConstant();
                         ce.lexeme = ptr.lexeme;
                         ce.token = ptr.token;
@@ -137,6 +136,7 @@ namespace Assignment1
                         ce.typeOfConstant = typ;
                         ce.typeOfEntry = eTyp;
                         ce.size = 4;
+
                         offset = offset + ce.size;
                         ce.offset = offset;
 
@@ -157,7 +157,11 @@ namespace Assignment1
 
                     else if (typ == SymTab.varType.intType)
                     {
+                        Console.WriteLine("Int const ");
+
                         SymTab.entry.constant.intConstant ce = new SymTab.entry.constant.intConstant();
+
+                        Console.WriteLine(ptr.lexeme);
                         ce.lexeme = ptr.lexeme;
                         ce.token = ptr.token;
                         ce.depth = ptr.depth;
@@ -429,7 +433,7 @@ namespace Assignment1
 
             }
             //Console.WriteLine(offset);
-            f.sizeOfParams = offset;
+            f.sizeOfParams = offset-2;
             if (error != true)
                 moreArgs(ref f, ref offset);
 

@@ -186,6 +186,8 @@ namespace Assignment1
         public void writeTable(int depth)
         {
 
+            Console.Write("HERE!");
+
             if (rdp.error == true)
                 return;
 
@@ -240,13 +242,31 @@ namespace Assignment1
 
                                 case (SymTab.entryType.constEntry):
                                     Console.WriteLine();
-                                    SymTab.entry.constant t2 = new entry.constant();
-                                    Console.WriteLine("Constant: " + t2.lexeme + " With the following data: ");
-                                    Console.WriteLine("Token: " + t2.token);
-                                    Console.WriteLine("Type: " + t2.typeOfConstant);
-                                    Console.WriteLine("Depth: " + t2.depth);
-                                    Console.WriteLine("Size: " + t2.size);
-                                    Console.WriteLine("Offset: " + t2.offset);
+                                    SymTab.entry.constant t2 = temp.Next as SymTab.entry.constant;
+                                    switch(t2.typeOfConstant)
+                                    {
+                                        case (SymTab.varType.floatType):
+                                            SymTab.entry.constant.floatConstant f1 = temp.Next as SymTab.entry.constant.floatConstant;
+                                            Console.WriteLine("Constant: " + f1.lexeme + " With the following data: ");
+                                            Console.WriteLine("Token: " + f1.token);
+                                            Console.WriteLine("Type: " + f1.typeOfConstant);
+                                            Console.WriteLine("Depth: " + f1.depth);
+                                            Console.WriteLine("Size: " + f1.size);
+                                            Console.WriteLine("Offset: " + f1.offset);
+                                            break;
+                                        case (SymTab.varType.intType):
+                                            SymTab.entry.constant.intConstant i1 = temp.Next as SymTab.entry.constant.intConstant;
+                                            Console.WriteLine("Constant: " + i1.lexeme + " With the following data: ");
+                                            Console.WriteLine("Token: " + i1.token);
+                                            Console.WriteLine("Type: " + i1.typeOfConstant);
+                                            Console.WriteLine("Depth: " + i1.depth);
+                                            Console.WriteLine("Size: " + i1.size);
+                                            Console.WriteLine("Offset: " + i1.offset);
+
+                                            break;
+                                    }
+
+
                                     Console.WriteLine();
                                     break;
 
