@@ -183,16 +183,25 @@ namespace Assignment1
         /// <summary>
         /// Writes the contents of the table. Skips empty lists
         /// </summary>
+        /// 
+
+
         public void writeTable(int depth)
         {
 
-            Console.Write("HERE!");
+
+
 
             if (rdp.error == true)
                 return;
+            string output = "";
+            //string vOutput = String.Format("| {0,-10}  {1,-10} {2, -10} {3, -5} {4, -20}  {5, -20} \t\t\t  |", "Entrytype ", "Token", "Type", "Depth", "Size", "Offset");
+            string fOutput = String.Format("| {0,-10}  {1,-10} {2, -10} {3, -5} {4, -20}  {5, -20} {6,-20} |", "Token", "Lexeme", "Depth", "Mode", "Number of parameters", "Size of Locals", "Size of parameters");
+           // Console.WriteLine("Following symbols are at depth " + depth);
+            Console.WriteLine("|---------------------------------------------------------------------------------------------------------|");
+            Console.WriteLine("|-------------------------------"+" Depth: "+ depth + " ----------------------------------------------------------------|");
+            Console.WriteLine("|---------------------------------------------------------------------------------------------------------|");
 
-            Console.WriteLine("Following symbols are at depth " + depth);
-            Console.WriteLine();
             int t = 0;
             for (int i=0; i<hashTable.Length;i++)
             {
@@ -203,17 +212,17 @@ namespace Assignment1
                     Console.ReadKey();
                     t = 0;
                 }
-                
+
                 try
                 {
-                    //Console.WriteLine(depth);
+
 
                     entry temp = hashTable[i].ElementAt(0);
 
 
                     while (temp.Next != null)
                     {
-                        
+
                         if (temp.Next.depth == depth)
                         {
                             t++;
@@ -222,15 +231,13 @@ namespace Assignment1
                             {
                                 case (SymTab.entryType.functionEntry):
                                     SymTab.entry.function t1 = temp.Next as SymTab.entry.function;
-                                    Console.WriteLine();
-                                    Console.WriteLine("Procedure: " + t1.lexeme + " With the following data: ");
-                                    Console.WriteLine("Token: " + t1.token);
-                                    Console.WriteLine("Depth: " + t1.depth);
-                                    Console.WriteLine("Mode: " + t1.mode);
-                                    Console.WriteLine("Number of Parameters: " + t1.numberOfParams);
-                                    Console.WriteLine("Size of local variables and consts: " + t1.sizeOfLocal);
-                                    Console.WriteLine("Size of parameters: " + t1.sizeOfParams);
-                                    Console.Write("The parameters: ");
+                                    Console.WriteLine("| Procedure: \t\t\t\t\t\t\t\t\t\t\t\t  |");
+                                    output = string.Format("| {0,-10}  {1,-10} {2, -10} {3, -5} {4, -20}  {5, -20} {6,-20} |",
+                                        t1.token, t1.lexeme, t1.depth, t1.mode, t1.numberOfParams, t1.sizeOfLocal, t1.sizeOfParams);
+
+                                    Console.WriteLine(fOutput);
+                                    Console.WriteLine(output);
+                                    Console.Write("| Parameters: ");
 
                                     if (t1.numberOfParams > 0)
                                         for (int j = 1; j <= t1.paramList.Count; j++)
@@ -247,6 +254,8 @@ namespace Assignment1
                                     {
                                         case (SymTab.varType.floatType):
                                             SymTab.entry.constant.floatConstant f1 = temp.Next as SymTab.entry.constant.floatConstant;
+
+                          
                                             Console.WriteLine("Constant: " + f1.lexeme + " With the following data: ");
                                             Console.WriteLine("Token: " + f1.token);
                                             Console.WriteLine("Type: " + f1.typeOfConstant);
@@ -272,6 +281,7 @@ namespace Assignment1
 
                                 case (SymTab.entryType.varEntry):
                                     SymTab.entry.var t3 = temp.Next as SymTab.entry.var;
+                          
                                     Console.WriteLine();
                                     Console.WriteLine("Variable: " + t3.lexeme + " With the following data: ");
                                     Console.WriteLine("Token: " + t3.token);
@@ -290,7 +300,7 @@ namespace Assignment1
                             temp = temp.Next;
                         }
                     }
-                    
+
 
                 }
                 catch (NullReferenceException)
@@ -301,6 +311,125 @@ namespace Assignment1
             }
         }
 
+
+        /*        public void writeTable(int depth)
+                {
+
+
+
+                    if (rdp.error == true)
+                        return;
+
+                    Console.WriteLine("Following symbols are at depth " + depth);
+                    Console.WriteLine();
+                    int t = 0;
+                    for (int i=0; i<hashTable.Length;i++)
+                    {
+
+                        if(t>2)
+                        {
+                            Console.WriteLine("Press any key to continue...");
+                            Console.ReadKey();
+                            t = 0;
+                        }
+
+                        try
+                        {
+
+
+                            entry temp = hashTable[i].ElementAt(0);
+
+
+                            while (temp.Next != null)
+                            {
+
+                                if (temp.Next.depth == depth)
+                                {
+                                    t++;
+
+                                    switch (temp.Next.typeOfEntry)
+                                    {
+                                        case (SymTab.entryType.functionEntry):
+                                            SymTab.entry.function t1 = temp.Next as SymTab.entry.function;
+                                            Console.WriteLine();
+                                            Console.WriteLine("Procedure: " + t1.lexeme + " With the following data: ");
+                                            Console.WriteLine("Token: " + t1.token);
+                                            Console.WriteLine("Depth: " + t1.depth);
+                                            Console.WriteLine("Mode: " + t1.mode);
+                                            Console.WriteLine("Number of Parameters: " + t1.numberOfParams);
+                                            Console.WriteLine("Size of local variables and consts: " + t1.sizeOfLocal);
+                                            Console.WriteLine("Size of parameters: " + t1.sizeOfParams);
+                                            Console.Write("The parameters: ");
+
+                                            if (t1.numberOfParams > 0)
+                                                for (int j = 1; j <= t1.paramList.Count; j++)
+                                                    Console.Write(t1.paramList.ElementAt(j-1)+ "   " );
+                                            else
+                                                Console.WriteLine(" none");
+                                             Console.WriteLine();
+                                            break;
+
+                                        case (SymTab.entryType.constEntry):
+                                            Console.WriteLine();
+                                            SymTab.entry.constant t2 = temp.Next as SymTab.entry.constant;
+                                            switch(t2.typeOfConstant)
+                                            {
+                                                case (SymTab.varType.floatType):
+                                                    SymTab.entry.constant.floatConstant f1 = temp.Next as SymTab.entry.constant.floatConstant;
+                                                    Console.WriteLine("Constant: " + f1.lexeme + " With the following data: ");
+                                                    Console.WriteLine("Token: " + f1.token);
+                                                    Console.WriteLine("Type: " + f1.typeOfConstant);
+                                                    Console.WriteLine("Depth: " + f1.depth);
+                                                    Console.WriteLine("Size: " + f1.size);
+                                                    Console.WriteLine("Offset: " + f1.offset);
+                                                    break;
+                                                case (SymTab.varType.intType):
+                                                    SymTab.entry.constant.intConstant i1 = temp.Next as SymTab.entry.constant.intConstant;
+                                                    Console.WriteLine("Constant: " + i1.lexeme + " With the following data: ");
+                                                    Console.WriteLine("Token: " + i1.token);
+                                                    Console.WriteLine("Type: " + i1.typeOfConstant);
+                                                    Console.WriteLine("Depth: " + i1.depth);
+                                                    Console.WriteLine("Size: " + i1.size);
+                                                    Console.WriteLine("Offset: " + i1.offset);
+
+                                                    break;
+                                            }
+
+
+                                            Console.WriteLine();
+                                            break;
+
+                                        case (SymTab.entryType.varEntry):
+                                            SymTab.entry.var t3 = temp.Next as SymTab.entry.var;
+                                            Console.WriteLine();
+                                            Console.WriteLine("Variable: " + t3.lexeme + " With the following data: ");
+                                            Console.WriteLine("Token: " + t3.token);
+                                            Console.WriteLine("Type: " + t3.typeOfVar);
+                                            Console.WriteLine("Depth: " + t3.depth);
+                                            Console.WriteLine("Size: " + t3.size);
+                                            Console.WriteLine("Offset: " + t3.offset);
+                                            Console.WriteLine();
+                                            break;
+                                    }
+                                }
+                                //Console.WriteLine(temp.Next.lexeme);
+                                //Console.WriteLine(temp.Next.typeOfEntry);
+                                if(temp.Next != null)
+                                {
+                                    temp = temp.Next;
+                                }
+                            }
+
+
+                        }
+                        catch (NullReferenceException)
+                        {
+                            //Console.WriteLine("NULL REFERENCE!");
+                            //Empty entry
+                        }
+                    }
+                }*/
+
         /// <summary>
         /// Inserts an entry into the symbol table. Uses a hash function to find its position
         /// </summary>
@@ -310,11 +439,11 @@ namespace Assignment1
 
         unsafe public void insert(string lexeme, lexicalScanner.SYMBOL token, int depth)
         {
-
+            
             //int h = hash(convertStringToCharP(lexeme)); // Get hash
             uint h = hash(lexeme);
 
-            entry temp = new entry(token,lexeme, depth); //Create new record
+            entry temp = new entry(token, lexeme, depth); //Create new record
 
             //Console.WriteLine(hashTable[h].Count);
            //S Console.WriteLine(token);
@@ -351,7 +480,7 @@ namespace Assignment1
 
         unsafe public entry lookUp(string lexeme) //Lookup using the lexeme
         {
-
+            lexeme = lexeme.ToLower();
             uint h = hash(lexeme);
             entry temp = new entry();
 

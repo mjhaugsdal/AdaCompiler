@@ -69,12 +69,11 @@ namespace Assignment1
 
             match(lexicalScanner.SYMBOL.proct);
 
+            //{ 1 }
             checkForDups();
             st.insert(token.lexeme, token.token, depth);
-
             SymTab.entry ptr = new SymTab.entry();
             ptr = st.lookUp(token.lexeme);
-            //Console.WriteLine(token.token);
             match(lexicalScanner.SYMBOL.idt);
 
             //Create f for functionEntry
@@ -83,15 +82,14 @@ namespace Assignment1
             f.lexeme = ptr.lexeme;
             f.depth = ptr.depth;
             f.token = ptr.token;
-
+            depth++;
             //Args
             if (error != true)
                 pArgs(ref f);
             //is
 
             match(lexicalScanner.SYMBOL.ist);
-            depth++;
-
+            
 
             //DeclarativePart
             int offset = 0;
@@ -105,7 +103,7 @@ namespace Assignment1
             //Not implemented. Sequence of statements.
             if (error != true)
                 seqOfStatements();
-
+            //{ 3 }
             insertFunction(f);
             match(lexicalScanner.SYMBOL.endt);
             match(lexicalScanner.SYMBOL.idt);
@@ -117,9 +115,9 @@ namespace Assignment1
 
         }
 
-        private void insertVar(SymTab.entry ptr, SymTab.varType typ, SymTab.entryType eTyp, ref int offset)
+        private void insertArg(SymTab.entry ptr, SymTab.varType typ, SymTab.entryType eTyp, ref int offset)
         {
-            Console.WriteLine(eTyp);
+            
            
             switch (eTyp)
             {
@@ -128,7 +126,6 @@ namespace Assignment1
 
                     if (typ == SymTab.varType.floatType)
                     {
-                        //Console.WriteLine("he");
                         SymTab.entry.constant.floatConstant ce = new SymTab.entry.constant.floatConstant();
                         ce.lexeme = ptr.lexeme;
                         ce.token = ptr.token;
@@ -137,9 +134,9 @@ namespace Assignment1
                         ce.typeOfEntry = eTyp;
                         ce.size = 4;
 
+                        ce.offset = offset + ce.size;
                         offset = offset + ce.size;
-                        ce.offset = offset;
-
+    
                         if (ptr.Next != null)
                         {
                             ce.Prev = ptr.Prev;
@@ -157,19 +154,18 @@ namespace Assignment1
 
                     else if (typ == SymTab.varType.intType)
                     {
-                        Console.WriteLine("Int const ");
-
+                     
                         SymTab.entry.constant.intConstant ce = new SymTab.entry.constant.intConstant();
-
-                        Console.WriteLine(ptr.lexeme);
                         ce.lexeme = ptr.lexeme;
                         ce.token = ptr.token;
                         ce.depth = ptr.depth;
                         ce.typeOfConstant = typ;
                         ce.typeOfEntry = eTyp;
                         ce.size = 2;
+
+                        ce.offset = offset + ce.size;
                         offset = offset + ce.size;
-                        ce.offset = offset;
+
 
                         if (ptr.Next != null)
                         {
@@ -183,17 +179,9 @@ namespace Assignment1
                             ce.Prev = ptr.Prev;
                             ptr.Prev.Next = ce;
                         }
-
-
                     }
-
-
-
                     break;
-
-
                 case (SymTab.entryType.varEntry):
-                    //Console.WriteLine("VARENTRY");
                     SymTab.entry.var v = new SymTab.entry.var();
                     v.lexeme = ptr.lexeme;
                     v.token = ptr.token;
@@ -203,24 +191,26 @@ namespace Assignment1
 
                     if (typ == SymTab.varType.floatType)
                     {
-
                         v.size = 4;
+
+
+                        v.offset = offset + v.size;
                         offset = offset + v.size;
-                        v.offset = offset;
                     }
 
                     else if (typ == SymTab.varType.intType)
                     {
                         v.size = 2;
+                        v.offset = offset + v.size;
                         offset = offset + v.size;
-                        v.offset = offset;
 
                     }
                     else if(typ == SymTab.varType.charType)
                     {
                         v.size = 1;
+                        v.offset = offset + v.size;
                         offset = offset + v.size;
-                        v.offset = offset;
+
                     }
 
 
@@ -239,15 +229,12 @@ namespace Assignment1
                     }
                     break;
             }
-
-
         }
 
         private void insertFunction(SymTab.entry.function f)
         {
             SymTab.entry eptr;
             eptr = st.lookUp(f.lexeme);
-            //Console.WriteLine(f.token);
 
             f.typeOfEntry = SymTab.entryType.functionEntry;
             f.numberOfParams = f.paramList.Count;
@@ -291,28 +278,24 @@ namespace Assignment1
         }
 
          
-        private void declPart(ref SymTab.entry.function f, ref int offset)
+        private void declPart(ref SymTab.entry.function f, ref int offset )
         {
             switch(token.token)
             {
 
                 case (lexicalScanner.SYMBOL.idt):
                     
+                    // { 1 }
+
                     if (error != true)
                     {
-                        LinkedList<SymTab.varType> ll = new LinkedList<SymTab.varType>();
-                        idList(ref ll,  ref offset);
+                        vars(ref offset);
                     }
-                    /*match(lexicalScanner.SYMBOL.colont);
-                    if (error != true)
-                        typeMark();*/
+                    
                     f.sizeOfLocal = offset;
                     match(lexicalScanner.SYMBOL.semicolont);
                     if (error != true)
-                        declPart(ref f, ref offset);
-
-                   // f.sizeOfLocal = offset;
-
+                        declPart(ref f,  ref offset);
                     break;
                 default:
                     //Lambda / empty
@@ -320,6 +303,172 @@ namespace Assignment1
             }
         }
 
+        private void vars(ref int offset)
+        {
+            // { 1 }  
+            int counter = 1;                 
+            checkForDups();
+            st.insert(token.lexeme, token.token, depth);
+            SymTab.entry ptr = st.lookUp(token.lexeme);
+            SymTab.varType typ = new SymTab.varType();
+            SymTab.entryType eTyp = new SymTab.entryType();
+
+            match(lexicalScanner.SYMBOL.idt);
+            if (error != true)
+                varsTail( ref typ, ref eTyp, ref offset,  counter);
+            //{ 3 }
+
+
+            insertVar(ptr, typ, eTyp, ref offset, counter);
+        }
+
+        private void varsTail(ref SymTab.varType typ, ref SymTab.entryType eTyp ,  ref int offset,  int counter)
+        {
+            switch(token.token)
+            {
+                case (lexicalScanner.SYMBOL.commat):
+                    match(lexicalScanner.SYMBOL.commat);
+                    // { 1 } 
+                    counter++;
+                    checkForDups();
+                    st.insert(token.lexeme, token.token, depth);
+                    SymTab.entry ptr = st.lookUp(token.lexeme);
+
+                    
+                    match(lexicalScanner.SYMBOL.idt);
+                    if (error != true)
+                        varsTail(ref typ, ref eTyp, ref offset,  counter);
+
+                    //{ 3 }
+                    
+                    insertVar(ptr, typ, eTyp, ref offset, counter);
+                    break;
+
+                case (lexicalScanner.SYMBOL.colont):
+                    match(lexicalScanner.SYMBOL.colont);
+                    if (error != true)
+                        varType(ref offset, ref typ, ref eTyp);
+                    break;
+                
+                   
+                default:
+                    break;
+            }
+        }
+        private void insertVar(SymTab.entry ptr, SymTab.varType typ, SymTab.entryType eTyp, ref int offset, int counter)
+        {
+
+
+            switch (eTyp)
+            {
+                case (SymTab.entryType.constEntry):
+
+
+                    if (typ == SymTab.varType.floatType)
+                    {
+                        SymTab.entry.constant.floatConstant ce = new SymTab.entry.constant.floatConstant();
+                        ce.lexeme = ptr.lexeme;
+                        ce.token = ptr.token;
+                        ce.depth = ptr.depth;
+                        ce.typeOfConstant = typ;
+                        ce.typeOfEntry = eTyp;
+                        ce.size = 4;
+
+                        ce.offset = counter * ce.size;
+                        offset = offset + ce.size;
+                        if (ptr.Next != null)
+                        {
+                            ce.Prev = ptr.Prev;
+                            ce.Next = ptr.Next;
+                            ptr.Prev.Next = ce;
+                            ce.Next.Prev = ce;
+                        }
+                        else
+                        {
+                            ce.Prev = ptr.Prev;
+                            ptr.Prev.Next = ce;
+                        }
+
+                    }
+
+                    else if (typ == SymTab.varType.intType)
+                    {
+
+                        SymTab.entry.constant.intConstant ce = new SymTab.entry.constant.intConstant();
+                        ce.lexeme = ptr.lexeme;
+                        ce.token = ptr.token;
+                        ce.depth = ptr.depth;
+                        ce.typeOfConstant = typ;
+                        ce.typeOfEntry = eTyp;
+                        ce.size = 2;
+
+                        ce.offset = counter * ce.size;
+                        offset = offset + ce.size;
+                        if (ptr.Next != null)
+                        {
+                            ce.Prev = ptr.Prev;
+                            ce.Next = ptr.Next;
+                            ptr.Prev.Next = ce;
+                            ce.Next.Prev = ce;
+                        }
+                        else
+                        {
+                            ce.Prev = ptr.Prev;
+                            ptr.Prev.Next = ce;
+                        }
+                    }
+                    break;
+
+
+                case (SymTab.entryType.varEntry):
+                    SymTab.entry.var v = new SymTab.entry.var();
+                    v.lexeme = ptr.lexeme;
+                    v.token = ptr.token;
+                    v.depth = ptr.depth;
+                    v.typeOfVar = typ;
+                    v.typeOfEntry = eTyp;
+
+                    if (typ == SymTab.varType.floatType)
+                    {
+                        v.size = 4;
+
+                        v.offset = counter*v.size;
+                        offset = offset + v.size;
+                    }
+
+                    else if (typ == SymTab.varType.intType)
+                    {
+                        v.size = 2;
+
+                        v.offset = counter*v.size;
+                        offset = offset + v.size;
+
+                    }
+                    else if (typ == SymTab.varType.charType)
+                    {
+                        v.size = 1;
+
+                        v.offset = counter*v.size;
+                        offset = offset + v.size;
+                    }
+
+
+                    if (ptr.Next != null)
+                    {
+                        v.Prev = ptr.Prev;
+                        v.Next = ptr.Next;
+                        ptr.Prev.Next = v;
+                        v.Next.Prev = v;
+                    }
+                    else
+                    {
+                        v.Prev = ptr.Prev;
+                        ptr.Prev.Next = v;
+
+                    }
+                    break;
+            }
+        }
         private void typeMark(ref SymTab.varType typ, ref SymTab.entryType eTyp)
         {
             
@@ -365,8 +514,63 @@ namespace Assignment1
             }
 
         }
+        private void varType(ref int offset, ref SymTab.varType typ, ref SymTab.entryType eTyp)
+        {
 
-       
+            switch (token.token)
+            {
+                case (lexicalScanner.SYMBOL.integert):
+                    eTyp = SymTab.entryType.varEntry;
+                    typ = SymTab.varType.intType;
+                    offset = offset + 2;
+                    match(lexicalScanner.SYMBOL.integert);
+                    break;
+                case (lexicalScanner.SYMBOL.floatt):
+                    eTyp = SymTab.entryType.varEntry;
+                    typ = SymTab.varType.floatType;
+                    offset = offset + 4;
+                    match(lexicalScanner.SYMBOL.floatt);
+                     break;
+                /* case (lexicalScanner.SYMBOL.realt):
+                     match(lexicalScanner.SYMBOL.realt);
+                     break;*/
+                case (lexicalScanner.SYMBOL.chart):
+                    eTyp = SymTab.entryType.varEntry;
+                    typ = SymTab.varType.charType;
+                    offset = offset + 1;
+                    match(lexicalScanner.SYMBOL.chart);
+                    break;
+                case (lexicalScanner.SYMBOL.constt):
+                    eTyp = SymTab.entryType.constEntry;
+                    
+                    match(lexicalScanner.SYMBOL.constt);
+                    match(lexicalScanner.SYMBOL.assignopt);
+
+
+                    if (error != true)
+                        varValue(ref typ);
+
+                    break;
+            }
+
+        }
+
+        private void varValue(ref SymTab.varType typeOfVar)
+        {
+            //Numberical Literal
+            if (token.valueR.HasValue)
+            {
+                //We have a float!
+                typeOfVar = SymTab.varType.floatType;
+            }
+            else
+            {
+                typeOfVar = SymTab.varType.intType;
+                //We have a integer!
+            }
+            match(lexicalScanner.SYMBOL.numt);
+        }
+
         /// <summary>
         /// Checks if token has value (number token)
         /// </summary>
@@ -411,31 +615,25 @@ namespace Assignment1
                     break;
             }
 
-
-
         }
 
         private void argList(ref SymTab.entry.function f,  ref int offset)
         {
-
-            //SymTab.entry.var v = new SymTab.entry.var();
             
             if (error != true)
                 mode(ref f);
-            //match(lexicalScanner.SYMBOL.idt);
 
             if (error != true)
             {
-                idList(ref f.paramList, ref offset);
+                procList(ref f.paramList, ref offset);
 
             }
-            //Console.WriteLine(offset);
+
             f.sizeOfParams = offset-2;
             //if (error != true)
               //  moreArgs(ref f, ref offset);
 
-            //Console.WriteLine(offset);
-           
+
         }
 
         private void moreArgs(ref SymTab.entry.function f, ref int offset)
@@ -453,7 +651,7 @@ namespace Assignment1
             }
         }
 
-        private void idList(ref LinkedList<SymTab.varType> ll, ref int offset)
+        private void procList(ref LinkedList<SymTab.varType> ll, ref int offset)
         {
             switch (token.token)
             {
@@ -466,29 +664,24 @@ namespace Assignment1
                     SymTab.varType typ = new SymTab.varType();
                     SymTab.entryType eTyp = new SymTab.entryType();
 
-                    Console.WriteLine(token.lexeme);
-
                     match(lexicalScanner.SYMBOL.idt);
                     if (error != true)
-                        idListTail(ref typ , ref eTyp , ref ll, ref offset);
-
-
-                    //st.writeTable(2);
+                        procListTail(ref typ , ref eTyp , ref ll, ref offset);
 
                   /*  if (error != true)
-                        idList(ref ll, ref offset);
+                        procList(ref ll, ref offset);
 */
-                    insertVar(ptr, typ, eTyp, ref offset);
-                    ll.AddLast(typ);
+                    insertArg(ptr, typ, eTyp, ref offset);
+                    ll.AddFirst(typ);
                     break;
-             /*   case (lexicalScanner.SYMBOL.semicolont):
-                    match(lexicalScanner.SYMBOL.semicolont);
-                    if(error != true)
-                        idList(ref ll, ref offset);
+                /*   case (lexicalScanner.SYMBOL.semicolont):
+                       match(lexicalScanner.SYMBOL.semicolont);
+                       if(error != true)
+                           procList(ref ll, ref offset);
 
-    */
 
-                    break;
+
+                       break;*/
                 default:
                     
                     //empty
@@ -498,7 +691,7 @@ namespace Assignment1
 
 
         }
-        private void idListTail(ref SymTab.varType typ, ref SymTab.entryType eTyp, ref LinkedList<SymTab.varType> ll, ref int offset)
+        private void procListTail(ref SymTab.varType typ, ref SymTab.entryType eTyp, ref LinkedList<SymTab.varType> ll, ref int offset)
         {
             switch(token.token)
                 {
@@ -513,14 +706,11 @@ namespace Assignment1
                     match(lexicalScanner.SYMBOL.idt);
 
                     if (error != true)
-                        idListTail(ref typ, ref eTyp, ref ll, ref offset);
+                        procListTail(ref typ, ref eTyp, ref ll, ref offset);
 
-                    // insertToSymbolTable(ptr, typ, eTyp, ll);
-                    //processVar(ref var, typ);
-           
-                    insertVar(ptr, typ, eTyp, ref offset);
-
-                    ll.AddLast(typ);
+                    //{ 3 }
+                    insertArg(ptr, typ, eTyp, ref offset);
+                    ll.AddFirst(typ);
                     break;
                 case(lexicalScanner.SYMBOL.colont):
 
@@ -529,13 +719,13 @@ namespace Assignment1
                         typeMark(ref typ, ref eTyp);
 
                     if (error != true)
-                        idListTail(ref typ, ref eTyp, ref ll, ref offset);
+                        procListTail(ref typ, ref eTyp, ref ll, ref offset);
 
                     break;
                 case (lexicalScanner.SYMBOL.semicolont):
                     match(lexicalScanner.SYMBOL.semicolont);
                     if (error != true)
-                        idList(ref ll, ref offset);
+                        procList(ref ll, ref offset);
                     break;
             }
 
@@ -580,14 +770,11 @@ namespace Assignment1
         {
             
             SymTab.entry eptr;
-           
+            eptr = st.lookUp(token.lexeme.ToLower());
 
-            eptr = st.lookUp(token.lexeme);
-
-            //Console.WriteLine("Found: " + eptr.lexeme);
-
-            if (eptr.depth == depth && eptr.lexeme == token.lexeme)
+            if (eptr.depth == depth && eptr.lexeme == token.lexeme.ToLower())
             {
+                error = true;
                 Console.WriteLine("Error - Multiple declaration of \"" + eptr.lexeme + "\" on line " + lexicalScanner.ln);
 
             }
@@ -607,7 +794,7 @@ namespace Assignment1
                 {
                      
                     //Console.WriteLine(lexicalScanner.ln);
-                    //sr.ReadToEnd();
+                    sr.ReadToEnd();
                     //throw new Exception("Error in line " + lexicalScanner.ln + ". Expected token: " + desiredToken + ", Recieved: " + token.token);
                     Console.WriteLine("Error in line " + lexicalScanner.ln + ". Expected token: " + desiredToken + ", Recieved: " + token.token);
 
