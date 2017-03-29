@@ -231,7 +231,7 @@ namespace Assignment1
                             {
                                 case (SymTab.entryType.functionEntry):
                                     SymTab.entry.function t1 = temp.Next as SymTab.entry.function;
-                                    Console.WriteLine("| Procedure: \t\t\t\t\t\t\t\t\t\t\t\t  |");
+                                    Console.WriteLine("| Procedure: \t\t\t\t\t\t\t\t\t\t\t\t\t  |");
                                     output = string.Format("| {0,-10}  {1,-10} {2, -10} {3, -5} {4, -20}  {5, -20} {6,-20} |",
                                         t1.token, t1.lexeme, t1.depth, t1.mode, t1.numberOfParams, t1.sizeOfLocal, t1.sizeOfParams);
 
@@ -441,7 +441,8 @@ namespace Assignment1
         {
             
             //int h = hash(convertStringToCharP(lexeme)); // Get hash
-            uint h = hash(lexeme);
+            uint h = hash(lexeme.ToLower());
+            
 
             entry temp = new entry(token, lexeme, depth); //Create new record
 
@@ -480,20 +481,21 @@ namespace Assignment1
 
         unsafe public entry lookUp(string lexeme) //Lookup using the lexeme
         {
-            lexeme = lexeme.ToLower();
-            uint h = hash(lexeme);
+           
+            uint h = hash(lexeme.ToLower());
             entry temp = new entry();
 
 
             temp = hashTable[h].ElementAt(0);
            
+            
 
             while (temp.Next != null)
             {
 
                // Console.WriteLine("First it ");
                     
-                if (temp.lexeme == lexeme)
+                if (temp.lexeme == lexeme || temp.lexeme == lexeme.ToLower())
                 {
                    // Console.WriteLine("Found the lexeme!");
                     //Console.WriteLine("Returning: " + lexeme + " With the data " + temp.token + " ptrs: Prev " + temp.Prev +" And " + temp.Next);
