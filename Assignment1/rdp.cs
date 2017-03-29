@@ -50,7 +50,6 @@ namespace Assignment1
                 token = lx.getNextToken();
             }
 
-
             //Got the tokens!
             /* START FOLLOWING THE GRAMMAR RULES!
              * 
@@ -70,7 +69,6 @@ namespace Assignment1
 
             match(lexicalScanner.SYMBOL.proct);
 
-   
             checkForDups();
             st.insert(token.lexeme, token.token, depth);
 
@@ -91,9 +89,6 @@ namespace Assignment1
                 pArgs(ref f);
             //is
 
-           // Console.WriteLine(f.lexeme);
-            
-           
             match(lexicalScanner.SYMBOL.ist);
             depth++;
 
@@ -118,55 +113,76 @@ namespace Assignment1
             st.writeTable(depth);
             depth--;
 
-            //Console.WriteLine("I should only be here two times");
-
-            //st.writeTable(depth);
-
             return token;
 
         }
 
         private void insertVar(SymTab.entry ptr, SymTab.varType typ, SymTab.entryType eTyp, ref int offset)
         {
-           // Console.WriteLine("Inserting : " + ptr.lexeme);
-            switch(eTyp)
+
+           
+            switch (eTyp)
             {
                 case (SymTab.entryType.constEntry):
-                    SymTab.entry.constant.floatConstant ce = new SymTab.entry.constant.floatConstant();
-                    ce.lexeme = ptr.lexeme;
-                    ce.token = ptr.token;
-                    ce.typeOfConstant = typ;
-                    ce.typeOfEntry = SymTab.entryType.constEntry;
-                    if (typ == SymTab.varType.floatType)
-                    { 
+                 
 
+                    if (typ == SymTab.varType.floatType)
+                    {
+
+                        Console.WriteLine(ptr.lexeme);
+                        SymTab.entry.constant.floatConstant ce = new SymTab.entry.constant.floatConstant();
+                        ce.lexeme = ptr.lexeme;
+                        ce.token = ptr.token;
+                        ce.depth = ptr.depth;
+                        ce.typeOfConstant = typ;
+                        ce.typeOfEntry = eTyp;
                         ce.size = 4;
                         offset = offset + ce.size;
                         ce.offset = offset;
+
+                        if (ptr.Next != null)
+                        {
+                            ce.Prev = ptr.Prev;
+                            ce.Next = ptr.Next;
+                            ptr.Prev.Next = ce;
+                            ce.Next.Prev = ce;
+                        }
+                        else
+                        {
+                            ce.Prev = ptr.Prev;
+                            ptr.Prev.Next = ce;
+                        }
+
                     }
 
                     else if (typ == SymTab.varType.intType)
                     {
+                        SymTab.entry.constant.intConstant ce = new SymTab.entry.constant.intConstant();
+                        ce.lexeme = ptr.lexeme;
+                        ce.token = ptr.token;
+                        ce.depth = ptr.depth;
+                        ce.typeOfConstant = typ;
+                        ce.typeOfEntry = eTyp;
                         ce.size = 2;
                         offset = offset + ce.size;
                         ce.offset = offset;
 
-                    }
-                       
-                    if (ptr.Next != null)
-                    {
-                        ce.Prev = ptr.Prev;
-                        ce.Next = ptr.Next;
-                        ptr.Prev.Next = ce;
-                        ce.Next.Prev = ce;
-                    }
-                    else
-                    {
-                        ce.Prev = ptr.Prev;
-                        ptr.Prev.Next = ce;
+                        if (ptr.Next != null)
+                        {
+                            ce.Prev = ptr.Prev;
+                            ce.Next = ptr.Next;
+                            ptr.Prev.Next = ce;
+                            ce.Next.Prev = ce;
+                        }
+                        else
+                        {
+                            ce.Prev = ptr.Prev;
+                            ptr.Prev.Next = ce;
+                        }
 
 
                     }
+
 
 
                     break;
@@ -231,7 +247,6 @@ namespace Assignment1
 
             f.typeOfEntry = SymTab.entryType.functionEntry;
             f.numberOfParams = f.paramList.Count;
-            f.typeOfEntry = SymTab.entryType.functionEntry;
 
 
             if(eptr.Next != null)
@@ -333,6 +348,7 @@ namespace Assignment1
 
                     break;
                 case (lexicalScanner.SYMBOL.constt):
+
                     eTyp  = SymTab.entryType.constEntry;
                     match(lexicalScanner.SYMBOL.constt);
                     match(lexicalScanner.SYMBOL.assignopt);
@@ -377,7 +393,7 @@ namespace Assignment1
         private void pArgs(ref SymTab.entry.function f)
         {
 
-            int offset = 0;
+            int offset = 2;
             switch (token.token)
             {
                 
@@ -448,6 +464,8 @@ namespace Assignment1
                     SymTab.entry ptr = st.lookUp(token.lexeme);
                     SymTab.varType typ = new SymTab.varType();
                     SymTab.entryType eTyp = new SymTab.entryType();
+
+                    Console.WriteLine(token.lexeme);
 
                     match(lexicalScanner.SYMBOL.idt);
                     if (error != true)

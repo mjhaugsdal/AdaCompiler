@@ -186,20 +186,36 @@ namespace Assignment1
         public void writeTable(int depth)
         {
 
+            if (rdp.error == true)
+                return;
+
             Console.WriteLine("Following symbols are at depth " + depth);
+            Console.WriteLine();
+            int t = 0;
             for (int i=0; i<hashTable.Length;i++)
             {
+
+                if(t>2)
+                {
+                    Console.WriteLine("Press any key to continue...");
+                    Console.ReadKey();
+                    t = 0;
+                }
+                
                 try
                 {
                     //Console.WriteLine(depth);
 
                     entry temp = hashTable[i].ElementAt(0);
-                   
+
 
                     while (temp.Next != null)
                     {
-                        if(temp.Next.depth == depth)
+                        
+                        if (temp.Next.depth == depth)
                         {
+                            t++;
+
                             switch (temp.Next.typeOfEntry)
                             {
                                 case (SymTab.entryType.functionEntry):
@@ -219,13 +235,19 @@ namespace Assignment1
                                             Console.Write(t1.paramList.ElementAt(j-1)+ "   " );
                                     else
                                         Console.WriteLine(" none");
-
                                      Console.WriteLine();
                                     break;
 
                                 case (SymTab.entryType.constEntry):
-
+                                    Console.WriteLine();
                                     SymTab.entry.constant t2 = new entry.constant();
+                                    Console.WriteLine("Constant: " + t2.lexeme + " With the following data: ");
+                                    Console.WriteLine("Token: " + t2.token);
+                                    Console.WriteLine("Type: " + t2.typeOfConstant);
+                                    Console.WriteLine("Depth: " + t2.depth);
+                                    Console.WriteLine("Size: " + t2.size);
+                                    Console.WriteLine("Offset: " + t2.offset);
+                                    Console.WriteLine();
                                     break;
 
                                 case (SymTab.entryType.varEntry):
@@ -237,7 +259,7 @@ namespace Assignment1
                                     Console.WriteLine("Depth: " + t3.depth);
                                     Console.WriteLine("Size: " + t3.size);
                                     Console.WriteLine("Offset: " + t3.offset);
-
+                                    Console.WriteLine();
                                     break;
                             }
                         }

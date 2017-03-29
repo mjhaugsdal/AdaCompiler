@@ -31,10 +31,6 @@ namespace Assignment1
 
             //variables
             string fileName;
-
-            //for debugging
-           // fileName = "test2.adb";
-
            
             //if not two arguments
             if (args.Length != 1)
@@ -58,11 +54,10 @@ namespace Assignment1
                 rdp rdp = new rdp(token, lx, sr, st );
 
                 lx.createDictionary();
+
                 /*string output = String.Format("{0,-15}  {1,-15} ", "Token"
                      , "Lexeme");
               
-                
-
                 Console.WriteLine(output);
                 */
                
@@ -77,7 +72,7 @@ namespace Assignment1
                     
                     token = rdp.parse(token);
                     st.writeTable(1);
-                    //Console.WriteLine("Reached eof");
+     
                     if (rdp.error != true)
                         Console.WriteLine("Program is Valid!");
                     
