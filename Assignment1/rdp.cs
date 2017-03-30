@@ -1,4 +1,16 @@
-﻿using System;
+﻿/// <summary>
+/// Name: Markus Johan Haugsdal
+/// Class: CSC 446 Compiler Construction
+/// Assignment: 
+/// Due Date: 03.29.2017
+/// Instructor: Hamer
+/// 
+/// Description: Recursive Descent Parser 5
+/// 
+/// </summary>
+
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -111,17 +123,23 @@ namespace Assignment1
 
  
             insertFunction(f);
-  
             match(lexicalScanner.SYMBOL.endt);
             match(lexicalScanner.SYMBOL.idt);
             match(lexicalScanner.SYMBOL.semicolont);
             st.writeTable(depth);
+            st.deleteDepth(depth);
             depth--;
   
             return token;
 
         }
-
+        /// <summary>
+        /// Inserts the args of the procedure
+        /// </summary>
+        /// <param name="ptr"></param>
+        /// <param name="typ"></param>
+        /// <param name="eTyp"></param>
+        /// <param name="offset"></param>
         private void insertArg(SymTab.entry ptr, SymTab.varType typ, SymTab.entryType eTyp, ref int offset)
         {
             
@@ -241,7 +259,10 @@ namespace Assignment1
                     break;
             }
         }
-
+        /// <summary>
+        /// Inserts the procedure to the symbolTable
+        /// </summary>
+        /// <param name="f"></param>
         private void insertFunction(SymTab.entry.function f)
         {
             SymTab.entry eptr;
@@ -275,7 +296,9 @@ namespace Assignment1
             //EMPTY
             //throw new NotImplementedException();
         }
-
+        /// <summary>
+        /// Grammar rule for procedures
+        /// </summary>
         private void procedures()
         {
 
@@ -295,7 +318,12 @@ namespace Assignment1
 
         }
 
-         
+        /// <summary>
+        /// Declarative Part grammar rule
+        /// </summary>
+        /// <param name="f"></param>
+        /// <param name="offset"></param>
+        /// <param name="oldOffset"></param>
         private void declPart(ref SymTab.entry.function f, ref int offset, ref int oldOffset   )
         {
             switch(token.token)
@@ -322,7 +350,11 @@ namespace Assignment1
                     break;
             }
         }
-
+        /// <summary>
+        /// Variables grammar rule
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <param name="oldOffset"></param>
         private void vars(ref int offset, ref int oldOffset)
         {
             // { 1 }  
@@ -377,6 +409,15 @@ namespace Assignment1
                     break;
             }
         }
+        /// <summary>
+        /// Function for inserting variables to the symbol table
+        /// </summary>
+        /// <param name="ptr"></param>
+        /// <param name="typ"></param>
+        /// <param name="eTyp"></param>
+        /// <param name="offset"></param>
+        /// <param name="counter"></param>
+        /// <param name="oldOffset"></param>
         private void insertVar(SymTab.entry ptr, SymTab.varType typ, SymTab.entryType eTyp, ref int offset, int counter, int oldOffset)
         {
 
