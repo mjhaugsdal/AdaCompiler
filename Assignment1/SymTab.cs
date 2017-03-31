@@ -32,6 +32,18 @@ namespace Assignment1
         public enum varType { charType, intType, floatType, def }
         public enum entryType { constEntry, varEntry, functionEntry }
 
+        public class paramNode
+        {
+            public varType typeVar;
+            public lexicalScanner.SYMBOL mode;
+            public paramNode()
+            {
+
+            }
+        }
+
+        
+
         /// <summary>
         /// Polymorphic structure for entries to symbol table
         /// </summary>
@@ -130,8 +142,7 @@ namespace Assignment1
                 public int sizeOfLocal ;
                 public int numberOfParams ;
                 //public varType returnType ;
-                public LinkedList<varType> paramList = new LinkedList<varType>();
-                public lexicalScanner.SYMBOL mode = lexicalScanner.SYMBOL.intt;
+                public LinkedList<paramNode> paramList = new LinkedList<paramNode>();
                 public int sizeOfParams;
 
                 public function() 
@@ -196,7 +207,7 @@ namespace Assignment1
                 return;
             string output = "";
             //string vOutput = String.Format("| {0,-10}  {1,-10} {2, -10} {3, -5} {4, -20}  {5, -20} \t\t\t  |", "Entrytype ", "Token", "Type", "Depth", "Size", "Offset");
-            string fOutput = String.Format("| {0,-10}  {1,-10} {2, -10} {3, -5} {4, -20}  {5, -20} {6,-20} |", "Token", "Lexeme", "Depth", "Mode", "Number of parameters", "Size of Locals", "Size of parameters");
+            string fOutput = String.Format("| {0,-10}  {1,-10} {2, -10} {3, -15} {4, -20}  {5, -26} |", "Token", "Lexeme", "Depth", "Number of parameters", "Size of Locals", "Size of parameters");
            // Console.WriteLine("Following symbols are at depth " + depth);
             Console.WriteLine("|---------------------------------------------------------------------------------------------------------|");
             Console.WriteLine("|-------------------------------"+" Depth: "+ depth + " ----------------------------------------------------------------|");
@@ -232,8 +243,8 @@ namespace Assignment1
                                 case (SymTab.entryType.functionEntry):
                                     SymTab.entry.function t1 = temp.Next as SymTab.entry.function;
                                     Console.WriteLine("| Procedure: \t\t\t\t\t\t\t\t\t\t\t\t\t  |");
-                                    output = string.Format("| {0,-10}  {1,-10} {2, -10} {3, -5} {4, -20}  {5, -20} {6,-20} |",
-                                        t1.token, t1.lexeme, t1.depth, t1.mode, t1.numberOfParams, t1.sizeOfLocal, t1.sizeOfParams);
+                                    output = string.Format("| {0,-10}  {1,-10} {2, -10} {3, -20} {4, -20}  {5, -26} |",
+                                        t1.token, t1.lexeme, t1.depth,  t1.numberOfParams, t1.sizeOfLocal, t1.sizeOfParams);
 
                                     Console.WriteLine(fOutput);
                                     Console.WriteLine(output);
@@ -241,7 +252,10 @@ namespace Assignment1
 
                                     if (t1.numberOfParams > 0)
                                         for (int j = 1; j <= t1.paramList.Count; j++)
-                                            Console.Write(t1.paramList.ElementAt(j-1)+ "   " );
+                                        {
+                                            Console.Write(t1.paramList.ElementAt(j - 1).mode + " " + t1.paramList.ElementAt(j - 1).typeVar);
+                                        }
+                                           // Console.Write(t1.paramList.ElementAt(j-1)+ "   " );
                                     else
                                         Console.WriteLine(" none");
                                      Console.WriteLine();

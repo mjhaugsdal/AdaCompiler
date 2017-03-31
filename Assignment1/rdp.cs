@@ -270,6 +270,7 @@ namespace Assignment1
 
    
             f.typeOfEntry = SymTab.entryType.functionEntry;
+           
             f.numberOfParams = f.paramList.Count;
         
             if (eptr.Next != null)
@@ -663,7 +664,7 @@ namespace Assignment1
         /// <summary>
         /// Function for grammar rule Args -> ( ArgList ) | e
         /// </summary>
-        private void pArgs(ref SymTab.entry.function f)
+         private void pArgs(ref SymTab.entry.function f)
         {
 
             int offset = 4;
@@ -687,13 +688,15 @@ namespace Assignment1
 
         private void argList(ref SymTab.entry.function f,  ref int offset)
         {
-            
+
+            lexicalScanner.SYMBOL paramMode = lexicalScanner.SYMBOL.unkownt;
+
             if (error != true)
-                mode(ref f);
+                mode(ref paramMode);
 
             if (error != true)
             {
-                procList(ref f.paramList, ref offset);
+                procList(ref f.paramList, ref offset, ref paramMode);
 
             }
 
@@ -719,7 +722,7 @@ namespace Assignment1
             }
         }
 
-        private void procList(ref LinkedList<SymTab.varType> ll, ref int offset)
+        private void procList(ref LinkedList<SymTab.paramNode> ll, ref int offset, ref lexicalScanner.SYMBOL paramMode)
         {
             switch (token.token)
             {
@@ -734,13 +737,16 @@ namespace Assignment1
 
                     match(lexicalScanner.SYMBOL.idt);
                     if (error != true)
-                        procListTail(ref typ , ref eTyp , ref ll, ref offset);
+                        procListTail(ref typ , ref eTyp , ref ll, ref offset, ref  paramMode);
 
                   /*  if (error != true)
                         procList(ref ll, ref offset);
 */
                     insertArg(ptr, typ, eTyp, ref offset);
-                    ll.AddFirst(typ);
+                    SymTab.paramNode pn = new SymTab.paramNode();
+                    pn.typeVar = typ;
+                    pn.mode = paramMode;
+                    ll.AddFirst(pn);
                     break;
                 /*   case (lexicalScanner.SYMBOL.semicolont):
                        match(lexicalScanner.SYMBOL.semicolont);
@@ -759,7 +765,7 @@ namespace Assignment1
 
 
         }
-        private void procListTail(ref SymTab.varType typ, ref SymTab.entryType eTyp, ref LinkedList<SymTab.varType> ll, ref int offset)
+        private void procListTail(ref SymTab.varType typ, ref SymTab.entryType eTyp, ref LinkedList<SymTab.paramNode> ll, ref int offset, ref lexicalScanner.SYMBOL paramMode)
         {
             switch(token.token)
                 {
@@ -774,11 +780,14 @@ namespace Assignment1
                     match(lexicalScanner.SYMBOL.idt);
 
                     if (error != true)
-                        procListTail(ref typ, ref eTyp, ref ll, ref offset);
+                        procListTail(ref typ, ref eTyp, ref ll, ref offset, ref paramMode);
 
                     //{ 3 }
                     insertArg(ptr, typ, eTyp, ref offset);
-                    ll.AddFirst(typ);
+                    SymTab.paramNode pn = new SymTab.paramNode();
+                    pn.typeVar = typ;
+                    pn.mode = paramMode;
+                    ll.AddFirst(pn);
                     break;
                 case(lexicalScanner.SYMBOL.colont):
 
@@ -786,44 +795,69 @@ namespace Assignment1
                     if (error != true)
                         typeMark(ref typ, ref eTyp);
 
+
+
                     if (error != true)
-                        procListTail(ref typ, ref eTyp, ref ll, ref offset);
+                       moreTail(ref typ, ref eTyp, ref ll, ref offset);
 
                     break;
                 case (lexicalScanner.SYMBOL.semicolont):
                     match(lexicalScanner.SYMBOL.semicolont);
                     if (error != true)
-                        procList(ref ll, ref offset);
+                        procList(ref ll, ref offset, ref paramMode);
                     break;
             }
 
         }
 
-
-
-        private void processVar(ref SymTab.entry.var var, SymTab.varType typ)
+        private void moreTail(ref SymTab.varType typ, ref SymTab.entryType eTyp, ref LinkedList<SymTab.paramNode> ll, ref int offset)
         {
-            switch (typ)
+            lexicalScanner.SYMBOL paramMode = lexicalScanner.SYMBOL.unkownt;
+
+            switch(token.token)
             {
-                case (SymTab.varType.intType):
+                case (lexicalScanner.SYMBOL.semicolont):
+                    match(lexicalScanner.SYMBOL.semicolont);
+
+                    if (error != true)
+                        mode(ref paramMode);
+
+                    if (error != true)
+                        procList(ref ll, ref offset,  ref paramMode);
+
+                    break;
+
+                default:
+                    //Empty
                     break;
             }
-        }
 
-        private void mode(ref SymTab.entry.function f)
+
+/*
+            if (error != true)
+                mode(ref paramMode);
+
+            if (error != true)
+                procList(ref ll, ref offset);
+
+    */
+    }
+
+        private void mode(ref lexicalScanner.SYMBOL mode)
         {
             switch (token.token)
             {
                 case (lexicalScanner.SYMBOL.intt):
-                    f.mode = lexicalScanner.SYMBOL.intt;
+                    mode = lexicalScanner.SYMBOL.intt;
+                    
                     match(lexicalScanner.SYMBOL.intt);
                     break;
                 case (lexicalScanner.SYMBOL.outt):
-                    f.mode = lexicalScanner.SYMBOL.outt;
+                    mode = lexicalScanner.SYMBOL.outt;
                     match(lexicalScanner.SYMBOL.outt);
                     break;
                 case (lexicalScanner.SYMBOL.inoutt):
-                    f.mode = lexicalScanner.SYMBOL.inoutt;
+                    mode = lexicalScanner.SYMBOL.inoutt;
                     match(lexicalScanner.SYMBOL.inoutt);
                     break;
                 default:
