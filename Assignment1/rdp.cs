@@ -812,7 +812,7 @@ namespace Assignment1
 
         private void moreTail(ref SymTab.varType typ, ref SymTab.entryType eTyp, ref LinkedList<SymTab.paramNode> ll, ref int offset)
         {
-            lexicalScanner.SYMBOL paramMode = lexicalScanner.SYMBOL.int;
+            lexicalScanner.SYMBOL paramMode = lexicalScanner.SYMBOL.intt;
 
             switch(token.token)
             {
