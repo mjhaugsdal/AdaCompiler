@@ -689,7 +689,7 @@ namespace Assignment1
         private void argList(ref SymTab.entry.function f,  ref int offset)
         {
 
-            lexicalScanner.SYMBOL paramMode = lexicalScanner.SYMBOL.unkownt;
+            lexicalScanner.SYMBOL paramMode = lexicalScanner.SYMBOL.intt;
 
             if (error != true)
                 mode(ref paramMode);
@@ -812,7 +812,7 @@ namespace Assignment1
 
         private void moreTail(ref SymTab.varType typ, ref SymTab.entryType eTyp, ref LinkedList<SymTab.paramNode> ll, ref int offset)
         {
-            lexicalScanner.SYMBOL paramMode = lexicalScanner.SYMBOL.unkownt;
+            lexicalScanner.SYMBOL paramMode = lexicalScanner.SYMBOL.int;
 
             switch(token.token)
             {
