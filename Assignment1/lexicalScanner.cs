@@ -39,7 +39,7 @@ namespace Assignment1
             andt, eoft, unkownt, relopt, addopt, assignopt,
             multopt, lparent, rparent,commat,colont,semicolont,
             periodt,idt,literalt,numt, intt, outt, inoutt, commentt,
-            realt
+            realt,nott
         };
 
         //Token object for token building
@@ -490,6 +490,9 @@ namespace Assignment1
             reswords.Add("out", SYMBOL.outt);
             reswords.Add("inout", SYMBOL.inoutt);
             reswords.Add("real", SYMBOL.realt);
+
+            //Assignment 6
+            reswords.Add("not", SYMBOL.nott);
 
         }
 

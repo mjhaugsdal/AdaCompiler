@@ -305,9 +305,181 @@ namespace Assignment1
 
         private void seqOfStatements()
         {
-            //EMPTY
+            switch(token.token)
+            {
+                case (lexicalScanner.SYMBOL.idt):
+
+                    if(error != true)
+                        statement();
+                    match(lexicalScanner.SYMBOL.semicolont);
+                    if (error != true)
+                        seqOfStatements();
+
+                    break;
+                default:
+                    //Lambda
+                    break;
+
+            }
+
             //throw new NotImplementedException();
         }
+
+        private void statement()
+        {
+            switch (token.token)
+            {
+                case (lexicalScanner.SYMBOL.idt):
+                    AssignStat();
+                    break;
+                default:
+                    IOStat();
+                    break;
+            }
+        }
+
+        private void IOStat()
+        {
+            //Lambda, for now
+        }
+
+        private void AssignStat()
+        {
+
+            //Check for undeclared variable!
+            checkUndeclared(token.lexeme);
+            //Start building code string
+            string code = token.lexeme;
+            SymTab.entry e_syn = new SymTab.entry();
+
+            match(lexicalScanner.SYMBOL.idt);
+            match(lexicalScanner.SYMBOL.assignopt);
+            if (error != true)
+                Expr(ref e_syn);
+
+        }
+
+        private void checkUndeclared(string lexeme)
+        {
+            SymTab.entry ePtr = st.lookUp(lexeme);
+            if(ePtr.lexeme != token.lexeme)
+            {
+                Console.WriteLine("ERROR! UNDECLARED VARIABLE " + token.lexeme +  " AT LINE "  + lexicalScanner.ln );
+            }
+            //If it is the right lexeme, the depth has to be LOWER
+            else if(ePtr.lexeme == token.lexeme && ePtr.depth > depth)
+            {
+                Console.WriteLine("ERROR! VARIABLE NOT DECLARED IN THIS SCOPE!" + token.lexeme + " SCOPE: " + depth );
+            }
+        }
+
+        /// <summary>
+        /// Input : E.SYN
+        /// </summary>
+        private void Expr(ref SymTab.entry syn)
+        {
+            relation(ref syn);
+        }
+
+        private void relation(ref SymTab.entry syn)
+        {
+            simpleExpression(ref syn);
+        }
+
+        private void simpleExpression(ref SymTab.entry syn)
+        {
+            SymTab.entry tSyn = new SymTab.entry();
+            term(ref tSyn);
+            moreTerm(ref tSyn);
+            
+            syn = tSyn; // Set syn to t_syn
+        }
+
+
+        private void term(ref SymTab.entry tSyn)
+        {
+            factor(ref tSyn);
+            moreFactor(ref tSyn);
+        }
+
+        private void moreFactor(ref SymTab.entry tSyn)
+        {
+            switch(token.token)
+            {
+                case (lexicalScanner.SYMBOL.multopt):
+                    mulop();
+                    factor(ref tSyn);
+                    moreFactor(ref tSyn);
+                    break;
+
+                default:
+                    break;
+            }
+
+
+        }
+
+        private void mulop()
+        {
+            //Lexeme contains specific operation
+        }
+
+        private void factor(ref SymTab.entry tSyn)
+        {
+            switch (token.token)
+            { 
+                case (lexicalScanner.SYMBOL.idt): // IDT
+                    match(lexicalScanner.SYMBOL.idt);
+
+                    break;
+                case (lexicalScanner.SYMBOL.numt): // Numt
+                    match(lexicalScanner.SYMBOL.numt);
+                    break;
+                case (lexicalScanner.SYMBOL.lparent): // ( EXPR )
+                    match(lexicalScanner.SYMBOL.lparent);
+                    Expr(ref tSyn);
+                    match(lexicalScanner.SYMBOL.rparent);
+                    break;
+                case (lexicalScanner.SYMBOL.nott): // not Factor
+                    match(lexicalScanner.SYMBOL.nott);
+                    factor(ref tSyn);
+                    break;
+                case (lexicalScanner.SYMBOL.addopt): // SignOp Factor
+                    signOp(ref tSyn);
+                    factor(ref tSyn);
+                    break;
+            }
+
+        }
+
+        private void signOp(ref SymTab.entry tSyn)
+        {
+           //Check if addopt's lexeme == a minus sign
+        }
+
+        private void moreTerm(ref SymTab.entry tSyn)
+        {
+            switch(token.token)
+            {
+                case (lexicalScanner.SYMBOL.addopt):
+                    addOp(ref tSyn);
+                    term(ref tSyn);
+                    moreTerm(ref tSyn);
+
+                    break;
+                default:
+                    //lambda allowed
+                    break;
+
+            }
+
+        }
+
+        private void addOp(ref SymTab.entry tSyn)
+        {
+            //Lexeme contains specific operation.
+        }
+
         /// <summary>
         /// Grammar rule for procedures
         /// </summary>
