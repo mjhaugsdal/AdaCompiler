@@ -81,6 +81,8 @@ namespace Assignment1
 
             match(lexicalScanner.SYMBOL.proct);
 
+            string rememberme = token.lexeme;
+
             //{ 1 }
             checkForDups();
             st.insert(token.lexeme, token.token, depth);
@@ -122,8 +124,17 @@ namespace Assignment1
             //{ 3 }
 
  
+
             insertFunction(f);
             match(lexicalScanner.SYMBOL.endt);
+
+            if (token.lexeme != rememberme)
+            {
+                Console.WriteLine("ERROR! PROCEDURE " + rememberme+ " DID NOT MATCH AT END " + token.lexeme);
+                error = true;
+            }
+
+
             match(lexicalScanner.SYMBOL.idt);
             match(lexicalScanner.SYMBOL.semicolont);
             st.writeTable(depth);

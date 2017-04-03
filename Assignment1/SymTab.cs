@@ -501,31 +501,18 @@ namespace Assignment1
 
 
             temp = hashTable[h].ElementAt(0);
-           
-            
 
             while (temp.Next != null)
             {
-
-               // Console.WriteLine("First it ");
                     
                 if (temp.lexeme == lexeme || temp.lexeme == lexeme.ToLower())
                 {
-                   // Console.WriteLine("Found the lexeme!");
-                    //Console.WriteLine("Returning: " + lexeme + " With the data " + temp.token + " ptrs: Prev " + temp.Prev +" And " + temp.Next);
-
                     return temp;
-
                 }
-
                 if (temp.Next != null)
                     temp = temp.Next;
             }
-            
-            
-            //Console.WriteLine("I shouldnt be here! ");
             return temp;
-
         }
 
         /// <summary>
