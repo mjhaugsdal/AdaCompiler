@@ -30,7 +30,19 @@ namespace Assignment1
     
 
         public enum varType { charType, intType, floatType, def }
+        public enum entryType { constEntry, varEntry, functionEntry }
 
+        public class paramNode
+        {
+            public varType typeVar;
+            public lexicalScanner.SYMBOL mode;
+            public paramNode()
+            {
+
+            }
+        }
+
+        
 
         /// <summary>
         /// Polymorphic structure for entries to symbol table
@@ -40,77 +52,122 @@ namespace Assignment1
             public lexicalScanner.SYMBOL token = lexicalScanner.SYMBOL.unkownt;
             public string lexeme = " ";
             public int depth = 0;
+            public entryType typeOfEntry;
 
-            public entry(lexicalScanner.SYMBOL a, string b, int c)
+
+            public entry()
             {
-                token = a;
-                lexeme = b;
-                depth = c;
 
             }
 
-        }
-
-        public class var : entry
-        {
-            public varType typeOfVar;
-            public int Offset;
-            public int size;
-
-            public var(lexicalScanner.SYMBOL a, string b, int c, varType d, int e, int f) : base(a, b, c)
+            public entry(lexicalScanner.SYMBOL token, string lexeme, int depth )
             {
-                typeOfVar = d;
-                Offset = e;
-                size = f;
+                this.token = token;
+                this.lexeme = lexeme;
+                this.depth = depth;
+                //this.typeOfEntry = typeOfEntry;
 
             }
-        }
-
-        public class constant : entry
-        {
-            public varType typeOfConstant;
-
-            public constant(lexicalScanner.SYMBOL a, string b, int c, varType d) : base(a, b, c)
+            public class var : entry
             {
-                typeOfConstant = d;
-            }
+                public varType typeOfVar;
+                public int offset;
+                public int size;
 
-            public class intConstant : constant
-            {
-                public int value;
-
-                public intConstant(lexicalScanner.SYMBOL a, string b, int c, varType d, int e) : base(a, b, c, d)
+                public var()
                 {
-                    value = e;
 
                 }
-            }
-            public class floatConstant : constant
-            {
-                public float valueR;
 
-                public floatConstant(lexicalScanner.SYMBOL a, string b, int c, varType d, int e) : base(a, b, c, d)
+                /*public var(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, varType typeOfVar, int offset, int size) : base(token, lexeme, depth, typeOfEntry)
                 {
-                    valueR = e;
-                }
+
+                    this.typeOfVar = typeOfVar;
+                    this.offset = offset;
+                    this.size = size;
+
+                }*/
             }
-        } // end constant
 
-        public class function : entry 
-        {
-            public int sizeOfLocal;
-            public int numberOfParams;
-            public varType returnType;
-            public LinkedList<varType> paramList = new LinkedList<varType>();
-
-            public function(lexicalScanner.SYMBOL a, string b, int c, int d, int e, varType f, LinkedList<varType> g) : base(a, b, c)
+            public class constant : entry
             {
-                sizeOfLocal = d;
-                numberOfParams = e;
-                returnType = f;
-                paramList = g;
+                public varType typeOfConstant;
+                public int offset;
+                public int size;
+                public constant()
+                {
+
+                }
+
+              /*  public constant(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, varType typeOfConstant) : base(token, lexeme, depth, typeOfEntry)
+                {
+                    this.typeOfConstant = typeOfConstant;
+                }
+*/
+                public class intConstant : constant
+                {
+                    public int value;
+
+                    public intConstant()
+                    {
+
+                    }
+
+                   /* public intConstant(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, varType typeOfConstant, int value) : base(token, lexeme, depth, typeOfEntry, typeOfConstant)
+                    {
+                        this.value = value;
+
+                    }
+                    */
+                }
+                public class floatConstant : constant
+                {
+                    public float valueR;
+
+
+                    public floatConstant()
+                    {
+
+                    }
+
+                    /*public floatConstant(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, varType typeOfConstant, int valueR) : base(token, lexeme, depth, typeOfEntry, typeOfConstant)
+                    {
+                        this.valueR = valueR;
+                    }*/
+                }
+            } // end constant
+
+            public class function : entry
+            {
+                public int sizeOfLocal ;
+                public int numberOfParams ;
+                //public varType returnType ;
+                public LinkedList<paramNode> paramList = new LinkedList<paramNode>();
+                public int sizeOfParams;
+
+                public function() 
+                {
+
+                }
+/*
+                public function(lexicalScanner.SYMBOL token, string lexeme, int depth, entryType typeOfEntry, int sizeOfLocal, int numberOfParams, varType returnType, LinkedList<varType> paramList, lexicalScanner.SYMBOL mode) : base(token, lexeme, depth, typeOfEntry)
+                {
+                    this.sizeOfLocal = sizeOfLocal;
+                    this.numberOfParams = numberOfParams;
+                    this.returnType = returnType;
+                    this.paramList = paramList;
+                    this.mode = mode;
+                }
+
+*/
+
             }
-        }
+
+            public entry Next;
+            public entry Prev;
+        }// end entry
+
+
 
         //HashTable
 
@@ -129,7 +186,7 @@ namespace Assignment1
 
             for(int i = 0; i<tableSize; i++)
             {
-                hashTable[i].AddFirst(new entry(lexicalScanner.SYMBOL.unkownt, "", 0));
+                hashTable[i].AddFirst(new entry());
             }
         }
 
@@ -137,27 +194,255 @@ namespace Assignment1
         /// <summary>
         /// Writes the contents of the table. Skips empty lists
         /// </summary>
-        public void writeTable()
+        /// 
+
+
+        public void writeTable(int depth)
         {
-            for(int i=0; i<hashTable.Length;i++)
+
+
+
+
+            if (rdp.error == true)
+                return;
+            string output = "";
+            //string vOutput = String.Format("| {0,-10}  {1,-10} {2, -10} {3, -5} {4, -20}  {5, -20} \t\t\t  |", "Entrytype ", "Token", "Type", "Depth", "Size", "Offset");
+            string fOutput = String.Format("| {0,-10}  {1,-10} {2, -10} {3, -15} {4, -20}  {5, -26} |", "Token", "Lexeme", "Depth", "Number of parameters", "Size of Locals", "Size of parameters");
+           // Console.WriteLine("Following symbols are at depth " + depth);
+            Console.WriteLine("|---------------------------------------------------------------------------------------------------------|");
+            Console.WriteLine("|-------------------------------"+" Depth: "+ depth + " ----------------------------------------------------------------|");
+            Console.WriteLine("|---------------------------------------------------------------------------------------------------------|");
+
+            int t = 0;
+            for (int i=0; i<hashTable.Length;i++)
             {
+
+                if(t>2)
+                {
+                    Console.WriteLine("Press any key to continue...");
+                    Console.ReadKey();
+                    t = 0;
+                }
+
                 try
                 {
-                    for (int j = 0; j < hashTable[i].Count; j++)
+
+
+                    entry temp = hashTable[i].ElementAt(0);
+
+
+                    while (temp.Next != null)
                     {
-                        if(hashTable[i].ElementAt(j).depth != 0)
-                        Console.Write(hashTable[i].ElementAt(j).lexeme + " " + hashTable[i].ElementAt(j).token + " " + hashTable[i].ElementAt(j).depth+ "  " );
+
+                        if (temp.Next.depth == depth)
+                        {
+                            t++;
+
+                            switch (temp.Next.typeOfEntry)
+                            {
+                                case (SymTab.entryType.functionEntry):
+                                    SymTab.entry.function t1 = temp.Next as SymTab.entry.function;
+                                    Console.WriteLine("| Procedure: \t\t\t\t\t\t\t\t\t\t\t\t\t  |");
+                                    output = string.Format("| {0,-10}  {1,-10} {2, -10} {3, -20} {4, -20}  {5, -26} |",
+                                        t1.token, t1.lexeme, t1.depth,  t1.numberOfParams, t1.sizeOfLocal, t1.sizeOfParams);
+
+                                    Console.WriteLine(fOutput);
+                                    Console.WriteLine(output);
+                                    Console.Write("| Parameters: ");
+
+                                    if (t1.numberOfParams > 0)
+                                        for (int j = 1; j <= t1.paramList.Count; j++)
+                                        {
+                                            Console.Write(t1.paramList.ElementAt(j - 1).mode + " " + t1.paramList.ElementAt(j - 1).typeVar + "  ");
+                                        }
+                                           // Console.Write(t1.paramList.ElementAt(j-1)+ "   " );
+                                    else
+                                        Console.WriteLine(" none");
+                                     Console.WriteLine();
+                                    break;
+
+                                case (SymTab.entryType.constEntry):
+                                    Console.WriteLine();
+                                    SymTab.entry.constant t2 = temp.Next as SymTab.entry.constant;
+                                    switch(t2.typeOfConstant)
+                                    {
+                                        case (SymTab.varType.floatType):
+                                            SymTab.entry.constant.floatConstant f1 = temp.Next as SymTab.entry.constant.floatConstant;
+
+                          
+                                            Console.WriteLine("Constant: " + f1.lexeme + " With the following data: ");
+                                            Console.WriteLine("Token: " + f1.token);
+                                            Console.WriteLine("Type: " + f1.typeOfConstant);
+                                            Console.WriteLine("Depth: " + f1.depth);
+                                            Console.WriteLine("Size: " + f1.size);
+                                            Console.WriteLine("Offset: " + f1.offset);
+                                            break;
+                                        case (SymTab.varType.intType):
+                                            SymTab.entry.constant.intConstant i1 = temp.Next as SymTab.entry.constant.intConstant;
+                                            Console.WriteLine("Constant: " + i1.lexeme + " With the following data: ");
+                                            Console.WriteLine("Token: " + i1.token);
+                                            Console.WriteLine("Type: " + i1.typeOfConstant);
+                                            Console.WriteLine("Depth: " + i1.depth);
+                                            Console.WriteLine("Size: " + i1.size);
+                                            Console.WriteLine("Offset: " + i1.offset);
+
+                                            break;
+                                    }
+
+
+                                    Console.WriteLine();
+                                    break;
+
+                                case (SymTab.entryType.varEntry):
+                                    SymTab.entry.var t3 = temp.Next as SymTab.entry.var;
+                          
+                                    Console.WriteLine();
+                                    Console.WriteLine("Variable: " + t3.lexeme + " With the following data: ");
+                                    Console.WriteLine("Token: " + t3.token);
+                                    Console.WriteLine("Type: " + t3.typeOfVar);
+                                    Console.WriteLine("Depth: " + t3.depth);
+                                    Console.WriteLine("Size: " + t3.size);
+                                    Console.WriteLine("Offset: " + t3.offset);
+                                    Console.WriteLine();
+                                    break;
+                            }
+                        }
+                        //Console.WriteLine(temp.Next.lexeme);
+                        //Console.WriteLine(temp.Next.typeOfEntry);
+                        if(temp.Next != null)
+                        {
+                            temp = temp.Next;
+                        }
                     }
 
-                    if (hashTable[i].ElementAt(0).depth != 0)
-                        Console.WriteLine();
+
                 }
-                catch(NullReferenceException)
+                catch (NullReferenceException)
                 {
+                    //Console.WriteLine("NULL REFERENCE!");
                     //Empty entry
                 }
             }
         }
+
+
+        /*        public void writeTable(int depth)
+                {
+
+
+
+                    if (rdp.error == true)
+                        return;
+
+                    Console.WriteLine("Following symbols are at depth " + depth);
+                    Console.WriteLine();
+                    int t = 0;
+                    for (int i=0; i<hashTable.Length;i++)
+                    {
+
+                        if(t>2)
+                        {
+                            Console.WriteLine("Press any key to continue...");
+                            Console.ReadKey();
+                            t = 0;
+                        }
+
+                        try
+                        {
+
+
+                            entry temp = hashTable[i].ElementAt(0);
+
+
+                            while (temp.Next != null)
+                            {
+
+                                if (temp.Next.depth == depth)
+                                {
+                                    t++;
+
+                                    switch (temp.Next.typeOfEntry)
+                                    {
+                                        case (SymTab.entryType.functionEntry):
+                                            SymTab.entry.function t1 = temp.Next as SymTab.entry.function;
+                                            Console.WriteLine();
+                                            Console.WriteLine("Procedure: " + t1.lexeme + " With the following data: ");
+                                            Console.WriteLine("Token: " + t1.token);
+                                            Console.WriteLine("Depth: " + t1.depth);
+                                            Console.WriteLine("Mode: " + t1.mode);
+                                            Console.WriteLine("Number of Parameters: " + t1.numberOfParams);
+                                            Console.WriteLine("Size of local variables and consts: " + t1.sizeOfLocal);
+                                            Console.WriteLine("Size of parameters: " + t1.sizeOfParams);
+                                            Console.Write("The parameters: ");
+
+                                            if (t1.numberOfParams > 0)
+                                                for (int j = 1; j <= t1.paramList.Count; j++)
+                                                    Console.Write(t1.paramList.ElementAt(j-1)+ "   " );
+                                            else
+                                                Console.WriteLine(" none");
+                                             Console.WriteLine();
+                                            break;
+
+                                        case (SymTab.entryType.constEntry):
+                                            Console.WriteLine();
+                                            SymTab.entry.constant t2 = temp.Next as SymTab.entry.constant;
+                                            switch(t2.typeOfConstant)
+                                            {
+                                                case (SymTab.varType.floatType):
+                                                    SymTab.entry.constant.floatConstant f1 = temp.Next as SymTab.entry.constant.floatConstant;
+                                                    Console.WriteLine("Constant: " + f1.lexeme + " With the following data: ");
+                                                    Console.WriteLine("Token: " + f1.token);
+                                                    Console.WriteLine("Type: " + f1.typeOfConstant);
+                                                    Console.WriteLine("Depth: " + f1.depth);
+                                                    Console.WriteLine("Size: " + f1.size);
+                                                    Console.WriteLine("Offset: " + f1.offset);
+                                                    break;
+                                                case (SymTab.varType.intType):
+                                                    SymTab.entry.constant.intConstant i1 = temp.Next as SymTab.entry.constant.intConstant;
+                                                    Console.WriteLine("Constant: " + i1.lexeme + " With the following data: ");
+                                                    Console.WriteLine("Token: " + i1.token);
+                                                    Console.WriteLine("Type: " + i1.typeOfConstant);
+                                                    Console.WriteLine("Depth: " + i1.depth);
+                                                    Console.WriteLine("Size: " + i1.size);
+                                                    Console.WriteLine("Offset: " + i1.offset);
+
+                                                    break;
+                                            }
+
+
+                                            Console.WriteLine();
+                                            break;
+
+                                        case (SymTab.entryType.varEntry):
+                                            SymTab.entry.var t3 = temp.Next as SymTab.entry.var;
+                                            Console.WriteLine();
+                                            Console.WriteLine("Variable: " + t3.lexeme + " With the following data: ");
+                                            Console.WriteLine("Token: " + t3.token);
+                                            Console.WriteLine("Type: " + t3.typeOfVar);
+                                            Console.WriteLine("Depth: " + t3.depth);
+                                            Console.WriteLine("Size: " + t3.size);
+                                            Console.WriteLine("Offset: " + t3.offset);
+                                            Console.WriteLine();
+                                            break;
+                                    }
+                                }
+                                //Console.WriteLine(temp.Next.lexeme);
+                                //Console.WriteLine(temp.Next.typeOfEntry);
+                                if(temp.Next != null)
+                                {
+                                    temp = temp.Next;
+                                }
+                            }
+
+
+                        }
+                        catch (NullReferenceException)
+                        {
+                            //Console.WriteLine("NULL REFERENCE!");
+                            //Empty entry
+                        }
+                    }
+                }*/
 
         /// <summary>
         /// Inserts an entry into the symbol table. Uses a hash function to find its position
@@ -168,15 +453,37 @@ namespace Assignment1
 
         unsafe public void insert(string lexeme, lexicalScanner.SYMBOL token, int depth)
         {
-
+            
             //int h = hash(convertStringToCharP(lexeme)); // Get hash
-            uint h = hash(lexeme);
+            uint h = hash(lexeme.ToLower());
+            
 
             entry temp = new entry(token, lexeme, depth); //Create new record
-           
+
+            //Console.WriteLine(hashTable[h].Count);
+           //S Console.WriteLine(token);
+
+            //If there are elements in the list
+            if (hashTable[h].ElementAt(0).Next != null)
+            {
+                temp.Next = hashTable[h].ElementAt(0).Next;
+                hashTable[h].ElementAt(0).Next = temp;
+
+                temp.Next.Prev = temp;
+                temp.Prev = hashTable[h].ElementAt(0);
+
+            }
+            //If there are no elements in the list
+            else
+            {
+              
+                hashTable[h].ElementAt(0).Next = temp;
+                temp.Prev = hashTable[h].ElementAt(0);
+
+             
+            }
 
             
-            hashTable[h].AddFirst(temp); // Enter record at location in symbol table
 
         }
         
@@ -188,24 +495,24 @@ namespace Assignment1
 
         unsafe public entry lookUp(string lexeme) //Lookup using the lexeme
         {
-            int i = 0;
-            int j = 0;
-            entry temp = new entry(lexicalScanner.SYMBOL.unkownt, "", 0);
+           
+            uint h = hash(lexeme.ToLower());
+            entry temp = new entry();
 
-            for (i=0; i<tableSize; i++)
+
+            temp = hashTable[h].ElementAt(0);
+
+            while (temp.Next != null)
             {
-                for (j = 0; j < hashTable[j].Count; j++)
+                    
+                if (temp.lexeme == lexeme || temp.lexeme == lexeme.ToLower())
                 {
-                    if(hashTable[i].ElementAt(j).lexeme == lexeme)
-                    {
-                         temp = hashTable[i].ElementAt(j);
-                        return temp;
-                    }
-
+                    return temp;
                 }
+                if (temp.Next != null)
+                    temp = temp.Next;
             }
             return temp;
-
         }
 
         /// <summary>
@@ -216,16 +523,33 @@ namespace Assignment1
         {
             for(int i =0; i<hashTable.Length; i++)
             {
-                for(int j= 0; j<hashTable[i].Count; j++)
-                {
-                    if (hashTable[i].ElementAt(j).depth == depth)
-                    {
-                        hashTable[i].ElementAt(j).depth = 0;
-                        hashTable[i].ElementAt(j).lexeme = "";
-                        hashTable[i].ElementAt(j).token = lexicalScanner.SYMBOL.unkownt;
-                    }
+                entry temp = hashTable[i].ElementAt(0); // Create temp and point to head
 
+                if (temp != null) // If element is not empty.
+                {
+                    while (temp.Next != null) //Iterate list
+                    {
+                        if (temp.Next.depth == depth) //found!
+                        {
+                            if (temp.Next.Next != null) //If there is at least two elements
+                            {
+                                temp.Next = temp.Next.Next; // Remove reference to middle node
+
+                            }
+                            else // only one element
+                            {
+                                temp.Next = null; // delete
+
+                            }
+
+                        }
+
+                        else if (temp.Next != null)
+                            temp = temp.Next;
+                    }
                 }
+
+
 
             }
         }
@@ -242,7 +566,7 @@ namespace Assignment1
             uint h = 0, g;
             uint prime = tableSize;
 
-            for(int i =0; i<s.Length; i++)
+            for (int i = 0; i < s.Length; i++)
             {
                 h = (h << 4) + s[i];
                 g = h & 0xF0000000;
@@ -253,10 +577,8 @@ namespace Assignment1
                 }
             }
 
-            return h%prime;
+            return h % prime;
         }
-
-
 
     /*
         unsafe public int hash(char * s)
