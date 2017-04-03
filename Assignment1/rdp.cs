@@ -106,7 +106,7 @@ namespace Assignment1
 
             //DeclarativePart
             int offset = 0;
-            int oldOffset = 0;
+            int oldOffset = 2;
             if (error != true)
                 declPart(ref f, ref offset, ref oldOffset);
             //Procedures
@@ -338,7 +338,7 @@ namespace Assignment1
                     {
                         vars(ref offset, ref oldOffset);
                     }
-                    oldOffset = offset;
+                    oldOffset = offset+2;
                   
                     match(lexicalScanner.SYMBOL.semicolont);
                     if (error != true)
@@ -360,7 +360,7 @@ namespace Assignment1
         {
             // { 1 }  
 
-            int counter = 1;
+            int counter = 0;
             checkForDups();
             st.insert(token.lexeme, token.token, depth);
             SymTab.entry ptr = st.lookUp(token.lexeme);

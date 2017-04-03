@@ -253,7 +253,7 @@ namespace Assignment1
                                     if (t1.numberOfParams > 0)
                                         for (int j = 1; j <= t1.paramList.Count; j++)
                                         {
-                                            Console.Write(t1.paramList.ElementAt(j - 1).mode + " " + t1.paramList.ElementAt(j - 1).typeVar);
+                                            Console.Write(t1.paramList.ElementAt(j - 1).mode + " " + t1.paramList.ElementAt(j - 1).typeVar + "  ");
                                         }
                                            // Console.Write(t1.paramList.ElementAt(j-1)+ "   " );
                                     else
