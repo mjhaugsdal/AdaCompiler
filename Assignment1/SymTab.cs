@@ -3,7 +3,7 @@
 /// Name: Markus Johan Haugsdal
 /// Class: CSC 446 Compiler Construction
 /// Assignment: 
-/// Due Date: 03.20.2017
+/// Due Date: 04.04.2017
 /// Instructor: Hamer
 /// 
 /// Description: Symbol table for compiler assignment 4

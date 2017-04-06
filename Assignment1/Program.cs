@@ -10,8 +10,8 @@ using System.Globalization;
 /// <summary>
 /// Name: Markus Johan Haugsdal
 /// Class: CSC 446 Compiler Construction
-/// Assignment: 1
-/// Due Date: 01.02.2017
+/// Assignment: 
+/// Due Date: 04.04.2017
 /// Instructor: Hamer
 /// 
 /// Description: Main Driver for compiler assignment 1

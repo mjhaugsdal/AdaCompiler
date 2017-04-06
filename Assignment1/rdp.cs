@@ -2,7 +2,7 @@
 /// Name: Markus Johan Haugsdal
 /// Class: CSC 446 Compiler Construction
 /// Assignment: 
-/// Due Date: 03.29.2017
+/// Due Date: 04.04.2017
 /// Instructor: Hamer
 /// 
 /// Description: Recursive Descent Parser 5
@@ -80,7 +80,6 @@ namespace Assignment1
             //
 
             match(lexicalScanner.SYMBOL.proct);
-
             string rememberme = token.lexeme;
 
             //{ 1 }
@@ -128,7 +127,7 @@ namespace Assignment1
             insertFunction(f);
             match(lexicalScanner.SYMBOL.endt);
 
-            if (token.lexeme != rememberme)
+            if (token.lexeme != rememberme && error != true)
             {
                 Console.WriteLine("ERROR! PROCEDURE " + rememberme+ " DID NOT MATCH AT END " + token.lexeme);
                 error = true;
@@ -302,7 +301,9 @@ namespace Assignment1
             }
             
         }
-
+        /// <summary>
+        /// Additional grammar for Sequence of Statements.
+        /// </summary>
         private void seqOfStatements()
         {
             switch(token.token)
@@ -313,7 +314,7 @@ namespace Assignment1
                         statement();
                     match(lexicalScanner.SYMBOL.semicolont);
                     if (error != true)
-                        seqOfStatements();
+                        statTail();
 
                     break;
                 default:
@@ -321,33 +322,62 @@ namespace Assignment1
                     break;
 
             }
-
-            //throw new NotImplementedException();
+        
         }
+        /// <summary>
+        /// Tail for statements
+        /// </summary>
+        private void statTail()
+        {
+            switch (token.token)
+            {
+                case (lexicalScanner.SYMBOL.idt):
 
+                    if (error != true)
+                        statement();
+                    match(lexicalScanner.SYMBOL.semicolont);
+                    if (error != true)
+                        statTail();
+
+                    break;
+                default:
+                    //Lambda
+                    break;
+            }
+        }
+        /// <summary>
+        /// Statement -> Assignstat
+        /// </summary>
         private void statement()
         {
             switch (token.token)
             {
                 case (lexicalScanner.SYMBOL.idt):
-                    AssignStat();
+                    if (error != true)
+                        AssignStat();
                     break;
                 default:
-                    IOStat();
+                    if (error != true)
+                        IOStat();
                     break;
             }
         }
+
 
         private void IOStat()
         {
             //Lambda, for now
         }
 
+        /// <summary>
+        /// A-> idt := Expression
+        /// </summary>
         private void AssignStat()
         {
 
             //Check for undeclared variable!
-            checkUndeclared(token.lexeme);
+            if (error != true)
+                checkUndeclared(token.lexeme);
             //Start building code string
             string code = token.lexeme;
             SymTab.entry e_syn = new SymTab.entry();
@@ -358,77 +388,121 @@ namespace Assignment1
                 Expr(ref e_syn);
 
         }
-
+        /// <summary>
+        /// Checks for undeclared variables
+        /// </summary>
+        /// <param name="lexeme"></param>
         private void checkUndeclared(string lexeme)
         {
+
+
             SymTab.entry ePtr = st.lookUp(lexeme);
-            if(ePtr.lexeme != token.lexeme)
+            if(ePtr.lexeme != token.lexeme && error != true)
             {
                 Console.WriteLine("ERROR! UNDECLARED VARIABLE " + token.lexeme +  " AT LINE "  + lexicalScanner.ln );
+                error = true;
             }
             //If it is the right lexeme, the depth has to be LOWER
-            else if(ePtr.lexeme == token.lexeme && ePtr.depth > depth)
+        /*    else if(ePtr.lexeme == token.lexeme && ePtr.depth > depth)
             {
                 Console.WriteLine("ERROR! VARIABLE NOT DECLARED IN THIS SCOPE!" + token.lexeme + " SCOPE: " + depth );
-            }
+            }*/
         }
 
         /// <summary>
-        /// Input : E.SYN
+        /// Expression -> Term, RestOfExpression
         /// </summary>
         private void Expr(ref SymTab.entry syn)
         {
-            relation(ref syn);
+            if (error != true)
+                relation(ref syn);
         }
 
+        /// <summary>
+        /// Rule to call Simple Expression
+        /// </summary>
+        /// <param name="syn"></param>
         private void relation(ref SymTab.entry syn)
         {
-            simpleExpression(ref syn);
+            if (error != true)
+                simpleExpression(ref syn);
         }
-
+        /// <summary>
+        /// SimpleExpression
+        /// </summary>
+        /// <param name="syn"></param>
         private void simpleExpression(ref SymTab.entry syn)
         {
             SymTab.entry tSyn = new SymTab.entry();
-            term(ref tSyn);
-            moreTerm(ref tSyn);
-            
-            syn = tSyn; // Set syn to t_syn
+            // term(ref tSyn);
+            // moreTerm(ref tSyn);
+            if (error != true)
+                term(ref tSyn);
+            if (error != true)
+                moreTerm(ref tSyn);
+
+            // syn = tSyn; // Set syn to t_syn
         }
 
-
+        /// <summary>
+        /// Term -> Factor MoreFactor
+        /// </summary>
+        /// <param name="tSyn"></param>
         private void term(ref SymTab.entry tSyn)
         {
-            factor(ref tSyn);
-            moreFactor(ref tSyn);
+            if (error != true)
+                factor(ref tSyn);
+            if (error != true)
+                moreFactor(ref tSyn);
         }
 
+        /// <summary>
+        /// MoreFactor -> Mulop Factor Morefactor | E
+        /// </summary>
+        /// <param name="tSyn"></param>
         private void moreFactor(ref SymTab.entry tSyn)
         {
             switch(token.token)
             {
                 case (lexicalScanner.SYMBOL.multopt):
-                    mulop();
-                    factor(ref tSyn);
-                    moreFactor(ref tSyn);
+                    if (error != true)
+                        mulop();
+                    if (error != true)
+                        factor(ref tSyn);
+                    if (error != true)
+                        moreFactor(ref tSyn);
                     break;
 
                 default:
+                    //Lambda
                     break;
             }
 
 
         }
 
+        /// <summary>
+        /// * | / | mod | rem | and
+        /// </summary>
         private void mulop()
         {
+            match(lexicalScanner.SYMBOL.multopt);
             //Lexeme contains specific operation
         }
 
+        /// <summary>
+        /// Factor -> Id | num | ( Expr ) | not Factor | SignOp Factor | 
+        /// </summary>
+        /// <param name="tSyn"></param>
         private void factor(ref SymTab.entry tSyn)
         {
             switch (token.token)
             { 
                 case (lexicalScanner.SYMBOL.idt): // IDT
+
+                    //Check for undeclared
+                    if (error != true)
+                        checkUndeclared(token.lexeme);
                     match(lexicalScanner.SYMBOL.idt);
 
                     break;
@@ -437,46 +511,81 @@ namespace Assignment1
                     break;
                 case (lexicalScanner.SYMBOL.lparent): // ( EXPR )
                     match(lexicalScanner.SYMBOL.lparent);
-                    Expr(ref tSyn);
+                    if(error!=true)
+                        Expr(ref tSyn);
                     match(lexicalScanner.SYMBOL.rparent);
                     break;
                 case (lexicalScanner.SYMBOL.nott): // not Factor
                     match(lexicalScanner.SYMBOL.nott);
-                    factor(ref tSyn);
+                    if (error != true)
+                        factor(ref tSyn);
                     break;
-                case (lexicalScanner.SYMBOL.addopt): // SignOp Factor
-                    signOp(ref tSyn);
-                    factor(ref tSyn);
+                case (lexicalScanner.SYMBOL.addopt): // SignOp Facto
+                    if (error != true)
+                        signOp(ref tSyn);
+                    if (error != true)
+                        factor(ref tSyn);
+                    break;
+                default:
+                    //Lambda NOT allowed
+                    Console.WriteLine("ERROR! ILLEGAL SYMBOL " + token.lexeme + " AT LINE " + lexicalScanner.ln);
+                    error = true;
                     break;
             }
 
         }
 
+
+        /// <summary>
+        /// - Checks for - Sign. Sets error flag for other addopt's
+        /// </summary>
+        /// <param name="tSyn"></param>
         private void signOp(ref SymTab.entry tSyn)
         {
+            if(token.lexeme == "-" && token.token == lexicalScanner.SYMBOL.addopt)
+            {
+                match(lexicalScanner.SYMBOL.addopt);
+            }
+            else
+            {
+                error = true;
+                Console.WriteLine("ERROR! \"" + token.lexeme + "\" NOT ALLOWED ON LINE " + lexicalScanner.ln + ". CHECK YOUR STATEMENT. (Perhaps you have two additions?)");
+            }
            //Check if addopt's lexeme == a minus sign
         }
 
+        /// <summary>
+        /// MoreTerm -> Addop Term MoreTerm | E
+        /// </summary>
+        /// <param name="tSyn"></param>
         private void moreTerm(ref SymTab.entry tSyn)
         {
             switch(token.token)
             {
                 case (lexicalScanner.SYMBOL.addopt):
-                    addOp(ref tSyn);
-                    term(ref tSyn);
-                    moreTerm(ref tSyn);
+                    if(error!=true)
+                        addOp(ref tSyn);
+                    if (error != true)
+                        term(ref tSyn);
+                    if (error != true)
+                        moreTerm(ref tSyn);
 
                     break;
                 default:
-                    //lambda allowed
+                    //Lambda allowed
+
                     break;
 
             }
 
         }
-
+        /// <summary>
+        /// + | - | or
+        /// </summary>
+        /// <param name="tSyn"></param>
         private void addOp(ref SymTab.entry tSyn)
         {
+            match(lexicalScanner.SYMBOL.addopt);
             //Lexeme contains specific operation.
         }
 
