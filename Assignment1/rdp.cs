@@ -28,7 +28,7 @@ namespace Assignment1
         private lexicalScanner lx;
         private StreamReader sr;
         private SymTab st;
-
+        private FileStream fs;
 
         public rdp(lexicalScanner.Token token)
         {
@@ -48,6 +48,11 @@ namespace Assignment1
         public rdp(lexicalScanner.Token token, lexicalScanner lx, StreamReader sr, SymTab st) : this(token, lx, sr)
         {
             this.st = st;
+        }
+
+        public rdp(lexicalScanner.Token token, lexicalScanner lx, StreamReader sr, SymTab st, FileStream fs) : this(token, lx, sr, st)
+        {
+            this.fs = fs;
         }
 
 
@@ -77,13 +82,19 @@ namespace Assignment1
              * NOTE: Changes will come after friday the 10th
              */
             //proct
-            //
 
             match(lexicalScanner.SYMBOL.proct);
             string rememberme = token.lexeme;
 
-            //{ 1 }
-            checkForDups();
+            /* 
+             * Write header of TAC file
+             */
+            
+
+
+
+                //{ 1 }
+                checkForDups();
             st.insert(token.lexeme, token.token, depth);
             SymTab.entry ptr = new SymTab.entry();
             ptr = st.lookUp(token.lexeme);
@@ -97,6 +108,7 @@ namespace Assignment1
             f.depth = ptr.depth;
             f.token = ptr.token;
             depth++;
+
             //Args
             if (error != true)
                 pArgs(ref f);
@@ -375,19 +387,109 @@ namespace Assignment1
         private void AssignStat()
         {
 
-            //Check for undeclared variable!
-            if (error != true)
-                checkUndeclared(token.lexeme);
-            //Start building code string
-            string code = token.lexeme;
-            SymTab.entry e_syn = new SymTab.entry();
-
-            match(lexicalScanner.SYMBOL.idt);
-            match(lexicalScanner.SYMBOL.assignopt);
-            if (error != true)
-                Expr(ref e_syn);
+            switch(token.token)
+            {
+                case (lexicalScanner.SYMBOL.idt):
+                    //Check for undeclared variable!
+                    if (error != true)
+                        checkUndeclared(token.lexeme);
+                    //Start building code string
+                    string code = token.lexeme;
+                    SymTab.entry e_syn = new SymTab.entry();
+                    match(lexicalScanner.SYMBOL.idt);
+                    statOrProc(ref e_syn);
+                    break;
+                default:
+                    Console.WriteLine("ASSIGNSTAT: ERROR ON LINE: " + lexicalScanner.ln);
+                    error = true;
+                    break;
+            }
 
         }
+
+
+        private void statOrProc(ref SymTab.entry e_syn)
+        {
+            switch(token.token)
+            {
+                case (lexicalScanner.SYMBOL.lparent):
+                    match(lexicalScanner.SYMBOL.lparent);
+                    if(error!=true)
+                        parameters();
+                    match(lexicalScanner.SYMBOL.rparent);
+                    break;
+                case (lexicalScanner.SYMBOL.assignopt):
+                    match(lexicalScanner.SYMBOL.assignopt);
+                    if (error != true)
+                        Expr(ref e_syn);
+                    break;
+                default:
+                    Console.WriteLine("STATORPROC: ERROR ON LINE: " + lexicalScanner.ln);
+                    break;
+            }
+        }
+
+        private void parameters()
+        {
+            switch (token.token)
+            {
+                case (lexicalScanner.SYMBOL.idt):
+                    if (error != true)
+                        checkUndeclared(token.lexeme);
+                    match(lexicalScanner.SYMBOL.idt);
+                    if (error != true)
+                        parametersTail();
+                    break;
+                case (lexicalScanner.SYMBOL.numt):
+                    match(lexicalScanner.SYMBOL.numt);
+                    if (error != true)
+                        parametersTail();
+                    break;
+                default:
+                    Console.WriteLine("Lambda in parameters");
+                    break;
+            }
+        }
+
+        private void parametersTail()
+        {
+            switch (token.token)
+            {
+                case (lexicalScanner.SYMBOL.commat):
+                    match(lexicalScanner.SYMBOL.commat);
+                    if(error!=true)
+                        parametersTailTail();
+                    break;
+                default:
+                    Console.WriteLine("Lambda in ParametersTail");
+                    break;
+            }
+            
+           
+
+        }
+
+        private void parametersTailTail()
+        {
+            switch(token.token)
+            {
+                case (lexicalScanner.SYMBOL.idt):
+                    if (error != true)
+                        checkUndeclared(token.lexeme);
+                    match(lexicalScanner.SYMBOL.idt);
+                    parametersTail();
+
+                    break;
+                case (lexicalScanner.SYMBOL.numt):
+                    match(lexicalScanner.SYMBOL.numt);
+                    parametersTail();   
+                    break;
+                default:
+                    Console.WriteLine("Lambda in tailtail :P ");
+                    break;
+            }
+        }
+
         /// <summary>
         /// Checks for undeclared variables
         /// </summary>

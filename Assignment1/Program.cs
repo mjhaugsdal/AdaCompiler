@@ -31,7 +31,7 @@ namespace Assignment1
 
             //variables
             string fileName;
-           
+
             //if not two arguments
             if (args.Length != 1)
             {
@@ -40,6 +40,14 @@ namespace Assignment1
 
             else
             {
+                //Create file
+                string path = args[0];
+                string[] tacPath = path.Split('.');
+                path = tacPath[0] + ".tac";
+
+                FileStream fs = File.Create(path);
+
+
 
                 SymTab st = new SymTab();
                 
@@ -51,7 +59,7 @@ namespace Assignment1
                 lexicalScanner.Token token = new lexicalScanner.Token();
 
                 lexicalScanner lx = new lexicalScanner(fileName, sr);
-                rdp rdp = new rdp(token, lx, sr, st );
+                rdp rdp = new rdp(token, lx, sr, st, fs );
 
                 lx.createDictionary();
 
