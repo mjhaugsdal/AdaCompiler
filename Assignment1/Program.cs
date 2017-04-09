@@ -44,10 +44,12 @@ namespace Assignment1
                 string path = args[0];
                 string[] tacPath = path.Split('.');
                 path = tacPath[0] + ".tac";
+                if(File.Exists(path))
+                {
+                    File.Delete(path);
 
-                FileStream fs = File.Create(path);
-
-
+                }
+               // StreamWriter sw = new StreamWriter(path, true);
 
                 SymTab st = new SymTab();
                 
@@ -59,7 +61,7 @@ namespace Assignment1
                 lexicalScanner.Token token = new lexicalScanner.Token();
 
                 lexicalScanner lx = new lexicalScanner(fileName, sr);
-                rdp rdp = new rdp(token, lx, sr, st, fs );
+                rdp rdp = new rdp(token, lx, sr, st, path );
 
                 lx.createDictionary();
 

@@ -24,11 +24,14 @@ namespace Assignment1
    
         public static bool error = false;
         public int depth = 1;
+        public int tempVarNr = 1;
         private lexicalScanner.Token token;
         private lexicalScanner lx;
         private StreamReader sr;
         private SymTab st;
         private FileStream fs;
+        private StreamWriter sw;
+        private string path;
 
         public rdp(lexicalScanner.Token token)
         {
@@ -50,10 +53,12 @@ namespace Assignment1
             this.st = st;
         }
 
-        public rdp(lexicalScanner.Token token, lexicalScanner lx, StreamReader sr, SymTab st, FileStream fs) : this(token, lx, sr, st)
+        public rdp(lexicalScanner.Token token, lexicalScanner lx, StreamReader sr, SymTab st, string path) : this(token, lx, sr, st)
         {
-            this.fs = fs;
+            this.path = path;
         }
+
+
 
 
         //Parse
@@ -89,12 +94,11 @@ namespace Assignment1
             /* 
              * Write header of TAC file
              */
-            
 
+            emit("proc " + token.lexeme + "\n");
 
-
-                //{ 1 }
-                checkForDups();
+            //{ 1 }
+            checkForDups();
             st.insert(token.lexeme, token.token, depth);
             SymTab.entry ptr = new SymTab.entry();
             ptr = st.lookUp(token.lexeme);
@@ -129,9 +133,12 @@ namespace Assignment1
                 procedures();
             //Match begint
             match(lexicalScanner.SYMBOL.begint);
-            //Not implemented. Sequence of statements.
+            //Sequence of statements.
+
+            
+
             if (error != true)
-                seqOfStatements();
+                seqOfStatements(offset);
             //{ 3 }
 
  
@@ -316,17 +323,17 @@ namespace Assignment1
         /// <summary>
         /// Additional grammar for Sequence of Statements.
         /// </summary>
-        private void seqOfStatements()
+        private void seqOfStatements(int offset)
         {
             switch(token.token)
             {
                 case (lexicalScanner.SYMBOL.idt):
 
                     if(error != true)
-                        statement();
+                        statement(ref offset);
                     match(lexicalScanner.SYMBOL.semicolont);
                     if (error != true)
-                        statTail();
+                        statTail(ref offset);
 
                     break;
                 default:
@@ -339,17 +346,17 @@ namespace Assignment1
         /// <summary>
         /// Tail for statements
         /// </summary>
-        private void statTail()
+        private void statTail(ref int offset)
         {
             switch (token.token)
             {
                 case (lexicalScanner.SYMBOL.idt):
 
                     if (error != true)
-                        statement();
+                        statement(ref offset);
                     match(lexicalScanner.SYMBOL.semicolont);
                     if (error != true)
-                        statTail();
+                        statTail(ref offset);
 
                     break;
                 default:
@@ -360,13 +367,13 @@ namespace Assignment1
         /// <summary>
         /// Statement -> Assignstat
         /// </summary>
-        private void statement()
+        private void statement(ref int offset)
         {
             switch (token.token)
             {
                 case (lexicalScanner.SYMBOL.idt):
                     if (error != true)
-                        AssignStat();
+                        AssignStat(ref offset);
                     break;
                 default:
                     if (error != true)
@@ -384,7 +391,7 @@ namespace Assignment1
         /// <summary>
         /// A-> idt := Expression
         /// </summary>
-        private void AssignStat()
+        private void AssignStat(ref int offset)
         {
 
             switch(token.token)
@@ -394,10 +401,51 @@ namespace Assignment1
                     if (error != true)
                         checkUndeclared(token.lexeme);
                     //Start building code string
-                    string code = token.lexeme;
-                    SymTab.entry e_syn = new SymTab.entry();
+                    string code = null;
+                 
+                    SymTab.entry idtPtr = st.lookUp(token.lexeme); // IdtPtr for left side of statement
+                    SymTab.entry.var vPtr = idtPtr as SymTab.entry.var;
+                    SymTab.entry e_syn = new SymTab.entry();       // e_syn for right side of statement
+
                     match(lexicalScanner.SYMBOL.idt);
-                    statOrProc(ref e_syn);
+                    statOrProc(idtPtr, ref e_syn, ref offset);
+
+                    SymTab.entry.var ePtr = e_syn as SymTab.entry.var;
+
+                    if(depth == 2)
+                    {
+                        code = string.Concat(code, vPtr.lexeme);
+                        code = string.Concat(code, "\t=\t");
+                        code = string.Concat(code, e_syn.lexeme + "\n");
+                    }
+                    else
+                    {
+                        //HOW TO KNOW IF - OR +???
+                        if(vPtr.offset > 0)
+                        {
+                            code = string.Concat(code, "_bp+" + vPtr.offset);
+                            code = string.Concat(code, "\t=\t");
+                            if (ePtr.offset > 0)
+                                code = string.Concat(code, "_bp+" + ePtr.offset +  "\n");
+                            else
+                                code = string.Concat(code, "_bp" + ePtr.offset +"\n");
+
+                        }
+                        else
+                        {
+                            code = string.Concat(code, "_bp" + vPtr.offset);
+                            code = string.Concat(code, "\t=\t");
+
+                            if(ePtr.offset>0)
+                                code = string.Concat(code, "_bp+" + ePtr.offset + "\n");
+                            else
+                                code = string.Concat(code, "_bp" + ePtr.offset + "\n");
+                        }
+                    }
+
+                    emit(code);
+
+
                     break;
                 default:
                     Console.WriteLine("ASSIGNSTAT: ERROR ON LINE: " + lexicalScanner.ln);
@@ -408,20 +456,25 @@ namespace Assignment1
         }
 
 
-        private void statOrProc(ref SymTab.entry e_syn)
+        private void statOrProc(SymTab.entry idtPtr, ref SymTab.entry e_syn, ref int offset)
         {
             switch(token.token)
             {
                 case (lexicalScanner.SYMBOL.lparent):
                     match(lexicalScanner.SYMBOL.lparent);
-                    if(error!=true)
-                        parameters();
+
+                    SymTab.entry.function fPtr = idtPtr as SymTab.entry.function;
+
+                    if (error!=true)
+                        parameters(fPtr.paramList);                       //PARAMETERS -> PROCEDURE CALL
+
+                    emit("call " + idtPtr.lexeme);
                     match(lexicalScanner.SYMBOL.rparent);
                     break;
                 case (lexicalScanner.SYMBOL.assignopt):
-                    match(lexicalScanner.SYMBOL.assignopt);
+                    match(lexicalScanner.SYMBOL.assignopt); // ASSIGNOPT -> EXPRESSION
                     if (error != true)
-                        Expr(ref e_syn);
+                        Expr(ref e_syn, ref offset);
                     break;
                 default:
                     Console.WriteLine("STATORPROC: ERROR ON LINE: " + lexicalScanner.ln);
@@ -429,17 +482,28 @@ namespace Assignment1
             }
         }
 
-        private void parameters()
+        private void parameters(LinkedList<SymTab.paramNode> ll)
         {
+
+
             switch (token.token)
             {
                 case (lexicalScanner.SYMBOL.idt):
                     if (error != true)
                         checkUndeclared(token.lexeme);
+
+                    
+                    //CHECK PROCEDURE IN SYMTAB FOR INOUT OR OUT MODE
+
+
+                    emit("push" + token.lexeme);
+
                     match(lexicalScanner.SYMBOL.idt);
                     if (error != true)
                         parametersTail();
                     break;
+
+
                 case (lexicalScanner.SYMBOL.numt):
                     match(lexicalScanner.SYMBOL.numt);
                     if (error != true)
@@ -477,15 +541,18 @@ namespace Assignment1
                     if (error != true)
                         checkUndeclared(token.lexeme);
                     match(lexicalScanner.SYMBOL.idt);
-                    parametersTail();
+                    if (error != true)
+                        parametersTail();
 
                     break;
                 case (lexicalScanner.SYMBOL.numt):
                     match(lexicalScanner.SYMBOL.numt);
-                    parametersTail();   
+                    if(error!=true)
+                        parametersTail();   
                     break;
                 default:
-                    Console.WriteLine("Lambda in tailtail :P ");
+                    error = true;
+                    Console.WriteLine("ERROR IN TAIL TAIL");
                     break;
             }
         }
@@ -514,55 +581,55 @@ namespace Assignment1
         /// <summary>
         /// Expression -> Term, RestOfExpression
         /// </summary>
-        private void Expr(ref SymTab.entry syn)
+        private void Expr(ref SymTab.entry syn, ref int offset)
         {
             if (error != true)
-                relation(ref syn);
+                relation(ref syn, ref offset);
         }
 
         /// <summary>
         /// Rule to call Simple Expression
         /// </summary>
         /// <param name="syn"></param>
-        private void relation(ref SymTab.entry syn)
+        private void relation(ref SymTab.entry syn, ref int offset)
         {
             if (error != true)
-                simpleExpression(ref syn);
+                simpleExpression(ref syn, ref offset);
         }
         /// <summary>
         /// SimpleExpression
         /// </summary>
         /// <param name="syn"></param>
-        private void simpleExpression(ref SymTab.entry syn)
+        private void simpleExpression(ref SymTab.entry syn, ref int offset)
         {
             SymTab.entry tSyn = new SymTab.entry();
             // term(ref tSyn);
             // moreTerm(ref tSyn);
             if (error != true)
-                term(ref tSyn);
+                term(ref tSyn, ref offset);
             if (error != true)
-                moreTerm(ref tSyn);
+                moreTerm(ref tSyn,  ref offset);
 
-            // syn = tSyn; // Set syn to t_syn
+             syn = tSyn; // Set syn to t_syn
         }
 
         /// <summary>
         /// Term -> Factor MoreFactor
         /// </summary>
         /// <param name="tSyn"></param>
-        private void term(ref SymTab.entry tSyn)
+        private void term(ref SymTab.entry tSyn, ref int offset)
         {
             if (error != true)
-                factor(ref tSyn);
+                factor(ref tSyn, ref offset);
             if (error != true)
-                moreFactor(ref tSyn);
+                moreFactor(ref tSyn, ref offset);
         }
 
         /// <summary>
         /// MoreFactor -> Mulop Factor Morefactor | E
         /// </summary>
         /// <param name="tSyn"></param>
-        private void moreFactor(ref SymTab.entry tSyn)
+        private void moreFactor(ref SymTab.entry tSyn, ref int offset)
         {
             switch(token.token)
             {
@@ -570,9 +637,9 @@ namespace Assignment1
                     if (error != true)
                         mulop();
                     if (error != true)
-                        factor(ref tSyn);
+                        factor(ref tSyn, ref offset);
                     if (error != true)
-                        moreFactor(ref tSyn);
+                        moreFactor(ref tSyn, ref offset);
                     break;
 
                 default:
@@ -596,7 +663,7 @@ namespace Assignment1
         /// Factor -> Id | num | ( Expr ) | not Factor | SignOp Factor | 
         /// </summary>
         /// <param name="tSyn"></param>
-        private void factor(ref SymTab.entry tSyn)
+        private void factor(ref SymTab.entry tSyn, ref int offset)
         {
             switch (token.token)
             { 
@@ -605,28 +672,32 @@ namespace Assignment1
                     //Check for undeclared
                     if (error != true)
                         checkUndeclared(token.lexeme);
+
+                    tSyn = st.lookUp(token.lexeme);
+
                     match(lexicalScanner.SYMBOL.idt);
 
                     break;
                 case (lexicalScanner.SYMBOL.numt): // Numt
+                    tSyn.lexeme = token.lexeme;
                     match(lexicalScanner.SYMBOL.numt);
                     break;
                 case (lexicalScanner.SYMBOL.lparent): // ( EXPR )
                     match(lexicalScanner.SYMBOL.lparent);
                     if(error!=true)
-                        Expr(ref tSyn);
+                        Expr(ref tSyn, ref offset);
                     match(lexicalScanner.SYMBOL.rparent);
                     break;
                 case (lexicalScanner.SYMBOL.nott): // not Factor
                     match(lexicalScanner.SYMBOL.nott);
                     if (error != true)
-                        factor(ref tSyn);
+                        factor(ref tSyn, ref offset);
                     break;
                 case (lexicalScanner.SYMBOL.addopt): // SignOp Facto
                     if (error != true)
                         signOp(ref tSyn);
                     if (error != true)
-                        factor(ref tSyn);
+                        factor(ref tSyn, ref offset);
                     break;
                 default:
                     //Lambda NOT allowed
@@ -660,17 +731,42 @@ namespace Assignment1
         /// MoreTerm -> Addop Term MoreTerm | E
         /// </summary>
         /// <param name="tSyn"></param>
-        private void moreTerm(ref SymTab.entry tSyn)
+        private void moreTerm(ref SymTab.entry rVal, ref int offset)
         {
             switch(token.token)
             {
                 case (lexicalScanner.SYMBOL.addopt):
-                    if(error!=true)
-                        addOp(ref tSyn);
+
+                    SymTab.entry Tval, tmpPtr;
+                    string code = null;
+                    tmpPtr = newTemp();
+
+                    
+                    code = string.Concat(code, tmpPtr.lexeme);
+                    if (depth == 2)
+                    {
+                        code = string.Concat(code, tmpPtr.lexeme);
+                        code = string.Concat(code, "\t=\t");
+                        code = string.Concat(code, rVal.lexeme + "\n");
+                    }
+                    else
+                    {
+                        //HOW TO KNOW IF - OR +???
+
+                        
+                       // code = string.Concat(code, "_bp+" + );
+                        code = string.Concat(code, "\t=\t");
+
+                        //0 0e = string.Concat(code, "_bp+" + ePtr.offset + "\n");
+                    }
+                    
+
+                    if (error!=true)
+                        addOp(ref rVal);
                     if (error != true)
-                        term(ref tSyn);
+                        term(ref rVal, ref offset);
                     if (error != true)
-                        moreTerm(ref tSyn);
+                        moreTerm(ref rVal, ref offset);
 
                     break;
                 default:
@@ -681,6 +777,22 @@ namespace Assignment1
             }
 
         }
+
+        private SymTab.entry newTemp()
+        {
+            SymTab.entry temp = new SymTab.entry();
+
+
+            temp.lexeme = "_t" + tempVarNr;
+            tempVarNr++;
+
+            st.insert(temp.lexeme, lexicalScanner.SYMBOL.idt, depth);
+
+
+            return temp;
+
+        }
+
         /// <summary>
         /// + | - | or
         /// </summary>
@@ -831,7 +943,7 @@ namespace Assignment1
                         ce.typeOfEntry = eTyp;
                         ce.size = 4;
 
-                        ce.offset = counter * ce.size + oldOffset;
+                        ce.offset = (counter * ce.size + oldOffset)*-1;
                         offset = offset + ce.size;
 
                         
@@ -863,7 +975,7 @@ namespace Assignment1
                         ce.size = 2;
 
 
-                        ce.offset = counter * ce.size + oldOffset;
+                        ce.offset = (counter * ce.size + oldOffset)*-1;
                         offset = offset + ce.size;
 
                         if (ptr.Next != null)
@@ -894,7 +1006,7 @@ namespace Assignment1
                     {
                         v.size = 4;
 
-                        v.offset = counter * v.size + oldOffset;
+                        v.offset = (counter * v.size + oldOffset)*-1;
                         offset = offset + v.size;
 
                     }
@@ -903,7 +1015,7 @@ namespace Assignment1
                     {
                         v.size = 2;
 
-                        v.offset = counter * v.size + oldOffset;
+                        v.offset = (counter * v.size + oldOffset)*-1;
                         offset = offset + v.size;
 
                     }
@@ -911,7 +1023,7 @@ namespace Assignment1
                     {
                         v.size = 1;
 
-                        v.offset = counter * v.size + oldOffset;
+                        v.offset = (counter * v.size + oldOffset)*-1;
                         offset = offset + v.size;
                     }
 
@@ -1176,6 +1288,7 @@ namespace Assignment1
                     if (error != true)
                         procListTail(ref typ, ref eTyp, ref ll, ref offset, ref paramMode);
 
+             
                     //{ 3 }
                     insertArg(ptr, typ, eTyp, ref offset);
                     SymTab.paramNode pn = new SymTab.paramNode();
@@ -1318,6 +1431,19 @@ namespace Assignment1
             }
         }
 
-       
+        /// <summary>
+        /// Emits code to intermediate representation
+        /// </summary>
+        /// <param name="code"></param>
+        private void emit(string code)
+        {
+            using (StreamWriter sw = new StreamWriter(path, true))
+                sw.Write(code);
+        }
+
     }//End class RDP
+
+
+
+
 }
