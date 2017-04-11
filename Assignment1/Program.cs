@@ -81,11 +81,11 @@ namespace Assignment1
                     token = lx.getNextToken();
                     
                     token = rdp.parse(token);
-                    st.writeTable(1);
-     
+                   // st.writeTable(1);
+                    
                     if (rdp.error != true)
                         Console.WriteLine("Program is Valid!");
-                    
+                    rdp.emit("start proc " + rdp.mainProc);
                    /* if(j > 20)
                     {
                         Console.WriteLine("Press any key to continue...");
