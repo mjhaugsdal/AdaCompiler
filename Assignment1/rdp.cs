@@ -1066,58 +1066,6 @@ namespace Assignment1
                     
 
 
-                    tmpPtr = newTemp(ref offset);
-                    tmpPtr = st.lookUp(tmpPtr.lexeme);
-                    SymTab.entry.var tp = tmpPtr as SymTab.entry.var;
-                    SymTab.entry tempRval = st.lookUp(rVal.lexeme);
-
-                    if (tempRval.token != lexicalScanner.SYMBOL.unkownt)
-                        rVal = tempRval;
-
-                    SymTab.entry.var rp = rVal as SymTab.entry.var;
-
-                    if (depth < 2)
-                    {
-                        if(tp.mode == lexicalScanner.SYMBOL.intt)
-                            code = string.Concat(code, tmpPtr.lexeme);
-                        else
-                            code = string.Concat(code, "@" + tmpPtr.lexeme);
-
-                        code = string.Concat(code, "\t=\t");
-                        if(rp.mode == lexicalScanner.SYMBOL.intt)
-                            code = string.Concat(code, rVal.lexeme);
-                        else
-                            code = string.Concat(code, "@" + rVal.lexeme);
-                    }           
-                    else
-                    {
-                        if (tp.isParameter)
-                        {
-                            if (tp.mode == lexicalScanner.SYMBOL.intt)
-                                code = string.Concat(code, "_bp+" + tp.offset);
-                            else
-                                code = string.Concat(code, "@_bp+" + tp.offset);
-
-
-                            code = string.Concat(code, "\t=\t");
-                            if(rp.mode == lexicalScanner.SYMBOL.intt)
-                                code = string.Concat(code, rVal.lexeme);
-                            else
-                                code = string.Concat(code, "@" + rVal.lexeme);
-                        }
-
-                        else
-                        {
-                            code = string.Concat(code, "_bp-" + tp.offset);
-                            code = string.Concat(code, "\t=\t");
-                            code = string.Concat(code, rVal.lexeme);
-                        }
-
-
-                    }
-
-                    emit(code + "\n");
-                    rVal = tmpPtr;
 
                     break;
 
