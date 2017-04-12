@@ -431,9 +431,24 @@ namespace Assignment1
             }
 
         }
-
+        /// <summary>
+        /// Adds code from ptr's to the code. Takes care of the complexity of determining depth and modes.
+        /// </summary>
+        /// <param name="ptr"></param>
+        /// <param name="code"></param>
         private void addCode(SymTab.entry ptr, ref string code)
         {
+            ptr.lexeme = ptr.lexeme.Trim();
+            
+            if(ptr.lexeme[0] == '-')
+            {
+                code = code + "-";
+                //emit("-");
+                ptr.lexeme = ptr.lexeme.Remove(0, 1);
+            }
+            
+
+            
             //THIS IS ALL WITH DEPTH LOWER THAN 2
             if(depth<2)
             {
@@ -734,9 +749,9 @@ namespace Assignment1
                     
                     if (error != true)
                         moreFactor(ref tmpPtr, ref offset);
+                    
 
-
-                   // rVal = tmpPtr;
+                    rVal = tmpPtr;
                     break;
 
                 default:
@@ -777,7 +792,11 @@ namespace Assignment1
                     if (error != true)
                         checkUndeclared(token.lexeme);
 
-                    tSyn = st.lookUp(token.lexeme);
+                    //tSyn =  st.lookUp(token.lexeme);
+
+                    tSyn.lexeme = tSyn.lexeme + token.lexeme;
+
+
                     match(lexicalScanner.SYMBOL.idt);   
 
                     break;
@@ -798,9 +817,11 @@ namespace Assignment1
                     if (error != true)
                         factor(ref tSyn, ref offset);
                     break;
-                case (lexicalScanner.SYMBOL.addopt): // SignOp Facto
+                case (lexicalScanner.SYMBOL.addopt): // SignOp Factor
                     if (error != true)
                         signOp(ref tSyn);
+
+
                     if (error != true)
                         factor(ref tSyn, ref offset);
                     break;
@@ -822,6 +843,7 @@ namespace Assignment1
         {
             if(token.lexeme == "-" && token.token == lexicalScanner.SYMBOL.addopt)
             {
+                tSyn.lexeme = token.lexeme;
                 match(lexicalScanner.SYMBOL.addopt);
             }
             else
@@ -854,6 +876,7 @@ namespace Assignment1
                     if (error != true)
                         addOp(); //Match addop
 
+                    //Tval = rVal;
                     if (error != true)
                         term(ref Tval, ref offset);
 
@@ -862,19 +885,13 @@ namespace Assignment1
                     if (error != true)
                         moreTerm(ref tmpPtr, ref offset);
 
-                   
-                   
+
+                    rVal = tmpPtr;
                     break;
                 default:
 
                     //Lambda allowed
-                    /*
-                    tmpPtr = newTemp(ref offset);
-                    addCode(tmpPtr, ref code);
-                    code = code + "\t=\t";
-                    addCode(rVal, ref code);
-                    emit(code+"\n");
-                    rVal = tmpPtr;*/
+
                     break;
 
             }
