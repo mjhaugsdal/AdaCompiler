@@ -54,6 +54,7 @@ namespace Assignment1
             public int depth = 0;
             public entryType typeOfEntry;
             public bool isParameter = false;
+            public lexicalScanner.SYMBOL mode = lexicalScanner.SYMBOL.intt;
 
 
             public entry()

@@ -409,16 +409,20 @@ namespace Assignment1
                     string code = null;
                  
                     SymTab.entry idtPtr = st.lookUp(token.lexeme); // IdtPtr for left side of statement
-                    SymTab.entry.var vPtr = idtPtr as SymTab.entry.var;
+
                     SymTab.entry e_syn = new SymTab.entry();       // e_syn for right side of statement
 
                     match(lexicalScanner.SYMBOL.idt);
                     bool stat = true;
                     statOrProc(ref stat, idtPtr, ref e_syn, ref offset); // E (SYN)   
 
-
-                    
-
+                    if(stat == true)
+                    {
+                        addCode(idtPtr, ref code);
+                        code = code + "\t=\t";
+                        addCode(e_syn, ref code);
+                        emit(code+"\n");
+                    }
                     break;
                 default:
                     Console.WriteLine("ASSIGNSTAT: ERROR ON LINE: " + lexicalScanner.ln);
@@ -428,6 +432,75 @@ namespace Assignment1
 
         }
 
+        private void addCode(SymTab.entry ptr, ref string code)
+        {
+            //THIS IS ALL WITH DEPTH LOWER THAN 2
+            if(depth<2)
+            {
+
+
+
+                //If right side is a number
+                if (ptr.token == lexicalScanner.SYMBOL.numt)
+                {
+                    code = (code + retNum(ptr));
+                    return; // SKIP REST
+                }
+
+
+                ptr = st.lookUp(ptr.lexeme);
+     
+
+                SymTab.entry.var Vptr = ptr as SymTab.entry.var;
+           
+                //Check flags
+
+                //THIS IS ALL IF LEFTPTR PASSING MODE IN/OUT/INOUT
+                if (Vptr.mode == lexicalScanner.SYMBOL.intt)
+                    code = code + Vptr.lexeme;
+                else
+                    code = code + "@"+ Vptr.lexeme;
+
+            }
+
+            else
+            {
+
+
+                if (ptr.token == lexicalScanner.SYMBOL.numt)
+                {
+                    code = (code + retNum(ptr));
+                    return; // SKIP REST
+                }
+                ptr = st.lookUp(ptr.lexeme);
+                SymTab.entry.var vPtr = ptr as SymTab.entry.var;
+                //Create vars
+                //Check flags
+
+                //THIS IS ALL IF LEFTPTR PASSING MODE IN/OUT/INOUT
+                if (vPtr.isParameter)
+                {
+                    if (vPtr.mode == lexicalScanner.SYMBOL.intt)
+                        code = code + "_bp+"+ vPtr.offset;
+                    else
+                        code = code + "@_bp+" + vPtr.offset;
+                }
+                else
+                {
+                    if (vPtr.mode == lexicalScanner.SYMBOL.intt)
+                        code = code + "_bp-" + vPtr.offset;
+                    else
+                        code = code + "@_bp-" + vPtr.offset;
+                }
+
+            }
+
+        }
+
+        private string retNum( SymTab.entry numptr)
+        {
+            return (numptr.lexeme);
+        }
 
         private void statOrProc(ref bool stat, SymTab.entry idtPtr, ref SymTab.entry e_syn, ref int offset)
         {
@@ -449,7 +522,7 @@ namespace Assignment1
                     match(lexicalScanner.SYMBOL.rparent);
                     break;
                 case (lexicalScanner.SYMBOL.assignopt):
-                    stat = true;
+                   // stat = true;
                     match(lexicalScanner.SYMBOL.assignopt); // ASSIGNOPT -> EXPRESSION
                     if (error != true)
                         Expr(ref e_syn, ref offset);
@@ -600,14 +673,19 @@ namespace Assignment1
         {
             SymTab.entry tSyn = new SymTab.entry();
             
-
-
             if (error != true)
                 term(ref tSyn, ref offset);
             if (error != true)
                 moreTerm(ref tSyn,  ref offset);
 
-           
+            SymTab.entry tmpPtr = newTemp(ref offset);
+            string code = null;
+            addCode(tmpPtr, ref code);
+            code = code + "\t=\t";
+            addCode(tSyn, ref code);
+            emit(code + "\n");
+            tSyn = tmpPtr;
+
             syn = tSyn; // Set syn to t_syn
         }
 
@@ -631,32 +709,44 @@ namespace Assignment1
         private void moreFactor(ref SymTab.entry rVal, ref int offset)
         {
             SymTab.entry Tval = new SymTab.entry();
-            SymTab.entry tmpPtr = newTemp(ref offset); 
+            SymTab.entry tmpPtr;
+
             string code = null;
                 
             switch (token.token)
             {
                 case (lexicalScanner.SYMBOL.multopt):
-
-
-                
+                    tmpPtr = newTemp(ref offset);
+                    addCode(tmpPtr, ref code);
+                    code = code + "\t=\t";
+                    addCode(rVal, ref code);
+                    code = code + token.lexeme; // Add operator mulop
 
                     if (error != true)
                         mulop(); //Match mulopt
-                       
+
                     if (error != true)
                         factor(ref Tval, ref offset);
+                        //term(ref Tval, ref  offset);
 
+                    addCode(Tval, ref  code);
+                    emit(code + "\n");
                     
                     if (error != true)
                         moreFactor(ref tmpPtr, ref offset);
 
 
-                    rVal = tmpPtr;
+                   // rVal = tmpPtr;
                     break;
 
                 default:
                     //Lambda
+                    /*
+                    tmpPtr = newTemp(ref offset);
+                    addCode(tmpPtr, ref code);
+                    code = code + "\t=\t";
+                    addCode(rVal, ref code);
+                    emit(code="\n");*/
                     break;
             }
 
@@ -693,6 +783,7 @@ namespace Assignment1
                     break;
                 case (lexicalScanner.SYMBOL.numt): // Numt
                     tSyn.lexeme = token.lexeme;
+                    tSyn.token = lexicalScanner.SYMBOL.numt;
 
                     match(lexicalScanner.SYMBOL.numt);
                     break;
@@ -748,34 +839,42 @@ namespace Assignment1
         private void moreTerm(ref SymTab.entry rVal, ref int offset)
         {
             SymTab.entry Tval = new SymTab.entry();
-            SymTab.entry tmpPtr = newTemp(ref offset);
+            SymTab.entry tmpPtr;
             string code = null;
 
             switch (token.token)
             {
                 case (lexicalScanner.SYMBOL.addopt):
-
+                    tmpPtr = newTemp(ref offset);
+                    addCode(tmpPtr, ref code);
+                    code = code + "\t=\t";
+                    addCode(rVal, ref code);
+                    code = code + token.lexeme; // Add operator mulop
 
                     if (error != true)
                         addOp(); //Match addop
 
                     if (error != true)
-                        factor(ref Tval, ref offset);
+                        term(ref Tval, ref offset);
 
-
+                    addCode(Tval, ref code);
+                    emit(code+"\n");
                     if (error != true)
                         moreTerm(ref tmpPtr, ref offset);
 
-          
+                   
                    
                     break;
                 default:
 
                     //Lambda allowed
-
-                    rVal = tmpPtr;
-
-
+                    /*
+                    tmpPtr = newTemp(ref offset);
+                    addCode(tmpPtr, ref code);
+                    code = code + "\t=\t";
+                    addCode(rVal, ref code);
+                    emit(code+"\n");
+                    rVal = tmpPtr;*/
                     break;
 
             }
@@ -1023,7 +1122,7 @@ namespace Assignment1
                     else if (typ == SymTab.varType.intType)
                     {
                         v.size = 2;
-
+                        v.mode = lexicalScanner.SYMBOL.intt;
                         v.offset = (counter * v.size + oldOffset);
                         offset = offset + v.size;
 
