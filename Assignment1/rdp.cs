@@ -938,6 +938,10 @@ namespace Assignment1
                         rVal = st.lookUp(rVal.lexeme);
                         SymTab.entry.var rrp = rVal as SymTab.entry.var;
 
+                        if(rVal.token == lexicalScanner.SYMBOL.unkownt)
+                        {
+
+                        }
                         
 
                         if (trp.mode == lexicalScanner.SYMBOL.intt)
@@ -1054,7 +1058,7 @@ namespace Assignment1
                     emit(code + "\n");
 
                     if (error != true)
-                        moreFactor(ref tmpPtr, ref offset);
+                        moreTerm(ref tmpPtr, ref offset);
 
                     rVal = tmpPtr;
                    
@@ -1063,32 +1067,66 @@ namespace Assignment1
 
                     //Lambda allowed
 
-                    
-
-
                     tmpPtr = newTemp(ref offset);
                     tmpPtr = st.lookUp(tmpPtr.lexeme);
                     SymTab.entry.var tp = tmpPtr as SymTab.entry.var;
                     SymTab.entry tempRval = st.lookUp(rVal.lexeme);
 
+
                     if (tempRval.token != lexicalScanner.SYMBOL.unkownt)
                         rVal = tempRval;
+                    else
+                    {
+                        if (depth < 2)
+                        {
+                            if (tp.mode == lexicalScanner.SYMBOL.intt)
+                                code = string.Concat(code, tmpPtr.lexeme);
+                            else
+                                code = string.Concat(code, "@" + tmpPtr.lexeme);
+                            code = string.Concat(code, "\t=\t");
+                            code = string.Concat(code, rVal.lexeme);
+                            emit(code + "\n");
+                            rVal = tmpPtr;
 
+                        }
+                        else
+                        {
+                            if(tp.isParameter)
+                            {
+                                if (tp.mode == lexicalScanner.SYMBOL.intt)
+                                    code = string.Concat(code, "_bp+" + tp.offset);
+                                else
+                                    code = string.Concat(code, "@" + tmpPtr.lexeme);
+                            }
+                            else
+                            {
+                                if (tp.mode == lexicalScanner.SYMBOL.intt)
+                                    code = string.Concat(code, "_bp-" + tp.offset);
+                                else
+                                    code = string.Concat(code, "@" + tmpPtr.lexeme);
+                            }
+                            code = string.Concat(code, "\t=\t");
+                            code = string.Concat(code, rVal.lexeme);
+                            emit(code + "\n");
+                            rVal = tmpPtr;
+                        }
+                        return;
+                    }
                     SymTab.entry.var rp = rVal as SymTab.entry.var;
 
                     if (depth < 2)
                     {
-                        if(tp.mode == lexicalScanner.SYMBOL.intt)
+                        if (tp.mode == lexicalScanner.SYMBOL.intt)
                             code = string.Concat(code, tmpPtr.lexeme);
                         else
                             code = string.Concat(code, "@" + tmpPtr.lexeme);
 
                         code = string.Concat(code, "\t=\t");
-                        if(rp.mode == lexicalScanner.SYMBOL.intt)
+                        if (rp.mode == lexicalScanner.SYMBOL.intt)
                             code = string.Concat(code, rVal.lexeme);
                         else
                             code = string.Concat(code, "@" + rVal.lexeme);
-                    }           
+                    }
                     else
                     {
                         if (tp.isParameter)
@@ -1100,7 +1138,7 @@ namespace Assignment1
 
 
                             code = string.Concat(code, "\t=\t");
-                            if(rp.mode == lexicalScanner.SYMBOL.intt)
+                            if (rp.mode == lexicalScanner.SYMBOL.intt)
                                 code = string.Concat(code, rVal.lexeme);
                             else
                                 code = string.Concat(code, "@" + rVal.lexeme);
@@ -1118,6 +1156,7 @@ namespace Assignment1
 
                     emit(code + "\n");
                     rVal = tmpPtr;
+
 
                     break;
 
