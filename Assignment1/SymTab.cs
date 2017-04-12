@@ -74,7 +74,7 @@ namespace Assignment1
                 public varType typeOfVar;
                 public int offset;
                 public int size;
-                public lexicalScanner.SYMBOL mode;
+                public lexicalScanner.SYMBOL mode = lexicalScanner.SYMBOL.intt;
                // public bool isParameter = false;
 
                 public var()

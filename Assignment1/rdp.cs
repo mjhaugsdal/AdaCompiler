@@ -25,7 +25,7 @@ namespace Assignment1
         public string mainProc;
         bool procSet = false;
         public static bool error = false;
-        public int depth = 1;
+        public int depth = 0;
         public int tempVarNr = 1;
         private lexicalScanner.Token token;
         private lexicalScanner lx;
@@ -99,8 +99,6 @@ namespace Assignment1
             }
 
 
-            
-
             //{ 1 }
             checkForDups();
             st.insert(token.lexeme, token.token, depth);
@@ -132,14 +130,14 @@ namespace Assignment1
                 declPart(ref f, ref offset, ref oldOffset);
             //Procedures
 
-     
+            insertFunction(f);
             if (error != true)
                 procedures();
             //Match begint
+            
             match(lexicalScanner.SYMBOL.begint);
             //Sequence of statements.
             emit("proc " + procName + "\n");
-
 
             if (error != true)
                 seqOfStatements(offset);
@@ -147,7 +145,7 @@ namespace Assignment1
 
  
 
-            insertFunction(f);
+
             emit("endp " + procName + "\n");
             match(lexicalScanner.SYMBOL.endt);
 
@@ -418,13 +416,24 @@ namespace Assignment1
                     bool stat = true;
                     statOrProc(ref stat, idtPtr, ref e_syn, ref offset); // E (SYN)   
                     if(stat == true)
-                    { 
-
-                        if(depth == 2)
+                    {
+                        stat = false;
+                        if(depth <2)
                         {
-                            code = string.Concat(code, vPtr.lexeme);
+                            e_syn = st.lookUp(e_syn.lexeme);
+                            SymTab.entry.var ePtr = e_syn as SymTab.entry.var;
+                           
+
+                            if(vPtr.mode == lexicalScanner.SYMBOL.intt)
+                                code = string.Concat(code, vPtr.lexeme);
+                            else
+                                code = string.Concat(code, "@"+vPtr.lexeme);
+
                             code = string.Concat(code, "\t=\t");
-                            code = string.Concat(code, e_syn.lexeme );
+                            if(ePtr.mode == lexicalScanner.SYMBOL.intt)
+                                code = string.Concat(code, e_syn.lexeme );
+                            else
+                                code = string.Concat(code, "@"+e_syn.lexeme);
                         }
                     
                         else
@@ -436,10 +445,10 @@ namespace Assignment1
                       
                             if(vPtr.isParameter == true)
                             {
-                                if(vPtr.mode == lexicalScanner.SYMBOL.outt)
-                                    code = string.Concat(code, "@_bp+" + vPtr.offset);
-                                else
+                                if(vPtr.mode == lexicalScanner.SYMBOL.intt)
                                     code = string.Concat(code, "_bp+" + vPtr.offset);
+                                else
+                                    code = string.Concat(code, "@_bp+" + vPtr.offset);
 
 
                                 code = string.Concat(code, "\t=\t");
@@ -447,11 +456,11 @@ namespace Assignment1
 
                                 if (e_syn.isParameter == true)
                                 {
-                                    if(ePtr.mode == lexicalScanner.SYMBOL.outt)
+                                    if(ePtr.mode == lexicalScanner.SYMBOL.intt)
 
-                                        code = string.Concat(code, "@_bp+" + ePtr.offset);
-                                    else
                                         code = string.Concat(code, "_bp+" + ePtr.offset);
+                                    else
+                                        code = string.Concat(code, "@_bp+" + ePtr.offset);
 
                                 }
                                    
@@ -466,10 +475,10 @@ namespace Assignment1
 
                                 if(ePtr.isParameter)
                                 {
-                                    if(ePtr.mode == lexicalScanner.SYMBOL.outt)
-                                        code = string.Concat(code, "@_bp+" + ePtr.offset);
-                                    else
+                                    if(ePtr.mode == lexicalScanner.SYMBOL.intt)
                                         code = string.Concat(code, "_bp+" + ePtr.offset);
+                                    else
+                                        code = string.Concat(code, "@_bp+" + ePtr.offset);
                                 }
                                     
                                 else
@@ -498,10 +507,14 @@ namespace Assignment1
                 case (lexicalScanner.SYMBOL.lparent):
                     match(lexicalScanner.SYMBOL.lparent);
                     stat = false;
+
+                    idtPtr = st.lookUp(idtPtr.lexeme);
+
                     SymTab.entry.function fPtr = idtPtr as SymTab.entry.function;
+
                     int i = 0;
-                    if (error!=true)
-                        parameters(fPtr.paramList, i);                       //PARAMETERS -> PROCEDURE CALL
+                    if (error != true)
+                        parameters(fPtr.paramList, i);    //PARAMETERS -> PROCEDURE CALL
 
                     emit("call " + idtPtr.lexeme+ "\n");
                     match(lexicalScanner.SYMBOL.rparent);
@@ -514,6 +527,7 @@ namespace Assignment1
                     break;
                 default:
                     Console.WriteLine("STATORPROC: ERROR ON LINE: " + lexicalScanner.ln);
+                    error = true;
                     break;
             }
         }
@@ -531,10 +545,10 @@ namespace Assignment1
                     SymTab.paramNode node = ll.ElementAt(i);
                     i++;
 
-                    if (node.mode == lexicalScanner.SYMBOL.outt)
-                        emit("push " + "@"+ token.lexeme +"\n");
+                    if (node.mode == lexicalScanner.SYMBOL.intt)
+                        emit("push " + token.lexeme +"\n");
                     else
-                        emit("push "  + token.lexeme + "\n");
+                        emit("push "  + "@" + token.lexeme + "\n");
 
                     //CHECK PROCEDURE IN SYMTAB FOR INOUT OR OUT MODE
                     match(lexicalScanner.SYMBOL.idt);
@@ -698,12 +712,22 @@ namespace Assignment1
 
                     tmpPtr = newTemp(ref offset);
 
-                    if (depth == 2)
+                    if (depth < 2)
                     {
-                        
-                        code = string.Concat(code, tmpPtr.lexeme);
+                        tmpPtr = st.lookUp(tmpPtr.lexeme);
+                        SymTab.entry.var tp = tmpPtr as SymTab.entry.var;
+                        rVal = st.lookUp(rVal.lexeme);
+                        SymTab.entry.var rp = rVal as SymTab.entry.var;
+
+                        if(tp.mode == lexicalScanner.SYMBOL.intt)
+                            code = string.Concat(code, tmpPtr.lexeme);
+                        else
+                            code = string.Concat(code, "@"+tmpPtr.lexeme);
                         code = string.Concat(code, "\t=\t");
-                        code = string.Concat(code, rVal.lexeme);
+                        if (rp.mode == lexicalScanner.SYMBOL.intt)
+                            code = string.Concat(code, rVal.lexeme);
+                        else
+                            code = string.Concat(code,"@"+rVal.lexeme);
                     }
                     else
                     {
@@ -714,10 +738,10 @@ namespace Assignment1
 
                         if (tp.isParameter)
                         {
-                            if(tp.mode == lexicalScanner.SYMBOL.outt)
-                                code = string.Concat(code, "@_bp+" + tp.offset);
-                            else
+                            if(tp.mode == lexicalScanner.SYMBOL.intt)
                                 code = string.Concat(code, "_bp+" + tp.offset);
+                            else
+                                code = string.Concat(code, "@_bp+" + tp.offset);
 
                         }
                             
@@ -731,10 +755,10 @@ namespace Assignment1
 
                         if (rp.isParameter)
                         {
-                            if (rp.mode == lexicalScanner.SYMBOL.outt)
-                                code = string.Concat(code, "@_bp+" + rp.offset);
-                            else
+                            if (rp.mode == lexicalScanner.SYMBOL.intt)
                                 code = string.Concat(code, "_bp+" + rp.offset);
+                            else
+                                code = string.Concat(code, "@_bp+" + rp.offset);
                         }
                             
                         else
@@ -754,10 +778,18 @@ namespace Assignment1
 
                     if(tvalp.token != lexicalScanner.SYMBOL.unkownt)
                     {
-                        if (depth == 2)
+                        if (depth < 2)
                         {
 
-                            code = string.Concat(code, Tval.lexeme);
+                            SymTab.entry.var tvalpp = tvalp as SymTab.entry.var;
+
+                          
+
+
+                            if(tvalpp.mode == lexicalScanner.SYMBOL.intt)
+                                 code = string.Concat(code, Tval.lexeme);
+                            else
+                                code = string.Concat(code, "@"+Tval.lexeme);
                         }
 
                         else
@@ -766,10 +798,10 @@ namespace Assignment1
 
                             if(tvalpp.isParameter)
                             {
-                                if(tvalpp.mode == lexicalScanner.SYMBOL.outt)
-                                    code = string.Concat(code, "@_bp+" + tvalpp.offset);
-                                  else
+                                if(tvalpp.mode == lexicalScanner.SYMBOL.intt)
                                     code = string.Concat(code, "_bp+" + tvalpp.offset);
+                                  else
+                                    code = string.Concat(code, "@_bp+" + tvalpp.offset);
                             }
                             
                             else
@@ -897,12 +929,30 @@ namespace Assignment1
 
                     tmpPtr = newTemp(ref offset);
                     //SymTab.entry.var v = rVal as SymTab.entry.var;
-                    
-                    if (depth == 2)
+                    if (depth < 2)
                     {
-                        code = string.Concat(code, tmpPtr.lexeme);
+               
+
+                        tmpPtr = st.lookUp(tmpPtr.lexeme);
+                        SymTab.entry.var trp = tmpPtr as SymTab.entry.var;
+                        rVal = st.lookUp(rVal.lexeme);
+                        SymTab.entry.var rrp = rVal as SymTab.entry.var;
+
+                        
+
+                        if (trp.mode == lexicalScanner.SYMBOL.intt)
+                            code = string.Concat(code, tmpPtr.lexeme);
+                        else
+                            code = string.Concat(code, "@" + tmpPtr.lexeme);
+
+
                         code = string.Concat(code, "\t=\t");
-                        code = string.Concat(code, rVal.lexeme);
+
+
+                        if (rrp.mode == lexicalScanner.SYMBOL.intt)
+                            code = string.Concat(code, rVal.lexeme);
+                        else
+                            code = string.Concat(code, "@" + rVal.lexeme);
                     }
 
                     else
@@ -971,13 +1021,13 @@ namespace Assignment1
 
                     if (tvalp.token != lexicalScanner.SYMBOL.unkownt)
                     {
-                        if (depth == 2)
+                        if (depth < 2)
                         {
                             SymTab.entry.var tvalVar = Tval as SymTab.entry.var;
-                            if(tvalVar.mode == lexicalScanner.SYMBOL.outt)
-                                code = string.Concat(code, "@"+Tval.lexeme);
-                            else
+                            if(tvalVar.mode == lexicalScanner.SYMBOL.intt)
                                 code = string.Concat(code, Tval.lexeme);
+                            else
+                                code = string.Concat(code, "@" + Tval.lexeme);
                         }
 
                         else
@@ -1026,32 +1076,32 @@ namespace Assignment1
 
                     SymTab.entry.var rp = rVal as SymTab.entry.var;
 
-                    if (depth == 2)
+                    if (depth < 2)
                     {
-                        if(tp.mode == lexicalScanner.SYMBOL.outt)
-                            code = string.Concat(code, "@"+tmpPtr.lexeme);
-                        else
+                        if(tp.mode == lexicalScanner.SYMBOL.intt)
                             code = string.Concat(code, tmpPtr.lexeme);
+                        else
+                            code = string.Concat(code, "@" + tmpPtr.lexeme);
 
                         code = string.Concat(code, "\t=\t");
-                        if(rp.mode == lexicalScanner.SYMBOL.outt)
-                            code = string.Concat(code, "@"+rVal.lexeme);
-                        else
+                        if(rp.mode == lexicalScanner.SYMBOL.intt)
                             code = string.Concat(code, rVal.lexeme);
+                        else
+                            code = string.Concat(code, "@" + rVal.lexeme);
                     }           
                     else
                     {
                         if (tp.isParameter)
                         {
-                            if (tp.mode == lexicalScanner.SYMBOL.outt)
-                                code = string.Concat(code, "@_bp+" + tp.offset);
-                            else
+                            if (tp.mode == lexicalScanner.SYMBOL.intt)
                                 code = string.Concat(code, "_bp+" + tp.offset);
+                            else
+                                code = string.Concat(code, "@_bp+" + tp.offset);
 
 
                             code = string.Concat(code, "\t=\t");
-                            if(rp.mode == lexicalScanner.SYMBOL.outt)
-                                code = string.Concat(code, "@"+rVal.lexeme);
+                            if(rp.mode == lexicalScanner.SYMBOL.intt)
+                                code = string.Concat(code, rVal.lexeme);
                             else
                                 code = string.Concat(code, "@" + rVal.lexeme);
                         }
@@ -1074,83 +1124,7 @@ namespace Assignment1
             }
 
         }
-/*
-        private string processTwoPointers(SymTab.entry tmpPtr, SymTab.entry rVal, string code)
-        {
 
-            tmpPtr = st.lookUp(tmpPtr.lexeme);
-            SymTab.entry.var tp = tmpPtr as SymTab.entry.var;
-            rVal = st.lookUp(rVal.lexeme);
-
-            if (depth == 2)
-            {
-                
-
-                code = string.Concat(code, tmpPtr.lexeme);
-                code = string.Concat(code, "\t=\t");
-                code = string.Concat(code, rVal.lexeme);
-            }
-            else
-            {
-
-
-
-                if (tp.isParameter)
-                {
-                    if (tp.mode == lexicalScanner.SYMBOL.outt)
-                        code = string.Concat(code, "@_bp+" + tp.offset);
-                    else
-                        code = string.Concat(code, "_bp+" + tp.offset);
-                }
-
-                else
-                    code = string.Concat(code, "_bp-" + tp.offset);
-
-                code = string.Concat(code, "\t=\t");
-                code = string.Concat(code, rVal.lexeme);
-
-            }
-
-            return code;
-        }
-*/
-        /*private void concatCode(string code, SymTab.entry left, SymTab.entry.var right)
-{
-   if (depth == 2)
-   {
-       code = string.Concat(code, left.lexeme);
-       code = string.Concat(code, "\t=\t");
-       code = string.Concat(code, right.lexeme);
-   }
-
-   else
-   {
-       left = st.lookUp(left.lexeme);
-       SymTab.entry.var v = left as SymTab.entry.var;
-       // Console.Write(ePtr.offset);
-
-       if (v.isParameter == true)
-       {
-
-           code = string.Concat(code, "_bp+" + v.offset);
-           code = string.Concat(code, "\t=\t");
-           if (v.isParameter == true)
-               code = string.Concat(code, "_bp+" + v.offset);
-           else
-               code = string.Concat(code, "_bp-" + v.offset);
-
-       }
-       else
-
-           code = string.Concat(code, "_bp-" + v.offset);
-       code = string.Concat(code, "\t=\t");
-
-       if (v.isParameter)
-           code = string.Concat(code, "_bp+" + v.offset);
-       else
-           code = string.Concat(code, "_bp-" + v.offset);
-   }
-}*/
 
         private SymTab.entry newTemp(ref int offset)
         {
