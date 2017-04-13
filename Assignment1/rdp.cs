@@ -446,25 +446,25 @@ namespace Assignment1
                 //emit("-");
                 ptr.lexeme = ptr.lexeme.Remove(0, 1);
             }
-            
-
-            
-            //THIS IS ALL WITH DEPTH LOWER THAN 2
-            if(depth<2)
+            if (ptr.lexeme.Length > 3) 
+            if(String.Compare(ptr.lexeme.Substring(0,3), "not", true ) == 0)
             {
+                code = code + "not ";
+                ptr.lexeme = ptr.lexeme.Remove(0, 3);
+            }
+            //If right side is a number
+            if (ptr.token == lexicalScanner.SYMBOL.numt)
+            {
+                code = (code + retNum(ptr));
+                return; // SKIP REST
+            }
+            ptr = st.lookUp(ptr.lexeme);
 
 
 
-                //If right side is a number
-                if (ptr.token == lexicalScanner.SYMBOL.numt)
-                {
-                    code = (code + retNum(ptr));
-                    return; // SKIP REST
-                }
-
-
-                ptr = st.lookUp(ptr.lexeme);
-     
+            //THIS IS ALL WITH DEPTH LOWER THAN 2
+            if(depth<2 || ptr.depth < 2)
+            {
 
                 SymTab.entry.var Vptr = ptr as SymTab.entry.var;
            
@@ -575,7 +575,7 @@ namespace Assignment1
 
 
                 case (lexicalScanner.SYMBOL.numt):
-
+                    i++;
                     emit("push " + token.lexeme + "\n");
 
                     match(lexicalScanner.SYMBOL.numt);
@@ -801,7 +801,7 @@ namespace Assignment1
 
                     break;
                 case (lexicalScanner.SYMBOL.numt): // Numt
-                    tSyn.lexeme = token.lexeme;
+                    tSyn.lexeme = tSyn.lexeme + token.lexeme;
                     tSyn.token = lexicalScanner.SYMBOL.numt;
 
                     match(lexicalScanner.SYMBOL.numt);
@@ -813,6 +813,7 @@ namespace Assignment1
                     match(lexicalScanner.SYMBOL.rparent);
                     break;
                 case (lexicalScanner.SYMBOL.nott): // not Factor
+                    tSyn.lexeme = tSyn.lexeme + token.lexeme;
                     match(lexicalScanner.SYMBOL.nott);
                     if (error != true)
                         factor(ref tSyn, ref offset);
@@ -820,7 +821,6 @@ namespace Assignment1
                 case (lexicalScanner.SYMBOL.addopt): // SignOp Factor
                     if (error != true)
                         signOp(ref tSyn);
-
 
                     if (error != true)
                         factor(ref tSyn, ref offset);
@@ -1568,17 +1568,15 @@ namespace Assignment1
             if (visual == true)
                 Console.Write(code);
             using (StreamWriter sw = new StreamWriter(path, true))
-                sw.Write(code);
-
-            
-
-
-
+            {
+                string[] tokens = code.Split(null);
+                if(tokens.Length>3)
+                    sw.Write("{0, -10}  {1, -10}  {2, -10} {3, -10} \n", tokens);
+                else
+                //Console.WriteLine("{0}  {1}  {2}",tokens);
+                sw.Write("{0, -10}  {1, -10}  {2, -10}  \n", tokens);
+                
+            }
         }
-
     }//End class RDP
-
-
-
-
 }

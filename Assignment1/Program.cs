@@ -40,6 +40,11 @@ namespace Assignment1
 
             else
             {
+
+                try
+                {
+
+                
                 //Create file
                 string path = args[0];
                 string[] tacPath = path.Split('.');
@@ -98,6 +103,12 @@ namespace Assignment1
                 }// end while NOT eoft
 
                // Console.WriteLine("Tokens processed: " + lexicalScanner.i); 
+                }
+                catch(FileNotFoundException)
+                {
+                    Console.WriteLine("Error! File not found");
+                }
+
             }
         }   
     }
