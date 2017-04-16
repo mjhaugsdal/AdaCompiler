@@ -703,9 +703,15 @@ namespace Assignment1
         {
             if (error != true)
                 relation(ref syn, ref offset);
-
-
-
+            
+            SymTab.entry tmpPtr = newTemp(ref offset);
+            string code = null;
+            addCode(tmpPtr, ref code);
+            code = code + "\t=\t";
+            addCode(syn, ref code);
+            emit(code + "\n");
+            syn = tmpPtr;
+            
 
         }
 
