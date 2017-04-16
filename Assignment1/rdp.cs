@@ -61,7 +61,7 @@ namespace Assignment1
         }
 
 
-
+        // TODO: CHECK IF YOU CAN HAVE MULTIPLE DECLARATIONS ON DIFFERENT DEPTHS
 
         //Parse
         internal lexicalScanner.Token parse(lexicalScanner.Token firstToken)
@@ -387,7 +387,9 @@ namespace Assignment1
             }
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
         private void IOStat()
         {
             //Lambda, for now
@@ -438,85 +440,102 @@ namespace Assignment1
         /// <param name="code"></param>
         private void addCode(SymTab.entry ptr, ref string code)
         {
-            ptr.lexeme = ptr.lexeme.Trim();
+            if(error != true)
+            {
+
             
-            if(ptr.lexeme[0] == '-')
-            {
-                code = code + "-";
-                //emit("-");
-                ptr.lexeme = ptr.lexeme.Remove(0, 1);
-            }
-            if (ptr.lexeme.Length > 3) 
-            if(String.Compare(ptr.lexeme.Substring(0,3), "not", true ) == 0)
-            {
-                code = code + "not ";
-                ptr.lexeme = ptr.lexeme.Remove(0, 3);
-            }
-            //If right side is a number
-            if (ptr.token == lexicalScanner.SYMBOL.numt)
-            {
-                code = (code + retNum(ptr));
-                return; // SKIP REST
-            }
-            ptr = st.lookUp(ptr.lexeme);
-
-
-
-            //THIS IS ALL WITH DEPTH LOWER THAN 2
-            if(depth<2 || ptr.depth < 2)
-            {
-
-                SymTab.entry.var Vptr = ptr as SymTab.entry.var;
-           
-                //Check flags
-
-                //THIS IS ALL IF LEFTPTR PASSING MODE IN/OUT/INOUT
-                if (Vptr.mode == lexicalScanner.SYMBOL.intt)
-                    code = code + Vptr.lexeme;
-                else
-                    code = code + "@"+ Vptr.lexeme;
-
-            }
-
-            else
-            {
-
-
+                ptr.lexeme = ptr.lexeme.Trim();
+            
+                if(ptr.lexeme[0] == '-')
+                {
+                    code = code + "-";
+                    //emit("-");
+                    ptr.lexeme = ptr.lexeme.Remove(0, 1);
+                }
+                if (ptr.lexeme.Length > 3) 
+                if(String.Compare(ptr.lexeme.Substring(0,3), "not", true ) == 0)
+                {
+                    code = code + "not ";
+                    ptr.lexeme = ptr.lexeme.Remove(0, 3);
+                }
+                //If right side is a number
                 if (ptr.token == lexicalScanner.SYMBOL.numt)
                 {
                     code = (code + retNum(ptr));
                     return; // SKIP REST
                 }
                 ptr = st.lookUp(ptr.lexeme);
-                SymTab.entry.var vPtr = ptr as SymTab.entry.var;
-                //Create vars
-                //Check flags
 
-                //THIS IS ALL IF LEFTPTR PASSING MODE IN/OUT/INOUT
-                if (vPtr.isParameter)
+
+
+                //THIS IS ALL WITH DEPTH LOWER THAN 2
+                if(depth<2 || ptr.depth < 2)
                 {
-                    if (vPtr.mode == lexicalScanner.SYMBOL.intt)
-                        code = code + "_bp+"+ vPtr.offset;
+
+                    SymTab.entry.var Vptr = ptr as SymTab.entry.var;
+           
+                    //Check flags
+
+                    //THIS IS ALL IF LEFTPTR PASSING MODE IN/OUT/INOUT
+                    if (Vptr.mode == lexicalScanner.SYMBOL.intt)
+                        code = code + Vptr.lexeme;
                     else
-                        code = code + "@_bp+" + vPtr.offset;
+                        code = code + "@"+ Vptr.lexeme;
+
                 }
+
                 else
                 {
-                    if (vPtr.mode == lexicalScanner.SYMBOL.intt)
-                        code = code + "_bp-" + vPtr.offset;
-                    else
-                        code = code + "@_bp-" + vPtr.offset;
-                }
 
+
+                    if (ptr.token == lexicalScanner.SYMBOL.numt)
+                    {
+                        code = (code + retNum(ptr));
+                        return; // SKIP REST
+                    }
+                    ptr = st.lookUp(ptr.lexeme);
+                    SymTab.entry.var vPtr = ptr as SymTab.entry.var;
+                    //Create vars
+                    //Check flags
+
+                    //THIS IS ALL IF LEFTPTR PASSING MODE IN/OUT/INOUT
+                    if (vPtr.isParameter)
+                    {
+                        if (vPtr.mode == lexicalScanner.SYMBOL.intt)
+                            code = code + "_bp+"+ vPtr.offset;
+                        else
+                            code = code + "@_bp+" + vPtr.offset;
+                    }
+                    else
+                    {
+                        if (vPtr.mode == lexicalScanner.SYMBOL.intt)
+                            code = code + "_bp-" + vPtr.offset;
+                        else
+                            code = code + "@_bp-" + vPtr.offset;
+                    }
+
+                }
             }
 
         }
 
+        /// <summary>
+        /// Returns the string representation of a number for TAC insertion.
+        /// </summary>
+        /// <param name="numptr"></param>
+        /// <returns></returns>
         private string retNum( SymTab.entry numptr)
         {
             return (numptr.lexeme);
         }
 
+        /// <summary>
+        /// Checks if there is a statement or procedure call
+        /// </summary>
+        /// <param name="stat"></param>
+        /// <param name="idtPtr"></param>
+        /// <param name="e_syn"></param>
+        /// <param name="offset"></param>
         private void statOrProc(ref bool stat, SymTab.entry idtPtr, ref SymTab.entry e_syn, ref int offset)
         {
             switch(token.token)
@@ -549,6 +568,11 @@ namespace Assignment1
             }
         }
 
+        /// <summary>
+        /// Grammar rule for parameters if there is a procedure call
+        /// </summary>
+        /// <param name="ll"></param>
+        /// <param name="i"></param>
         private void parameters(LinkedList<SymTab.paramNode> ll, int i)
         {
 
@@ -588,6 +612,11 @@ namespace Assignment1
             }
         }
 
+        /// <summary>
+        /// Rule to check for comma or no comma
+        /// </summary>
+        /// <param name="ll"></param>
+        /// <param name="i"></param>
         private void parametersTail(LinkedList<SymTab.paramNode> ll,int i)
         {
             switch (token.token)
@@ -605,7 +634,11 @@ namespace Assignment1
            
 
         }
-
+        /// <summary>
+        /// Extra rule to check number or identifier
+        /// </summary>
+        /// <param name="ll"></param>
+        /// <param name="i"></param>
         private void parametersTailTail(LinkedList<SymTab.paramNode> ll,int i)
         {
             switch(token.token)
@@ -650,7 +683,8 @@ namespace Assignment1
 
 
             SymTab.entry ePtr = st.lookUp(lexeme);
-            if(ePtr.lexeme != token.lexeme && error != true)
+
+            if(ePtr.lexeme.ToLower() != token.lexeme.ToLower() && error != true)
             {
                 Console.WriteLine("ERROR! UNDECLARED VARIABLE " + token.lexeme +  " AT LINE "  + lexicalScanner.ln );
                 error = true;
@@ -692,6 +726,7 @@ namespace Assignment1
                 term(ref tSyn, ref offset);
             if (error != true)
                 moreTerm(ref tSyn,  ref offset);
+
 
             SymTab.entry tmpPtr = newTemp(ref offset);
             string code = null;
@@ -898,7 +933,11 @@ namespace Assignment1
 
         }
 
-
+        /// <summary>
+        /// Creates a new tempoary variable and adds it to the symbol table.
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <returns></returns>
         private SymTab.entry newTemp(ref int offset)
         {
             SymTab.entry temp = new SymTab.entry();
@@ -1008,6 +1047,14 @@ namespace Assignment1
             insertVar(ptr, typ, eTyp, ref offset,  counter, oldOffset);
         }
 
+        /// <summary>
+        /// More variables grammar rule
+        /// </summary>
+        /// <param name="typ"></param>
+        /// <param name="eTyp"></param>
+        /// <param name="offset"></param>
+        /// <param name="counter"></param>
+        /// <param name="oldOffset"></param>
         private void varsTail(ref SymTab.varType typ, ref SymTab.entryType eTyp ,  ref int offset,  int counter, int oldOffset)
         {
             switch(token.token)
@@ -1171,6 +1218,11 @@ namespace Assignment1
                     break;
             }
         }
+        /// <summary>
+        /// Checks and sets the type of variable 
+        /// </summary>
+        /// <param name="typ"></param>
+        /// <param name="eTyp"></param>
         private void typeMark(ref SymTab.varType typ, ref SymTab.entryType eTyp)
         {
             
@@ -1216,6 +1268,12 @@ namespace Assignment1
             }
 
         }
+        /// <summary>
+        /// Checks and sets the type of variable.
+        /// </summary>
+        /// <param name="offset"></param>
+        /// <param name="typ"></param>
+        /// <param name="eTyp"></param>
         private void varType(ref int offset, ref SymTab.varType typ, ref SymTab.entryType eTyp)
         {
 
@@ -1257,6 +1315,10 @@ namespace Assignment1
 
         }
 
+        /// <summary>
+        /// Checks the type of constant value declaration (int or float)
+        /// </summary>
+        /// <param name="typeOfVar"></param>
         private void varValue(ref SymTab.varType typeOfVar)
         {
             //Numberical Literal
@@ -1318,7 +1380,11 @@ namespace Assignment1
             }
 
         }
-
+        /// <summary>
+        /// Calls procList for paramater declarations
+        /// </summary>
+        /// <param name="f"></param>
+        /// <param name="offset"></param>
         private void argList(ref SymTab.entry.function f,  ref int offset)
         {
 
@@ -1340,6 +1406,11 @@ namespace Assignment1
 
         }
 
+        /// <summary>
+        /// Currently not in use
+        /// </summary>
+        /// <param name="f"></param>
+        /// <param name="offset"></param>
         private void moreArgs(ref SymTab.entry.function f, ref int offset)
         {
             switch(token.token)
@@ -1355,6 +1426,12 @@ namespace Assignment1
             }
         }
 
+        /// <summary>
+        /// Grammar rule for args (paramaters)
+        /// </summary>
+        /// <param name="ll"></param>
+        /// <param name="offset"></param>
+        /// <param name="paramMode"></param>
         private void procList(ref LinkedList<SymTab.paramNode> ll, ref int offset, ref lexicalScanner.SYMBOL paramMode)
         {
             switch (token.token)
@@ -1399,6 +1476,14 @@ namespace Assignment1
 
 
         }
+        /// <summary>
+        /// Grammar rule for if there are more variables of the same type.
+        /// </summary>
+        /// <param name="typ"></param>
+        /// <param name="eTyp"></param>
+        /// <param name="ll"></param>
+        /// <param name="offset"></param>
+        /// <param name="paramMode"></param>
         private void procListTail(ref SymTab.varType typ, ref SymTab.entryType eTyp, ref LinkedList<SymTab.paramNode> ll, ref int offset, ref lexicalScanner.SYMBOL paramMode)
         {
             switch(token.token)
@@ -1445,6 +1530,13 @@ namespace Assignment1
 
         }
 
+        /// <summary>
+        /// Code to implement if there is more code after types
+        /// </summary>
+        /// <param name="typ"></param>
+        /// <param name="eTyp"></param>
+        /// <param name="ll"></param>
+        /// <param name="offset"></param>
         private void moreTail(ref SymTab.varType typ, ref SymTab.entryType eTyp, ref LinkedList<SymTab.paramNode> ll, ref int offset)
         {
             lexicalScanner.SYMBOL paramMode = lexicalScanner.SYMBOL.intt;
@@ -1503,6 +1595,9 @@ namespace Assignment1
             
         }
         
+        /// <summary>
+        /// Checks for duplicate declaration of variables at the same depth
+        /// </summary>
         void checkForDups()
         {
             
@@ -1512,7 +1607,7 @@ namespace Assignment1
            // Console.WriteLine(token.lexeme);
            // Console.WriteLine(eptr.lexeme);
 
-            if (eptr.depth == depth && eptr.lexeme == token.lexeme.ToLower())
+            if (eptr.depth == depth && eptr.lexeme.ToLower() == token.lexeme.ToLower())
             {
                 error = true;
                 Console.WriteLine("Error - Multiple declaration of \"" + eptr.lexeme + "\" on line " + lexicalScanner.ln);
@@ -1565,17 +1660,20 @@ namespace Assignment1
         /// <param name="code"></param>
         public void emit(string code)
         {
-            if (visual == true)
-                Console.Write(code);
-            using (StreamWriter sw = new StreamWriter(path, true))
-            {
-                string[] tokens = code.Split(null);
-                if(tokens.Length>3)
-                    sw.Write("{0, -10}  {1, -10}  {2, -10} {3, -10} \n", tokens);
-                else
-                //Console.WriteLine("{0}  {1}  {2}",tokens);
-                sw.Write("{0, -10}  {1, -10}  {2, -10}  \n", tokens);
+            if(error != true)
+            {    
+                if (visual == true)
+                    Console.Write(code);
+                using (StreamWriter sw = new StreamWriter(path, true))
+                {
+                    string[] tokens = code.Split(null);
+                    if(tokens.Length>3)
+                        sw.Write("{0, -10}  {1, -10}  {2, -10} {3, -10} \n", tokens);
+                    else
+                    //Console.WriteLine("{0}  {1}  {2}",tokens);
+                    sw.Write("{0, -10}  {1, -10}  {2, -10}  \n", tokens);
                 
+                }
             }
         }
     }//End class RDP
