@@ -703,6 +703,10 @@ namespace Assignment1
         {
             if (error != true)
                 relation(ref syn, ref offset);
+
+
+
+
         }
 
         /// <summary>
@@ -726,15 +730,6 @@ namespace Assignment1
                 term(ref tSyn, ref offset);
             if (error != true)
                 moreTerm(ref tSyn,  ref offset);
-
-
-            SymTab.entry tmpPtr = newTemp(ref offset);
-            string code = null;
-            addCode(tmpPtr, ref code);
-            code = code + "\t=\t";
-            addCode(tSyn, ref code);
-            emit(code + "\n");
-            tSyn = tmpPtr;
 
             syn = tSyn; // Set syn to t_syn
         }
