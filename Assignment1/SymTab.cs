@@ -53,8 +53,8 @@ namespace Assignment1
             public string lexeme = " ";
             public int depth = 0;
             public entryType typeOfEntry;
-            public bool isParameter = false;
-            public lexicalScanner.SYMBOL mode = lexicalScanner.SYMBOL.intt;
+           // public bool isParameter = false;
+            //public lexicalScanner.SYMBOL mode = lexicalScanner.SYMBOL.intt;
 
 
             public entry()
@@ -76,7 +76,7 @@ namespace Assignment1
                 public int offset;
                 public int size;
                 public lexicalScanner.SYMBOL mode = lexicalScanner.SYMBOL.intt;
-               // public bool isParameter = false;
+                public bool isParameter = false;
 
                 public var()
                 {
