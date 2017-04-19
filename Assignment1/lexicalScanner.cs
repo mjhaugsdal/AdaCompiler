@@ -479,6 +479,7 @@ namespace Assignment1
             reswords.Add("char", SYMBOL.chart);
             reswords.Add("get", SYMBOL.gett);
             reswords.Add("put", SYMBOL.putt);
+            reswords.Add("putln", SYMBOL.putt);
             reswords.Add("end", SYMBOL.endt);
             reswords.Add("or", SYMBOL.addopt);
             reswords.Add("rem", SYMBOL.multopt);

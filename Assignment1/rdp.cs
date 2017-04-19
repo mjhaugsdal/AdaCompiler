@@ -223,6 +223,7 @@ namespace Assignment1
                         ce.typeOfConstant = typ;
                         ce.typeOfEntry = eTyp;
                         ce.size = 2;
+                        ce.value = 
 
                         ce.offset = offset ;
                         offset = offset + ce.size;
@@ -392,9 +393,55 @@ namespace Assignment1
         /// </summary>
         private void IOStat()
         {
-            //Lambda, for now
+            switch(token.token)
+            {
+                case (lexicalScanner.SYMBOL.gett):
+                    if(error!=true)
+                        In_Stat();
+                    break;
+                case (lexicalScanner.SYMBOL.putt):
+                    if (error != true)
+                        Out_Stat(); 
+                    break;
+                default:
+                    error = true;
+                    break;
+            }
         }
 
+        private void Out_Stat()
+        {
+            match(lexicalScanner.SYMBOL.putt);
+            switch(token)
+        }
+
+        private void Id_List()
+        {
+            match(lexicalScanner.SYMBOL.idt);
+            if (error != true)
+                Id_List_Tail();
+        }
+
+        private void In_Stat()
+        {
+            match(lexicalScanner.SYMBOL.putt);
+            match(lexicalScanner.SYMBOL.lparent);
+            if (error != true)
+                Id_List();
+            match(lexicalScanner.SYMBOL.rparent);
+        }
+        private void Id_List_Tail()
+        {
+            switch(token.token)
+            {
+                case (lexicalScanner.SYMBOL.commat):
+
+                    break;
+                default:
+                    break;
+            }
+
+        }
         /// <summary>
         /// A-> idt := Expression
         /// </summary>
@@ -440,10 +487,14 @@ namespace Assignment1
         /// <param name="code"></param>
         private void addCode(SymTab.entry ptr, ref string code)
         {
+            
+
             if(error != true)
             {
 
             
+
+
                 ptr.lexeme = ptr.lexeme.Trim();
             
                 if(ptr.lexeme[0] == '-')
@@ -466,21 +517,27 @@ namespace Assignment1
                 }
                 ptr = st.lookUp(ptr.lexeme);
 
-
-
                 //THIS IS ALL WITH DEPTH LOWER THAN 2
-                if(depth<2 || ptr.depth < 2)
+                if (depth<2 || ptr.depth < 2)
                 {
 
-                    SymTab.entry.var Vptr = ptr as SymTab.entry.var;
-           
-                    //Check flags
+                    if(ptr.typeOfEntry == SymTab.entryType.varEntry)
+                    {
+                        SymTab.entry.var Vptr = ptr as SymTab.entry.var;
 
-                    //THIS IS ALL IF LEFTPTR PASSING MODE IN/OUT/INOUT
-                    if (Vptr.mode == lexicalScanner.SYMBOL.intt)
-                        code = code + Vptr.lexeme;
+                        //Check flags
+
+                        //THIS IS ALL IF LEFTPTR PASSING MODE IN/OUT/INOUT
+                        if (Vptr.mode == lexicalScanner.SYMBOL.intt)
+                            code = code + Vptr.lexeme;
+                        else
+                            code = code + "@" + Vptr.lexeme;
+                    }
                     else
-                        code = code + "@"+ Vptr.lexeme;
+                    {
+                        SymTab.entry.constant.intConstant Cptr = ptr as SymTab.entry.constant.intConstant;
+                        code = code + Cptr.value;
+                    }
 
                 }
 
@@ -493,25 +550,35 @@ namespace Assignment1
                         code = (code + retNum(ptr));
                         return; // SKIP REST
                     }
-                    ptr = st.lookUp(ptr.lexeme);
-                    SymTab.entry.var vPtr = ptr as SymTab.entry.var;
-                    //Create vars
-                    //Check flags
 
-                    //THIS IS ALL IF LEFTPTR PASSING MODE IN/OUT/INOUT
-                    if (vPtr.isParameter)
+                    if (ptr.typeOfEntry == SymTab.entryType.varEntry)
                     {
-                        if (vPtr.mode == lexicalScanner.SYMBOL.intt)
-                            code = code + "_bp+"+ vPtr.offset;
+
+                        ptr = st.lookUp(ptr.lexeme);
+                        SymTab.entry.var vPtr = ptr as SymTab.entry.var;
+                        //Create vars
+                        //Check flags
+
+                        //THIS IS ALL IF LEFTPTR PASSING MODE IN/OUT/INOUT
+                        if (vPtr.isParameter)
+                        {
+                            if (vPtr.mode == lexicalScanner.SYMBOL.intt)
+                                code = code + "_bp+"+ vPtr.offset;
+                            else
+                                code = code + "@_bp+" + vPtr.offset;
+                        }
                         else
-                            code = code + "@_bp+" + vPtr.offset;
+                        {
+                            if (vPtr.mode == lexicalScanner.SYMBOL.intt)
+                                code = code + "_bp-" + vPtr.offset;
+                            else
+                                code = code + "@_bp-" + vPtr.offset;
+                        }
+
                     }
                     else
                     {
-                        if (vPtr.mode == lexicalScanner.SYMBOL.intt)
-                            code = code + "_bp-" + vPtr.offset;
-                        else
-                            code = code + "@_bp-" + vPtr.offset;
+                        SymTab.entry.constant.intConstant Cptr = ptr as SymTab.entry.constant.intConstant;
                     }
 
                 }
@@ -950,7 +1017,7 @@ namespace Assignment1
             st.insert(temp.lexeme, lexicalScanner.SYMBOL.idt, depth);
             temp = st.lookUp(temp.lexeme);
             
-            insertVar(temp, SymTab.varType.intType, SymTab.entryType.varEntry, ref offset, 1, offset);
+            insertVar(temp, SymTab.varType.intType, SymTab.entryType.varEntry, ref offset, 1, offset, 0);
             
 
             return temp;
@@ -1031,6 +1098,7 @@ namespace Assignment1
         {
             // { 1 }  
 
+            float value = 0;
             int counter = 0;
             checkForDups();
             st.insert(token.lexeme, token.token, depth);
@@ -1040,12 +1108,12 @@ namespace Assignment1
 
             match(lexicalScanner.SYMBOL.idt);
             if (error != true)
-                varsTail( ref typ, ref eTyp, ref offset,  counter, oldOffset);
+                varsTail( ref typ, ref eTyp, ref offset,  counter, oldOffset, ref value);
             //{ 3 }
 
 
 
-            insertVar(ptr, typ, eTyp, ref offset,  counter, oldOffset);
+            insertVar(ptr, typ, eTyp, ref offset,  counter, oldOffset, value);
         }
 
         /// <summary>
@@ -1056,7 +1124,7 @@ namespace Assignment1
         /// <param name="offset"></param>
         /// <param name="counter"></param>
         /// <param name="oldOffset"></param>
-        private void varsTail(ref SymTab.varType typ, ref SymTab.entryType eTyp ,  ref int offset,  int counter, int oldOffset)
+        private void varsTail(ref SymTab.varType typ, ref SymTab.entryType eTyp ,  ref int offset,  int counter, int oldOffset, ref float value)
         {
             switch(token.token)
             {
@@ -1071,17 +1139,17 @@ namespace Assignment1
                     
                     match(lexicalScanner.SYMBOL.idt);
                     if (error != true)
-                        varsTail(ref typ, ref eTyp, ref offset,  counter, oldOffset);
+                        varsTail(ref typ, ref eTyp, ref offset,  counter, oldOffset, ref value);
 
                     //{ 3 }
                     
-                    insertVar(ptr, typ, eTyp, ref offset, counter, oldOffset);
+                    insertVar(ptr, typ, eTyp, ref offset, counter, oldOffset, value);
                     break;
 
                 case (lexicalScanner.SYMBOL.colont):
                     match(lexicalScanner.SYMBOL.colont);
                     if (error != true)
-                        varType(ref offset, ref typ, ref eTyp);
+                        varType(ref offset, ref typ, ref eTyp, ref value);
                     break;
                 
                    
@@ -1098,7 +1166,7 @@ namespace Assignment1
         /// <param name="offset"></param>
         /// <param name="counter"></param>
         /// <param name="oldOffset"></param>
-        private void insertVar(SymTab.entry ptr, SymTab.varType typ, SymTab.entryType eTyp, ref int offset, int counter, int oldOffset)
+        private void insertVar(SymTab.entry ptr, SymTab.varType typ, SymTab.entryType eTyp, ref int offset, int counter, int oldOffset, float value)
         {
 
             switch (eTyp)
@@ -1146,6 +1214,9 @@ namespace Assignment1
                         ce.typeOfConstant = typ;
                         ce.typeOfEntry = eTyp;
                         ce.size = 2;
+                        int intVal = (int)value;
+                        
+                        ce.value = intVal;
 
 
                         ce.offset = (counter * ce.size + oldOffset);
@@ -1275,7 +1346,7 @@ namespace Assignment1
         /// <param name="offset"></param>
         /// <param name="typ"></param>
         /// <param name="eTyp"></param>
-        private void varType(ref int offset, ref SymTab.varType typ, ref SymTab.entryType eTyp)
+        private void varType(ref int offset, ref SymTab.varType typ, ref SymTab.entryType eTyp, ref float value)
         {
 
             switch (token.token)
@@ -1309,7 +1380,7 @@ namespace Assignment1
 
 
                     if (error != true)
-                        varValue(ref typ);
+                        varValue(ref typ, ref value);
 
                     break;
             }
@@ -1320,18 +1391,20 @@ namespace Assignment1
         /// Checks the type of constant value declaration (int or float)
         /// </summary>
         /// <param name="typeOfVar"></param>
-        private void varValue(ref SymTab.varType typeOfVar)
+        private void varValue(ref SymTab.varType typeOfVar, ref float value)
         {
             //Numberical Literal
             if (token.valueR.HasValue)
             {
                 //We have a float!
                 typeOfVar = SymTab.varType.floatType;
+                value = float.Parse(token.lexeme);
             }
             else
             {
                 typeOfVar = SymTab.varType.intType;
                 //We have a integer!
+                value = float.Parse(token.lexeme);
             }
             match(lexicalScanner.SYMBOL.numt);
         }
