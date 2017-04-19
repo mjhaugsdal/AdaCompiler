@@ -411,8 +411,55 @@ namespace Assignment1
 
         private void Out_Stat()
         {
-            match(lexicalScanner.SYMBOL.putt);
-            switch(token)
+            switch(token.token)
+            {
+                case (lexicalScanner.SYMBOL.putt):
+                    match(lexicalScanner.SYMBOL.putt);
+                    Write_List();
+                    break;
+                case (lexicalScanner.SYMBOL.putlt):
+                    match(lexicalScanner.SYMBOL.putlt);
+                    Write_List();
+                    break;
+                default:
+                    error = true; // Lambda not allowed
+                    break;
+            }
+        }
+
+        private void Write_List()
+        {
+            Write_Token();
+            Write_List_Tail();
+        }
+
+        private void Write_List_Tail()
+        {
+            switch(token.token)
+            {
+                case (lexicalScanner.SYMBOL.commat):
+                    Write_Token();
+                    Write_List_Tail();
+
+                    break;
+                default:
+                    //Lambda
+                    break;
+            }
+        }
+
+        private void Write_Token()
+        {
+            switch(token.token)
+            {
+                case (lexicalScanner.SYMBOL.idt):
+                    break;
+                case (lexicalScanner.SYMBOL.numt):
+                    break;
+                case (lexicalScanner.SYMBOL.literalt):
+                    break;
+
+            }
         }
 
         private void Id_List()

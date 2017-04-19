@@ -39,7 +39,8 @@ namespace Assignment1
             andt, eoft, unkownt, relopt, addopt, assignopt,
             multopt, lparent, rparent,commat,colont,semicolont,
             periodt,idt,literalt,numt, intt, outt, inoutt, commentt,
-            realt,nott
+            realt,nott,
+            putlt
         };
 
         //Token object for token building
@@ -479,7 +480,7 @@ namespace Assignment1
             reswords.Add("char", SYMBOL.chart);
             reswords.Add("get", SYMBOL.gett);
             reswords.Add("put", SYMBOL.putt);
-            reswords.Add("putln", SYMBOL.putt);
+            reswords.Add("putln", SYMBOL.putlt);
             reswords.Add("end", SYMBOL.endt);
             reswords.Add("or", SYMBOL.addopt);
             reswords.Add("rem", SYMBOL.multopt);
