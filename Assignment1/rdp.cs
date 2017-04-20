@@ -146,7 +146,7 @@ namespace Assignment1
  
 
 
-            emit("endp " + procName + "\n");
+            emit("endp " + procName + "\n\n");
             match(lexicalScanner.SYMBOL.endt);
 
             if (token.lexeme != procName && error != true)
@@ -159,7 +159,7 @@ namespace Assignment1
             match(lexicalScanner.SYMBOL.idt);
             match(lexicalScanner.SYMBOL.semicolont);
            // st.writeTable(depth);
-            st.deleteDepth(depth);
+            //st.deleteDepth(depth);
             depth--;
   
             return token;
@@ -365,6 +365,31 @@ namespace Assignment1
                         statTail(ref offset);
 
                     break;
+
+                case (lexicalScanner.SYMBOL.gett):
+                    if (error != true)
+                        statement(ref offset);
+                    match(lexicalScanner.SYMBOL.semicolont);
+                    if (error != true)
+                        statTail(ref offset);
+                    break;
+
+                case (lexicalScanner.SYMBOL.putlt):
+                    if (error != true)
+                        statement(ref offset);
+                    match(lexicalScanner.SYMBOL.semicolont);
+                    if (error != true)
+                        statTail(ref offset);
+                    break;
+                case (lexicalScanner.SYMBOL.putt):
+                    if (error != true)
+                        statement(ref offset);
+                    match(lexicalScanner.SYMBOL.semicolont);
+                    if (error != true)
+                        statTail(ref offset);
+                    break;
+
+
                 default:
                     //Lambda
                     break;
@@ -382,6 +407,8 @@ namespace Assignment1
                         AssignStat(ref offset);
                     break;
                 default:
+
+                    
                     if (error != true)
                         IOStat();
                     break;
@@ -403,6 +430,10 @@ namespace Assignment1
                     if (error != true)
                         Out_Stat(); 
                     break;
+                case (lexicalScanner.SYMBOL.putlt):
+                    if(error!=true)
+                        Out_Stat();
+                    break;
                 default:
                     error = true;
                     break;
@@ -415,11 +446,17 @@ namespace Assignment1
             {
                 case (lexicalScanner.SYMBOL.putt):
                     match(lexicalScanner.SYMBOL.putt);
-                    Write_List();
+                    match(lexicalScanner.SYMBOL.lparent);
+                    if(error!=true)
+                        Write_List();
+                    match(lexicalScanner.SYMBOL.rparent);
                     break;
                 case (lexicalScanner.SYMBOL.putlt):
+                    match(lexicalScanner.SYMBOL.lparent);
                     match(lexicalScanner.SYMBOL.putlt);
-                    Write_List();
+                    if (error != true)
+                        Write_List();
+                    match(lexicalScanner.SYMBOL.rparent);
                     break;
                 default:
                     error = true; // Lambda not allowed
@@ -429,8 +466,10 @@ namespace Assignment1
 
         private void Write_List()
         {
-            Write_Token();
-            Write_List_Tail();
+            if(error!= true)
+                Write_Token();
+            if (error != true)
+                Write_List_Tail();
         }
 
         private void Write_List_Tail()
@@ -438,8 +477,10 @@ namespace Assignment1
             switch(token.token)
             {
                 case (lexicalScanner.SYMBOL.commat):
-                    Write_Token();
-                    Write_List_Tail();
+                    if (error != true)
+                        Write_Token();
+                    if (error != true)
+                        Write_List_Tail();
 
                     break;
                 default:
@@ -453,12 +494,29 @@ namespace Assignment1
             switch(token.token)
             {
                 case (lexicalScanner.SYMBOL.idt):
+                    string code = null;
+                    //Check its type (int or literal?)
+                    emit("wri ");
+                    SymTab.entry tptr = st.lookUp(token.lexeme);
+                    SymTab.entry.var vptr = tptr as SymTab.entry.var;
+
+                    addCode(tptr, ref code);
+                    
+                    emit(code + "\n");
+                    emit("wrln \n");
+
+                    match(lexicalScanner.SYMBOL.idt);
                     break;
                 case (lexicalScanner.SYMBOL.numt):
+                    match(lexicalScanner.SYMBOL.numt);
                     break;
                 case (lexicalScanner.SYMBOL.literalt):
+                    match(lexicalScanner.SYMBOL.literalt);
                     break;
-
+                default:
+                    error = true;
+                    Console.WriteLine("ERROR IN WRITE TOKEN");
+                    break;
             }
         }
 
@@ -471,7 +529,7 @@ namespace Assignment1
 
         private void In_Stat()
         {
-            match(lexicalScanner.SYMBOL.putt);
+            match(lexicalScanner.SYMBOL.gett);
             match(lexicalScanner.SYMBOL.lparent);
             if (error != true)
                 Id_List();
@@ -482,6 +540,10 @@ namespace Assignment1
             switch(token.token)
             {
                 case (lexicalScanner.SYMBOL.commat):
+                    match(lexicalScanner.SYMBOL.commat);
+                    match(lexicalScanner.SYMBOL.idt);
+                    if (error != true)
+                        Id_List_Tail();
 
                     break;
                 default:
@@ -1790,6 +1852,15 @@ namespace Assignment1
                     string[] tokens = code.Split(null);
                     if(tokens.Length>3)
                         sw.Write("{0, -10}  {1, -10}  {2, -10} {3, -10} \n", tokens);
+
+                    else if(tokens.Length == 2 )
+                    {
+                        sw.Write("{0, -10}  {1, -10} \n", tokens);
+                    }
+                    else if (tokens.Length == 1)
+                    {
+                        sw.Write("{0, -10} \n", tokens);
+                    }
                     else
                     //Console.WriteLine("{0}  {1}  {2}",tokens);
                     sw.Write("{0, -10}  {1, -10}  {2, -10}  \n", tokens);

@@ -26,7 +26,7 @@ namespace Assignment1
     public class SymTab
     {
         //Size of table (Prime number)
-        const int tableSize = 211;
+        public const int tableSize = 211;
     
 
         public enum varType { charType, intType, floatType, def }
