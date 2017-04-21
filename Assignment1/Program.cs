@@ -49,11 +49,10 @@ namespace Assignment1
                     string path = args[0];
                     string[] tacPath = path.Split('.');
                     path = tacPath[0] + ".tac";
-                    if(File.Exists(path))
-                    {
-                        File.Delete(path);
 
-                    }
+                    //File.Create(path);
+                    
+ 
                    // StreamWriter sw = new StreamWriter(path, true);
 
                     SymTab st = new SymTab();
@@ -61,6 +60,7 @@ namespace Assignment1
                     fileName = args[0]; // args
                     //fileName = "parse8.ada";
                     StreamReader sr = new StreamReader(fileName);
+                    StreamReader tacSr = new StreamReader(path);
                     //classes
                     //for return
                     lexicalScanner.Token token = new lexicalScanner.Token();
@@ -69,7 +69,7 @@ namespace Assignment1
                     rdp rdp = new rdp(token, lx, sr, st, path );
                     
                     
-                    Assembler asm = new Assembler(path, rdp);
+                    Assembler asm = new Assembler(path, rdp, tacSr);
                     lx.createDictionary();
 
                     /*string output = String.Format("{0,-15}  {1,-15} ", "Token"
@@ -115,7 +115,7 @@ namespace Assignment1
                 }
                 catch(FileNotFoundException)
                 {
-                    Console.WriteLine("Error! File not found");
+                    Console.WriteLine("Error!!! File not found");
 
 
                 }

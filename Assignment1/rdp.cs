@@ -496,7 +496,7 @@ namespace Assignment1
                 case (lexicalScanner.SYMBOL.idt):
                     string code = null;
                     //Check its type (int or literal?)
-                    emit("wri ");
+                    code = code + "wri ";
                     SymTab.entry tptr = st.lookUp(token.lexeme);
                     SymTab.entry.var vptr = tptr as SymTab.entry.var;
 
@@ -522,6 +522,9 @@ namespace Assignment1
 
         private void Id_List()
         {
+            //Not yet implemented
+            throw new NotImplementedException("NOT YET IMPLEMENTED!!!");
+
             match(lexicalScanner.SYMBOL.idt);
             if (error != true)
                 Id_List_Tail();

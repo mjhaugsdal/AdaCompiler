@@ -16,19 +16,10 @@ namespace Assignment1
         private string aPath;
         private string path;
         private rdp rdp;
-
-
-        public class tacLine
-        {
-            public string adr1 = null;
-            public string adr2 = null;
-            public string adr3 = null;
-            public tacLine()
-            {
-
-            }
-
-        }
+        private StreamReader tacSr;
+        private string tacToken;
+        char ch = ' ';
+        string token = "";
 
         public Assembler(string path)
         {
@@ -53,6 +44,11 @@ namespace Assignment1
             this.rdp = rdp;
         }
 
+        public Assembler(string path, rdp rdp, StreamReader tacSr) : this(path, rdp)
+        {
+            this.tacSr = tacSr;
+        }
+
         internal void emit(string code)
         {
             if (visual)
@@ -66,58 +62,107 @@ namespace Assignment1
 
         public  void genAssembly()
         {
+            
+            token = getNextToken();
 
-            using (StreamReader sr = new StreamReader(path))
+            while(!tacSr.EndOfStream )
             {
-                tacLine tl = tokenize(sr.ReadLine());
-                //Need to tokenize
-                //Console.WriteLine(tl.adr1);
+                
 
+            }
+            //Read last line
+
+
+
+
+
+                //tacLine tl = getProc(sr.ReadLine());
+                //Need to tokenize
 
                 //Read first line from tac file
-                while (tl.adr1 != "start" && tl.adr2 != "proc" && tl.adr3 != rdp.mainProc )
+               /* while (tl.adr1 != "start" && tl.adr2 != "proc" && tl.adr3 != rdp.mainProc )
                 {
 
 
                     string line = sr.ReadLine();
                     tl = tokenize(line);
                    // Console.WriteLine(line);
-                }
+                }*/
                 
                 //while tac != start proc rdp.mainProc
                 //If proc, insert procedure
                 //Read next line from TAC file
 
-            }
 
 
         }
 
-        private tacLine tokenize(string line)
+        /* private tacLine getProc(string v)
+         {
+
+         }*/
+        public char peekNextChar()
         {
-            //Console.WriteLine(line);
-
-            tacLine tl = new tacLine();
-            string[] tokens = new string[3] ;
-            tokens = line.Split(new char[0], StringSplitOptions.RemoveEmptyEntries);
-            /*
-            try
-            {
-                if (tokens[0] != null)
-                    tl.adr1 = tokens[0];
-                if (tokens[1] != null)
-                    tl.adr2 = tokens[1];
-                if (tokens[2] != null)
-                    tl.adr3 = tokens[2];
-            }
-            catch(IndexOutOfRangeException)
-            {
-
-            }
-            */
-
-            return tl;
+            return (char)tacSr.Peek();
         }
+        public char getNextChar()
+        {
+
+            ch = (char)tacSr.Read();
+            return ch;
+        }
+        private string getNextToken()
+        {
+            while (!tacSr.EndOfStream)
+            {
+                
+                char ch = getNextChar();
+
+                if (!Char.IsWhiteSpace(ch))
+                {
+                    //If peek was successful, get next char
+                    ch = getNextChar();
+                    processToken(); //Process the token
+
+                    return token;
+
+                }
+
+                if (ch == 10 || Char.IsWhiteSpace(ch))
+                {
+                    ch = getNextChar();
+                }
+                else
+                {
+                    return token;
+                }
+            }
+            return token;
+        }
+
+        public void processToken( )
+        {
+         
+            while (tacSr.Peek() > -1) // read the rest of the lexeme
+            {
+                char c = peekNextChar();
+                //idt can be letters, underscore and/or digits
+                if (!Char.IsLetterOrDigit(c) && c != 95)
+                    break;
+
+                else if (tacSr.Peek() == 32 || tacSr.Peek() == 10)
+                {
+                    break;
+                }
+                else
+                {
+                    ch = getNextChar();
+                    token = token+ ch;
+                }
+
+            }//end while
+        }
+
 
         private void insertProcedure()
         {
