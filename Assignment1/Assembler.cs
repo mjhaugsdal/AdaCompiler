@@ -16,22 +16,24 @@ namespace Assignment1
         private string aPath;
         private string path;
         private rdp rdp;
-        private StreamReader tacSr;
-        private string tacToken;
+        private string code = null;
         char ch = ' ';
         string token = "";
+        private StreamWriter asmSw;
+        private StreamReader tacSr;
+        private SymTab st;
+        bool ax = false;
 
         public Assembler(string path)
         {
             this.path = path;
-            //this.path = path;
-            string[] asmPath = path.Split('.');
-            this.aPath = asmPath[0] + ".asm";
             
-            //Create .asm file
+            string[] asmPath = path.Split('.');
+            aPath = asmPath[0] + ".asm";
 
-            if (File.Exists(this.aPath))
-                File.Delete(this.aPath); //Delete existing asm file
+            //Create .asm file
+            if (File.Exists(aPath))
+                File.Delete(aPath); //Delete existing asm file
 
             emit("\t.model small");
             emit("\t.586");
@@ -42,56 +44,66 @@ namespace Assignment1
         public Assembler(string path, rdp rdp) : this(path)
         {
             this.rdp = rdp;
+            
         }
 
-        public Assembler(string path, rdp rdp, StreamReader tacSr) : this(path, rdp)
+        public Assembler(string path, rdp rdp , StreamReader tacSr) : this(path, rdp)
         {
             this.tacSr = tacSr;
         }
 
-        internal void emit(string code)
+        public Assembler(string path, rdp rdp, StreamReader tacSr, SymTab st) : this(path, rdp, tacSr)
         {
-            if (visual)
-               // Console.Write(code +"\n");
-            using (StreamWriter asm = new StreamWriter(aPath, true))
-            {
-                    
-                    asm.Write(code+"\n");
-            }
+            this.st = st;
+        }
+
+        private void emit(string code)
+        {
+            //if (visual)
+            // Console.Write(code +"\n");
+            // using (StreamWriter sw = new StreamWriter(path, true))
+
+            using (StreamWriter asmSw = new StreamWriter(aPath, true))
+                asmSw.Write(code + "\n");
+
+            code = "";
+            
+
         }
 
         public  void genAssembly()
         {
-            
-            token = getNextToken();
 
-            while(!tacSr.EndOfStream )
+            while(!tacSr.EndOfStream)
+            insertProcedure();
+
+            /* while (!tacSr.EndOfStream )
             {
-                
 
-            }
+                token = getNextToken();
+            }*/
             //Read last line
 
 
 
 
 
-                //tacLine tl = getProc(sr.ReadLine());
-                //Need to tokenize
+            //tacLine tl = getProc(sr.ReadLine());
+            //Need to tokenize
 
-                //Read first line from tac file
-               /* while (tl.adr1 != "start" && tl.adr2 != "proc" && tl.adr3 != rdp.mainProc )
-                {
+            //Read first line from tac file
+            /* while (tl.adr1 != "start" && tl.adr2 != "proc" && tl.adr3 != rdp.mainProc )
+             {
 
 
-                    string line = sr.ReadLine();
-                    tl = tokenize(line);
-                   // Console.WriteLine(line);
-                }*/
-                
-                //while tac != start proc rdp.mainProc
-                //If proc, insert procedure
-                //Read next line from TAC file
+                 string line = sr.ReadLine();
+                 tl = tokenize(line);
+                // Console.WriteLine(line);
+             }*/
+
+            //while tac != start proc rdp.mainProc
+            //If proc, insert procedure
+            //Read next line from TAC file
 
 
 
@@ -113,17 +125,20 @@ namespace Assignment1
         }
         private string getNextToken()
         {
+
+
+            token = "";
             while (!tacSr.EndOfStream)
             {
                 
-                char ch = getNextChar();
+                char ch = peekNextChar();
 
                 if (!Char.IsWhiteSpace(ch))
                 {
                     //If peek was successful, get next char
                     ch = getNextChar();
-                    processToken(); //Process the token
-
+                    token = processToken(); //Process the token
+                    Console.WriteLine(token);
                     return token;
 
                 }
@@ -134,23 +149,29 @@ namespace Assignment1
                 }
                 else
                 {
+                    Console.WriteLine(token);
                     return token;
                 }
             }
             return token;
         }
-
-        public void processToken( )
+        private void match()
         {
-         
+                
+            //Console.WriteLine("MATCHED " + desiredToken + " AND " + token.token);
+            token = getNextToken();     
+        }
+        public string processToken( )
+        {
+
+            token = token + ch;
+
             while (tacSr.Peek() > -1) // read the rest of the lexeme
             {
                 char c = peekNextChar();
                 //idt can be letters, underscore and/or digits
-                if (!Char.IsLetterOrDigit(c) && c != 95)
-                    break;
 
-                else if (tacSr.Peek() == 32 || tacSr.Peek() == 10)
+                if (tacSr.Peek() == 32 || tacSr.Peek() == 10)
                 {
                     break;
                 }
@@ -161,26 +182,41 @@ namespace Assignment1
                 }
 
             }//end while
+
+            return token;
         }
 
 
         private void insertProcedure()
         {
-            //Template:
-            /*
-             
-             procname   PROC
-                        push bp
-                        mov bp, sp
-                        sub sp, SIZE OF LOCALS FROM SYM TABLE
+            
+            
+            token = getNextToken(); // proc
+            token = getNextToken(); // proc name
+            Console.WriteLine("LEXEME " + token);
+            SymTab.entry ptr = st.lookUp(token);
+            Console.WriteLine("LEXEME "+ptr.lexeme);
+            emit(token + "\t PROC");
+            emit("\tpush bp ");  //push bp
+            mov("bp", "sp"); // mov bp, sp
+            SymTab.entry.function fptr = ptr as SymTab.entry.function;
+            emit("\tsub sp, " + fptr.sizeOfLocal.ToString()); // sub sp, size of locals from symtab
 
-                        ; translated code(TAC)
+            //TRANSLATED CODE
+            emit("");
+            transCode();
 
-                        add sp, SIZE OF LOCALS FROM SYM TABLE
-                        pop bp
-                        ret SIZE OF PARAMETERS FROM SYM TABLE
-            procname    ENDP
-             */
+
+            //Last part of template
+            emit("\tadd sp, " + fptr.sizeOfLocal.ToString());
+            emit("\tpop bp");
+            emit("\tret " + fptr.sizeOfParams);
+
+           // token = getNextToken();
+            //token = getNextToken(); // proc
+            token = getNextToken(); // proc name
+            emit(token + "\t endp");
+
         }
 
 
@@ -252,5 +288,93 @@ namespace Assignment1
         }
 
 
+        private void transCode()
+        {
+            L();
+        }
+
+        private bool R()
+        {
+            token = getNextToken(); // get R
+
+            switch(token[0])
+            {
+                //BP
+                case ('_'):
+                    //addCode();
+                    break;
+                case ('@'):
+                    break;
+                default:
+                    if(char.IsDigit(token[0]))
+                    {
+                        mov("ax", token);
+                  
+                        L();
+                        return true;
+                    }
+
+                    break;
+            }
+
+            return false;
+        }
+
+        private bool L()
+        {
+            token = getNextToken(); // get L 
+            
+            switch (token[0])
+            {
+                //BP
+                case ('_'):
+                    //addCode();
+                    token = getNextToken(); // get = 
+                    ax = R();
+                    if(ax == true)
+                    {
+                        ax = false;
+                        token = token.Substring(1, token.Length-1);
+                        //token = getNextToken();
+                        mov("[" + token + "]", "ax");
+                    }
+
+                    break;
+
+                case ('@'):
+                    break;
+
+                default:
+
+                    switch (token)
+                    {
+                        case ("wri"):
+                            break;
+                        case ("ws"):
+                            break;
+                        case ("wrln"):
+                            break;
+                        case ("rdi"):
+                            break;
+                        case ("rds"):
+                            break;
+                        case ("call"):
+                            break;
+
+
+                        default:
+                            Console.WriteLine("Second switch -- variable?");
+                            break;
+                    }
+                    break;
+            }
+            return false;
+        }
+
+        private void addCode()
+        {
+            //Trim underscore if underscore
+
+        }
     }//End class assembler
 }//end namespace

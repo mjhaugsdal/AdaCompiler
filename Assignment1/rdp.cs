@@ -31,9 +31,8 @@ namespace Assignment1
         private lexicalScanner lx;
         private StreamReader sr;
         private SymTab st;
-      //  private FileStream fs;
-     //   private StreamWriter sw;
-        private string path;
+       // private string path;
+        private StreamWriter sw;
 
         public rdp(lexicalScanner.Token token)
         {
@@ -55,9 +54,9 @@ namespace Assignment1
             this.st = st;
         }
 
-        public rdp(lexicalScanner.Token token, lexicalScanner lx, StreamReader sr, SymTab st, string path) : this(token, lx, sr, st)
+        public rdp(lexicalScanner.Token token, lexicalScanner lx, StreamReader sr, SymTab st, StreamWriter sw) : this(token, lx, sr, st)
         {
-            this.path = path;
+            this.sw = sw;
         }
 
 
@@ -1850,8 +1849,7 @@ namespace Assignment1
             {    
                 if (visual == true)
                     Console.Write(code);
-                using (StreamWriter sw = new StreamWriter(path, true))
-                {
+
                     string[] tokens = code.Split(null);
                     if(tokens.Length>3)
                         sw.Write("{0, -10}  {1, -10}  {2, -10} {3, -10} \n", tokens);
@@ -1867,8 +1865,8 @@ namespace Assignment1
                     else
                     //Console.WriteLine("{0}  {1}  {2}",tokens);
                     sw.Write("{0, -10}  {1, -10}  {2, -10}  \n", tokens);
-                
-                }
+
+                //sw.Close();
             }
         }
     }//End class RDP

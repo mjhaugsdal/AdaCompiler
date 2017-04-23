@@ -50,36 +50,40 @@ namespace Assignment1
                     string[] tacPath = path.Split('.');
                     path = tacPath[0] + ".tac";
 
+
+
+
                     //File.Create(path);
-                    
- 
-                   // StreamWriter sw = new StreamWriter(path, true);
+                    if (File.Exists(path))
+                        File.Delete(path);
+                 /*   else
+                        File.Create(path);*/
+
+
+                  /*  else
+                        File.Create(aPath);*/
+
 
                     SymTab st = new SymTab();
                 
                     fileName = args[0]; // args
-                    //fileName = "parse8.ada";
-                    StreamReader sr = new StreamReader(fileName);
-                    StreamReader tacSr = new StreamReader(path);
+
+
+                    StreamWriter sw = new StreamWriter(path, true); //Write to .tac
+                    StreamReader sr = new StreamReader(fileName);   //read from .ada
+
+
+
                     //classes
                     //for return
                     lexicalScanner.Token token = new lexicalScanner.Token();
 
                     lexicalScanner lx = new lexicalScanner(fileName, sr);
-                    rdp rdp = new rdp(token, lx, sr, st, path );
-                    
-                    
-                    Assembler asm = new Assembler(path, rdp, tacSr);
-                    lx.createDictionary();
+                    rdp rdp = new rdp(token, lx, sr, st, sw);
 
-                    /*string output = String.Format("{0,-15}  {1,-15} ", "Token"
-                         , "Lexeme");
-              
-                    Console.WriteLine(output);
-                    */
-               
-               
-                
+                   
+                    lx.createDictionary();
+      
                     //While NOT eoft
                     while (token.token != lexicalScanner.SYMBOL.eoft )
                     {
@@ -88,12 +92,20 @@ namespace Assignment1
                         token = lx.getNextToken();
                     
                         token = rdp.parse(token);
- 
+                        
                         // st.writeTable(1);
 
                         if (rdp.error != true)
                             Console.WriteLine("Program is Valid!");
                         rdp.emit("start proc " + rdp.mainProc);
+                        Console.WriteLine();
+                        sw.Close(); // close writing .tac
+
+
+                       // StreamWriter asmSw = new StreamWriter(aPath, true); //Write to .asm
+                        StreamReader tacSr = new StreamReader(path);   //read from .tac
+
+                        Assembler asm = new Assembler(path, rdp, tacSr, st);
 
                         asm.buildDataSeg();
                         asm.addCodeAndIncludes();
