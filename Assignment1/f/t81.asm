@@ -1,4 +1,4 @@
-        .model  small                  
+        s.model  small                  
         .586                           
         .stack  100h                   
         .data                          
@@ -41,7 +41,8 @@ three   proc
         mov     bx,[bp+4]                
         mov     [bx],ax                
 
-        mov     dx,[bp+4]                
+		mov		ax,[bp+4]
+        mov     dx, ax                
         call    writeint                
 
         add     sp,10                  

@@ -109,8 +109,9 @@ namespace Assignment1
 
                         asm.buildDataSeg();
                         asm.addCodeAndIncludes();
-                        asm.generateMain();
+                        
                         asm.genAssembly();
+
                         /* if(j > 20)
                          {
                              Console.WriteLine("Press any key to continue...");

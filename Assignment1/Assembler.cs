@@ -19,10 +19,10 @@ namespace Assignment1
         private string code = null;
         char ch = ' ';
         string token = "";
-        private StreamWriter asmSw;
+
         private StreamReader tacSr;
         private SymTab st;
-        bool ax = false;
+
 
         public Assembler(string path)
         {
@@ -75,7 +75,19 @@ namespace Assignment1
         {
 
             while(!tacSr.EndOfStream)
-            insertProcedure();
+            {
+                insertProcedure();
+
+                if(token == rdp.mainProc)
+                {
+                    //GOTO END
+                    generateMain();
+                    break;
+                }
+            }
+            
+
+
 
             /* while (!tacSr.EndOfStream )
             {
@@ -138,7 +150,7 @@ namespace Assignment1
                     //If peek was successful, get next char
                     ch = getNextChar();
                     token = processToken(); //Process the token
-                    Console.WriteLine(token);
+                   // Console.WriteLine(token);
                     return token;
 
                 }
@@ -149,26 +161,28 @@ namespace Assignment1
                 }
                 else
                 {
-                    Console.WriteLine(token);
+                    //Console.WriteLine(token);
                     return token;
                 }
             }
             return token;
         }
-        private void match()
-        {
-                
-            //Console.WriteLine("MATCHED " + desiredToken + " AND " + token.token);
-            token = getNextToken();     
-        }
+
         public string processToken( )
         {
 
             token = token + ch;
+            if (tacSr.Peek() == 43 || tacSr.Peek() == 42)
+            {
+                return token;
+            }
+
 
             while (tacSr.Peek() > -1) // read the rest of the lexeme
             {
                 char c = peekNextChar();
+
+
                 //idt can be letters, underscore and/or digits
 
                 if (tacSr.Peek() == 32 || tacSr.Peek() == 10)
@@ -193,9 +207,9 @@ namespace Assignment1
             
             token = getNextToken(); // proc
             token = getNextToken(); // proc name
-            Console.WriteLine("LEXEME " + token);
-            SymTab.entry ptr = st.lookUp(token);
-            Console.WriteLine("LEXEME "+ptr.lexeme);
+
+            SymTab.entry ptr = st.lookUp(token.Trim(' '));
+
             emit(token + "\t PROC");
             emit("\tpush bp ");  //push bp
             mov("bp", "sp"); // mov bp, sp
@@ -204,6 +218,8 @@ namespace Assignment1
 
             //TRANSLATED CODE
             emit("");
+            if(token != "endp")
+                token = getNextToken(); // get L 
             transCode();
 
 
@@ -212,8 +228,6 @@ namespace Assignment1
             emit("\tpop bp");
             emit("\tret " + fptr.sizeOfParams);
 
-           // token = getNextToken();
-            //token = getNextToken(); // proc
             token = getNextToken(); // proc name
             emit(token + "\t endp");
 
@@ -269,6 +283,7 @@ namespace Assignment1
             mov("ah", "4ch");
             emit("\tint 21h");
             emit("main\tENDP");
+            emit("\tend main");
         }
 
         private string startProc()
@@ -284,64 +299,159 @@ namespace Assignment1
 
         private void mov(string r1, string r2)
         {
-            emit("\t" + r1 + "," +  r2);
+            emit("\tmov\t" + r1 + "," +  r2);
         }
-
+        
 
         private void transCode()
         {
+            
             L();
+            ct();
+           
         }
 
-        private bool R()
+        private void ct()
+        {
+            if(token != "endp")
+            {
+                
+                transCode();
+               // ct();
+            }
+            else
+            {
+                
+            }
+        }
+
+        private void R(string l)
         {
             token = getNextToken(); // get R
 
-            switch(token[0])
+
+            switch(l[0])
             {
-                //BP
-                case ('_'):
-                    //addCode();
-                    break;
                 case ('@'):
-                    break;
-                default:
-                    if(char.IsDigit(token[0]))
-                    {
-                        mov("ax", token);
-                  
-                        L();
-                        return true;
-                    }
+
+                    //De-reference
+                    token = trim(token);
+                    mov("ax ", "[" + token + "]");
+                    l = trim(l);
+                    token = getNextToken();
+                    rTail();
+                    mov("bx ", "[" + trim(l) + "]");
+                    mov("[bx]", "ax");
 
                     break;
+
+                default:
+                    switch (token[0])
+                    {
+                        //BP
+                        case ('_'):
+                            token = trim(token);
+                            mov("ax ", "[" + token + "]");
+                            l = trim(l);
+                            token = getNextToken();
+                            rTail();
+                            mov("[" + l + "]", " ax");
+
+                            break;
+                        case ('@'):
+                            //De-reference
+
+                            token = trim(token);
+                            mov("ax ", "[" + trim(token) + "]");
+                            l = trim(l);
+                            token = getNextToken();
+                            rTail();
+                            mov("bx ", "[" + l + "]");
+                            mov("[ bx ]", "ax");
+
+                            //    mov("[" + l + "]", " ax");
+
+                            break;
+                        default:
+                            if (char.IsDigit(token[0]))
+                            {
+                                mov("ax ", token);
+                                l = trim(l);
+                                token = getNextToken();
+                                // token = getNextToken();
+                                rTail();
+                                mov("[" + l + "]", " ax");
+                            }
+                            break;
+                    }
+                    break;
+
             }
 
-            return false;
+
         }
 
-        private bool L()
+
+        private string trim(string s)
         {
-            token = getNextToken(); // get L 
+            s = s.Substring(1, s.Length - 1);
+            return s;
+        }
+
+        private void rTail()
+        {
+
             
+            //ch = getNextChar();
+            switch (token[0])
+            {
+                case ('+'):
+                   
+
+                    token = getNextToken();
+                    token = getNextToken();
+                    // token = trim(token);
+                    mov("bx ", "[" + trim(token) + "]");
+                    emit("\twhat? " + "bx");
+
+                    break;
+                case ('*'):
+                    
+                    token = getNextToken();
+                    token = getNextToken();
+                    token = trim(token);
+                    mov("bx ", "[" + trim(token) + "]");
+                    emit("\timul " + "bx");
+
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void L()
+        {
+            
+            string l;
             switch (token[0])
             {
                 //BP
                 case ('_'):
-                    //addCode();
+                    l = token;
                     token = getNextToken(); // get = 
-                    ax = R();
-                    if(ax == true)
-                    {
-                        ax = false;
-                        token = token.Substring(1, token.Length-1);
-                        //token = getNextToken();
-                        mov("[" + token + "]", "ax");
-                    }
+                    R(l);
+                    emit("");
 
                     break;
 
                 case ('@'):
+                    
+                    l = token;
+                    token = getNextToken(); // get = 
+                    R(l);
+
+                    emit("");
+
                     break;
 
                 default:
@@ -349,26 +459,70 @@ namespace Assignment1
                     switch (token)
                     {
                         case ("wri"):
+
+                            token = getNextToken();
+
+                            //If pushing a number
+                            if(char.IsDigit(token[0]))
+                            {
+                                
+                            }
+                            //Else a variable
+                            else
+                            {
+                                token = trim(token);
+                                if (token[0] == '_')
+                                    mov("dx", "[" + trim(token) + "]");
+                                else
+                                    mov("dx", "[" + token + "]");
+                            }
+
+
+
+
+                            emit("\tcall writeint");
+
                             break;
-                        case ("ws"):
+                        case ("wrs"):
+
+
                             break;
                         case ("wrln"):
+                            token = getNextToken();
+
                             break;
                         case ("rdi"):
                             break;
                         case ("rds"):
                             break;
+                        case ("push"):
+                            token = getNextToken();
+
+                            mov("ax", "something");
+                            emit("\tpush something\n");
+
+                            token = getNextToken();
+
+                            Console.WriteLine(token);
+                            //token = getNextToken();
+                            break;
                         case ("call"):
+
+                            token = getNextToken();
+                            emit("\tcall " + token);
+
+                            token = getNextToken();
                             break;
 
 
                         default:
                             Console.WriteLine("Second switch -- variable?");
+                           // token = getNextToken();
                             break;
                     }
                     break;
             }
-            return false;
+            
         }
 
         private void addCode()

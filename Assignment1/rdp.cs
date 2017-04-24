@@ -610,14 +610,14 @@ namespace Assignment1
             
                 if(ptr.lexeme[0] == '-')
                 {
-                    code = code + "-";
+                    code = code + " - ";
                     //emit("-");
                     ptr.lexeme = ptr.lexeme.Remove(0, 1);
                 }
                 if (ptr.lexeme.Length > 3) 
-                if(String.Compare(ptr.lexeme.Substring(0,3), "not", true ) == 0)
+                if(String.Compare(ptr.lexeme.Substring(0,3), " not ", true ) == 0)
                 {
-                    code = code + "not ";
+                    code = code + " not ";
                     ptr.lexeme = ptr.lexeme.Remove(0, 3);
                 }
                 //If right side is a number
@@ -949,7 +949,7 @@ namespace Assignment1
                     addCode(tmpPtr, ref code);
                     code = code + "\t=\t";
                     addCode(rVal, ref code);
-                    code = code + token.lexeme; // Add operator mulop
+                    code = code + " " + token.lexeme + " "; // Add operator mulop
 
                     if (error != true)
                         mulop(); //Match mulopt
@@ -1085,7 +1085,7 @@ namespace Assignment1
                     addCode(tmpPtr, ref code);
                     code = code + "\t=\t";
                     addCode(rVal, ref code);
-                    code = code + token.lexeme; // Add operator mulop
+                    code = code + " " +token.lexeme + " "; // Add operator mulop
 
                     if (error != true)
                         addOp(); //Match addop
@@ -1851,8 +1851,14 @@ namespace Assignment1
                     Console.Write(code);
 
                     string[] tokens = code.Split(null);
-                    if(tokens.Length>3)
-                        sw.Write("{0, -10}  {1, -10}  {2, -10} {3, -10} \n", tokens);
+                    
+
+
+                  /*  if(tokens.Length == 5)
+                        sw.Write("{0, -10}  {1, -10}  {2, -10} {3, -10} {4, -10} \n", tokens);*/
+
+                    if (tokens.Length > 4)
+                        sw.Write("{0, -10}  {1, -10}  {2, -1} {3, -1} {4, -1}  \n", tokens);
 
                     else if(tokens.Length == 2 )
                     {
