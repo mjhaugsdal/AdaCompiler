@@ -764,10 +764,17 @@ namespace Assignment1
                     SymTab.paramNode node = ll.ElementAt(i);
                     i++;
 
-                    if (node.mode == lexicalScanner.SYMBOL.intt)
-                        emit("push " + token.lexeme +"\n");
+                    Console.WriteLine(token.lexeme);
+                    string code = null;
+                    SymTab.entry tmp = st.lookUp(token.lexeme);
+
+                    if(node.mode == lexicalScanner.SYMBOL.intt)
+                        code = code + "push\t";
                     else
-                        emit("push "  + "@" + token.lexeme + "\n");
+                        code = code + "push\t@";
+                    addCode(tmp, ref code);
+                    emit(code);
+                    // emit("push " + token.lexeme +"\n");
 
                     //CHECK PROCEDURE IN SYMTAB FOR INOUT OR OUT MODE
                     match(lexicalScanner.SYMBOL.idt);
@@ -819,18 +826,24 @@ namespace Assignment1
         /// <param name="i"></param>
         private void parametersTailTail(LinkedList<SymTab.paramNode> ll,int i)
         {
-            switch(token.token)
+            switch (token.token)
             {
                 case (lexicalScanner.SYMBOL.idt):
                     if (error != true)
                         checkUndeclared(token.lexeme);
                     SymTab.paramNode node = ll.ElementAt(i);
                     i++;
+                    string code = null;
+                    SymTab.entry tmp = st.lookUp(token.lexeme);
 
-                    if (node.mode == lexicalScanner.SYMBOL.outt)
-                        emit("push " + "@" + token.lexeme + "\n");
+                    if (node.mode == lexicalScanner.SYMBOL.intt)
+                        code = code + "push\t";
                     else
-                        emit("push " + token.lexeme + "\n");
+                        code = code + "push\t@";
+
+                    addCode(tmp, ref code);
+                    emit(code);
+ 
 
 
 

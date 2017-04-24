@@ -462,13 +462,52 @@ namespace Assignment1
                    
 
                     token = getNextToken();
-                    token = getNextToken();
+                    //  token = getNextToken();
                     // token = trim(token);
-                    mov("bx ", "[" + trim(token) + "]");
-                    emit("\tadd " + "ax,bx");
-                    
+                    //mov("bx ", "[" + trim(token) + "]");
 
+                    SymTab.entry ptr = st.lookUp(token);
+                    char c = token[0];
+                    if(char.IsDigit(c))
+                    {
 
+                    }
+                    else if(ptr.token == lexicalScanner.SYMBOL.unkownt)
+                    {
+                        if (token[0] == '@')
+                        {
+                            if(token[0] == '_')
+                                emit("\tadd ax, " + "[" +trim(trim(token)) + "]");
+                            else
+                                emit("\tadd ax, " + "[" + token + "]");
+                        }
+                        else
+                        {
+                            if (token[0] == '_')
+                                emit("\tadd ax," + "[" + trim(token) + "]");
+                            else
+                                emit("\tadd ax, " + "[" + token + "]");
+                        }
+                    }
+                    else
+                    {
+                        if (token[0] == '@')
+                        {
+                            if (token[0] == '_')
+                                emit("\tadd ax, " +  trim(trim(token)) );
+                            else
+                                emit("\tadd ax, " +  token );
+                        }
+                        else
+                        {
+                            if (token[0] == '_')
+                                emit("\tadd ax," + trim(token) );
+                            else
+                                emit("\tadd ax, " + token );
+                        }
+                    }
+
+                    token = getNextToken();
                     break;
                 case ('*'):
                     
@@ -530,13 +569,13 @@ namespace Assignment1
                             //Else a variable
                             else
                             {
-                                if(token[0] == '@')
-                                    token = trim(token);
 
                                 if (token[0] == '_')
-                                    mov("dx", "[" + trim(token) + "]");
+                                    mov("ax",  trim(token) );
                                 else
-                                    mov("dx", "[" + token + "]");
+                                    mov("ax",  token );
+                      
+
                             }
 
                             emit("\tcall writeint");
@@ -558,13 +597,32 @@ namespace Assignment1
                         case ("push"):
                             token = getNextToken();
 
-                            mov("ax", "something");
-                            emit("\tpush something\n");
+                            if (token[0] == '@') // De reference?   
+                            {
+                                token = trim(token);
+                                if (token[0] == '_')
+                                    token = trim(token);
+                                mov("ax", "offset " + token );
+                               // mov("ax", "offset " + token);
+                                emit("\tpush ax \n");
+
+                            }
+                            else
+                            {
+
+                                if (token[0] == '_')
+                                    token = trim(token);
+
+                                mov("ax", "offset " + token);
+                                emit("\tpush ax \n");
+
+                                //token = getNextToken();
+
+                                //Console.WriteLine(token);
+                                //token = getNextToken();
+                            }
 
                             token = getNextToken();
-
-                            //Console.WriteLine(token);
-                            //token = getNextToken();
                             break;
                         case ("call"):
 
