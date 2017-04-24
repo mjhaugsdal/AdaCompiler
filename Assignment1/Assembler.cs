@@ -328,45 +328,83 @@ namespace Assignment1
         private void R(string l)
         {
             token = getNextToken(); // get R
+            char c = l[0];
 
-
-            switch(l[0])
+            switch(c)
             {
                 case ('@'):
 
                     //De-reference
                     token = trim(token);
-                    mov("ax ", "[" + token + "]");
+
+
                     l = trim(l);
+                    if (l[0] == '_')
+                        l = trim(l);
+
+
+                    mov("ax", "[" + token + "]");
+                   // l = trim(l);
                     token = getNextToken();
                     rTail();
-                    mov("bx ", "[" + trim(l) + "]");
+                    mov("bx", "[" + l + "]");
                     mov("[bx]", "ax");
 
                     break;
 
                 default:
+
+
+
+                    if(char.IsDigit(c))
+                    {
+                        mov("heey", "lool");
+
+                        break;
+                    }
+
                     switch (token[0])
                     {
+
+                        case ('-'):
+                            //Unary negation?
+                            //extracting two tokens ignores it for now!
+                            token = getNextToken();
+                            token = getNextToken();
+
+                            break;
                         //BP
                         case ('_'):
                             token = trim(token);
-                            mov("ax ", "[" + token + "]");
-                            l = trim(l);
+                            mov("ax", "[" + token + "]");
+
+                            if(l[0] == '_')
+                            {
+                                l = trim(l);
+
+                                mov("[" + l + "]", "ax");
+                            }
+                            else
+                            {
+                                mov( l , "ax");
+                            }
                             token = getNextToken();
                             rTail();
-                            mov("[" + l + "]", " ax");
+                            //mov("[" + l + "]", " ax");
+
 
                             break;
                         case ('@'):
                             //De-reference
 
                             token = trim(token);
-                            mov("ax ", "[" + trim(token) + "]");
-                            l = trim(l);
+                            if (l[0] == '_')
+                                l = trim(l);
+                            mov("ax", "[" + trim(token) + "]");
+                           // l = trim(l);
                             token = getNextToken();
                             rTail();
-                            mov("bx ", "[" + l + "]");
+                            mov("bx", "[" + l + "]");
                             mov("[ bx ]", "ax");
 
                             //    mov("[" + l + "]", " ax");
@@ -375,13 +413,28 @@ namespace Assignment1
                         default:
                             if (char.IsDigit(token[0]))
                             {
-                                mov("ax ", token);
+                                mov("ax", token);
                                 l = trim(l);
                                 token = getNextToken();
                                 // token = getNextToken();
                                 rTail();
-                                mov("[" + l + "]", " ax");
+                                mov("[" + l + "]", "ax");
+
                             }
+                            else
+                            {
+                                if (l[0] == '_')
+                                    l = trim(l);
+                                mov("ax ", token);
+                                //l = trim(l);
+                                token = getNextToken();
+                                // token = getNextToken();
+                                rTail();
+                                mov("[" + l + "]", "ax");
+                                //token = getNextToken();
+                            }
+
+
                             break;
                     }
                     break;
@@ -412,7 +465,9 @@ namespace Assignment1
                     token = getNextToken();
                     // token = trim(token);
                     mov("bx ", "[" + trim(token) + "]");
-                    emit("\twhat? " + "bx");
+                    emit("\tadd " + "ax,bx");
+                    
+
 
                     break;
                 case ('*'):
@@ -454,33 +509,38 @@ namespace Assignment1
 
                     break;
 
+
+                
                 default:
 
                     switch (token)
                     {
+
+
+
                         case ("wri"):
 
                             token = getNextToken();
 
                             //If pushing a number
-                            if(char.IsDigit(token[0]))
+                            if (char.IsDigit(token[0]))
                             {
-                                
+
                             }
                             //Else a variable
                             else
                             {
-                                token = trim(token);
+                                if(token[0] == '@')
+                                    token = trim(token);
+
                                 if (token[0] == '_')
                                     mov("dx", "[" + trim(token) + "]");
                                 else
                                     mov("dx", "[" + token + "]");
                             }
 
-
-
-
                             emit("\tcall writeint");
+                            token = getNextToken();
 
                             break;
                         case ("wrs"):
@@ -503,7 +563,7 @@ namespace Assignment1
 
                             token = getNextToken();
 
-                            Console.WriteLine(token);
+                            //Console.WriteLine(token);
                             //token = getNextToken();
                             break;
                         case ("call"):
@@ -514,10 +574,29 @@ namespace Assignment1
                             token = getNextToken();
                             break;
 
+                        case ("proc"):
+                            break;
+                        case ("endp"):
+                            break;
 
                         default:
-                            Console.WriteLine("Second switch -- variable?");
-                           // token = getNextToken();
+                            SymTab.entry tmp = st.lookUp(token);
+
+                            if (tmp.token == lexicalScanner.SYMBOL.unkownt)
+                            {
+                                token = getNextToken();
+                            }
+                            else
+                            {
+                                l = token;
+                                token = getNextToken(); // get = 
+                                
+                                R(l);
+                                emit("");
+                                //Console.WriteLine("Second switch -- variable?");
+                                //  if(token != "proc" || token != "endp")   
+
+                            }
                             break;
                     }
                     break;

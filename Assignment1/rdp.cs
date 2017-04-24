@@ -1081,6 +1081,7 @@ namespace Assignment1
             switch (token.token)
             {
                 case (lexicalScanner.SYMBOL.addopt):
+
                     tmpPtr = newTemp(ref offset);
                     addCode(tmpPtr, ref code);
                     code = code + "\t=\t";
