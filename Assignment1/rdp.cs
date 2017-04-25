@@ -509,6 +509,10 @@ namespace Assignment1
                     match(lexicalScanner.SYMBOL.idt);
                     break;
                 case (lexicalScanner.SYMBOL.numt):
+
+                    code = code + "wri " + token.lexeme;
+                    emit(code);
+                    
                     match(lexicalScanner.SYMBOL.numt);
                     break;
                 case (lexicalScanner.SYMBOL.literalt):
@@ -603,7 +607,8 @@ namespace Assignment1
         private void Id_List(ref int offset)
         {
             //Not yet implemented
-            throw new NotImplementedException("NOT YET IMPLEMENTED!!!");
+
+            emit("rdi " + token.lexeme);
 
             match(lexicalScanner.SYMBOL.idt);
             if (error != true)
@@ -624,6 +629,7 @@ namespace Assignment1
             {
                 case (lexicalScanner.SYMBOL.commat):
                     match(lexicalScanner.SYMBOL.commat);
+                    emit("rdi " + token.lexeme);
                     match(lexicalScanner.SYMBOL.idt);
                     if (error != true)
                         Id_List_Tail(ref  offset);
@@ -765,8 +771,8 @@ namespace Assignment1
                         //Check flags
 
                         //THIS IS ALL IF LEFTPTR PASSING MODE IN/OUT/INOUT
-
-                        code = code + "_bp-" + Lptr.offset;
+                        code = code + Lptr.lexeme;
+                        //code = code + "_bp-" + Lptr.offset;
 
                     }
                     else if (ptr.typeOfEntry == SymTab.entryType.varEntry)

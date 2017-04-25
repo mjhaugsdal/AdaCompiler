@@ -584,7 +584,8 @@ namespace Assignment1
                             //If pushing a number
                             if (char.IsDigit(token[0]))
                             {
-
+                                mov("ax", token);
+                               // emit("\tcall writeint");
                             }
                             //Else a variable
                             else
@@ -594,11 +595,11 @@ namespace Assignment1
                                     mov("ax",  trim(token) );
                                 else
                                     mov("ax",  token );
-                      
 
+                                //emit("\tcall writeint");
                             }
-
                             emit("\tcall writeint");
+
                             token = getNextToken();
 
                             break;
@@ -617,6 +618,23 @@ namespace Assignment1
 
                             break;
                         case ("rdi"):
+                            emit("\tcall readint");
+                            //mov();
+                            token = getNextToken();
+
+                            if (token[0] == '@')
+                            {
+                                if (token[0] == '_')
+                                    token = trim(token);
+
+                                mov("dx", token);
+                            }
+                            else
+                                mov("dx", token);
+
+
+                            token = getNextToken();
+
                             break;
                         case ("rds"):
                             break;
