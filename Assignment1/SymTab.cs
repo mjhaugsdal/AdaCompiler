@@ -30,7 +30,7 @@ namespace Assignment1
     
 
         public enum varType { charType, intType, floatType, def }
-        public enum entryType { constEntry, varEntry, functionEntry }
+        public enum entryType { constEntry, varEntry, functionEntry, literalEntry }
 
         public class paramNode
         {
@@ -70,6 +70,18 @@ namespace Assignment1
                 //this.typeOfEntry = typeOfEntry;
 
             }
+
+            public class literal : entry
+            {
+                public string lit;
+                public int offset;
+
+                public literal()
+                {
+
+                }
+
+            }
             public class var : entry
             {
                 public varType typeOfVar;
@@ -92,6 +104,8 @@ namespace Assignment1
 
                 }*/
             }
+
+
 
             public class constant : entry
             {

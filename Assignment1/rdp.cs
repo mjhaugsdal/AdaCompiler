@@ -27,6 +27,7 @@ namespace Assignment1
         public static bool error = false;
         public int depth = 0;
         public int tempVarNr = 1;
+        public int StrtempVarNr = 0;
         private lexicalScanner.Token token;
         private lexicalScanner lx;
         private StreamReader sr;
@@ -409,7 +410,7 @@ namespace Assignment1
 
                     
                     if (error != true)
-                        IOStat();
+                        IOStat(ref  offset);
                     break;
             }
         }
@@ -417,21 +418,21 @@ namespace Assignment1
         /// <summary>
         /// 
         /// </summary>
-        private void IOStat()
+        private void IOStat(ref int offset)
         {
             switch(token.token)
             {
                 case (lexicalScanner.SYMBOL.gett):
                     if(error!=true)
-                        In_Stat();
+                        In_Stat(ref offset);
                     break;
                 case (lexicalScanner.SYMBOL.putt):
                     if (error != true)
-                        Out_Stat(); 
+                        Out_Stat(ref offset); 
                     break;
                 case (lexicalScanner.SYMBOL.putlt):
                     if(error!=true)
-                        Out_Stat();
+                        Out_Stat(ref offset);
                     break;
                 default:
                     error = true;
@@ -439,7 +440,7 @@ namespace Assignment1
             }
         }
 
-        private void Out_Stat()
+        private void Out_Stat(ref int offset)
         {
             switch(token.token)
             {
@@ -447,14 +448,14 @@ namespace Assignment1
                     match(lexicalScanner.SYMBOL.putt);
                     match(lexicalScanner.SYMBOL.lparent);
                     if(error!=true)
-                        Write_List();
+                        Write_List(ref offset);
                     match(lexicalScanner.SYMBOL.rparent);
                     break;
                 case (lexicalScanner.SYMBOL.putlt):
                     match(lexicalScanner.SYMBOL.lparent);
                     match(lexicalScanner.SYMBOL.putlt);
                     if (error != true)
-                        Write_List();
+                        Write_List(ref offset);
                     match(lexicalScanner.SYMBOL.rparent);
                     break;
                 default:
@@ -463,23 +464,23 @@ namespace Assignment1
             }
         }
 
-        private void Write_List()
+        private void Write_List(ref int offset)
         {
             if(error!= true)
-                Write_Token();
+                Write_Token(ref offset);
             if (error != true)
-                Write_List_Tail();
+                Write_List_Tail(ref offset);
         }
 
-        private void Write_List_Tail()
+        private void Write_List_Tail(ref int offset)
         {
             switch(token.token)
             {
                 case (lexicalScanner.SYMBOL.commat):
                     if (error != true)
-                        Write_Token();
+                        Write_Token(ref offset);
                     if (error != true)
-                        Write_List_Tail();
+                        Write_List_Tail(ref offset);
 
                     break;
                 default:
@@ -488,12 +489,13 @@ namespace Assignment1
             }
         }
 
-        private void Write_Token()
+        private void Write_Token(ref int offset)
         {
-            switch(token.token)
+            string code = null;
+            switch (token.token)
             {
                 case (lexicalScanner.SYMBOL.idt):
-                    string code = null;
+                    
                     //Check its type (int or literal?)
                     code = code + "wri ";
                     SymTab.entry tptr = st.lookUp(token.lexeme);
@@ -510,6 +512,21 @@ namespace Assignment1
                     match(lexicalScanner.SYMBOL.numt);
                     break;
                 case (lexicalScanner.SYMBOL.literalt):
+
+                   // st.insert(token.lexeme, lexicalScanner.SYMBOL.literalt, depth);
+
+                    string s = newString(token.lexeme, token.lexeme.Length);
+                    code = code + "wrs ";
+                    
+                    SymTab.entry ptr = st.lookUp(s);
+                    SymTab.entry.literal sptr = ptr as SymTab.entry.literal;
+
+                    addCode(ptr, ref code);
+
+
+                    emit(code + "\n");
+                    emit("wrln \n");
+
                     match(lexicalScanner.SYMBOL.literalt);
                     break;
                 default:
@@ -519,25 +536,89 @@ namespace Assignment1
             }
         }
 
-        private void Id_List()
+        private string newString(string literal, int len)
+        {
+            SymTab.entry temp = new SymTab.entry();
+
+
+            temp.lexeme = "_S" + StrtempVarNr;
+            StrtempVarNr++;
+
+            st.insert(temp.lexeme, lexicalScanner.SYMBOL.literalt, depth);
+
+            Console.WriteLine(temp.lexeme);
+
+            temp = st.lookUp(temp.lexeme);
+
+
+            Console.WriteLine(temp.depth);
+
+            insertLit(temp, literal, len);
+
+            return temp.lexeme;
+            
+        }
+
+        private void insertLit(SymTab.entry ptr, string literal, int len)
+        {
+
+
+
+            ptr = st.lookUp(ptr.lexeme);
+
+            Console.WriteLine(ptr.lexeme);
+
+            ptr.typeOfEntry = SymTab.entryType.literalEntry;
+
+            SymTab.entry.literal lptr = new SymTab.entry.literal();
+
+            lptr.lexeme = ptr.lexeme;
+            lptr.depth = ptr.depth;
+            lptr.token = ptr.token;
+            lptr.lit = literal;
+            lptr.typeOfEntry = SymTab.entryType.literalEntry;
+
+            lptr.offset = len;
+
+            if (ptr.Next != null)
+            {
+                lptr.Prev = ptr.Prev;
+                lptr.Next = ptr.Next;
+                ptr.Prev.Next = lptr;
+                lptr.Next.Prev = lptr;
+            }
+            else
+            {
+                lptr.Prev = ptr.Prev;
+                ptr.Prev.Next = lptr;
+            }
+
+            //Calculate offset, 1 char = 1 byte
+
+            
+            //Insert lexeme as $ eliminated string in literal
+        }
+
+
+        private void Id_List(ref int offset)
         {
             //Not yet implemented
             throw new NotImplementedException("NOT YET IMPLEMENTED!!!");
 
             match(lexicalScanner.SYMBOL.idt);
             if (error != true)
-                Id_List_Tail();
+                Id_List_Tail(ref offset);
         }
 
-        private void In_Stat()
+        private void In_Stat(ref int offset)
         {
             match(lexicalScanner.SYMBOL.gett);
             match(lexicalScanner.SYMBOL.lparent);
             if (error != true)
-                Id_List();
+                Id_List(ref offset);
             match(lexicalScanner.SYMBOL.rparent);
         }
-        private void Id_List_Tail()
+        private void Id_List_Tail(ref int offset)
         {
             switch(token.token)
             {
@@ -545,7 +626,7 @@ namespace Assignment1
                     match(lexicalScanner.SYMBOL.commat);
                     match(lexicalScanner.SYMBOL.idt);
                     if (error != true)
-                        Id_List_Tail();
+                        Id_List_Tail(ref  offset);
 
                     break;
                 default:
@@ -632,7 +713,21 @@ namespace Assignment1
                 if (depth<2 || ptr.depth < 2)
                 {
 
-                    if(ptr.typeOfEntry == SymTab.entryType.varEntry)
+
+
+                    if(ptr.typeOfEntry == SymTab.entryType.literalEntry)
+                    {
+                        SymTab.entry.literal Lptr = ptr as SymTab.entry.literal;
+
+                        //Check flags
+
+                        //THIS IS ALL IF LEFTPTR PASSING MODE IN/OUT/INOUT
+
+                         code = code + Lptr.lexeme;
+
+                    }
+
+                    else if(ptr.typeOfEntry == SymTab.entryType.varEntry)
                     {
                         SymTab.entry.var Vptr = ptr as SymTab.entry.var;
 
@@ -662,8 +757,22 @@ namespace Assignment1
                         return; // SKIP REST
                     }
 
-                    if (ptr.typeOfEntry == SymTab.entryType.varEntry)
+
+                    else if (ptr.typeOfEntry == SymTab.entryType.literalEntry)
                     {
+                        SymTab.entry.literal Lptr = ptr as SymTab.entry.literal;
+
+                        //Check flags
+
+                        //THIS IS ALL IF LEFTPTR PASSING MODE IN/OUT/INOUT
+
+                        code = code + "_bp-" + Lptr.offset;
+
+                    }
+                    else if (ptr.typeOfEntry == SymTab.entryType.varEntry)
+                    {
+
+
 
                         ptr = st.lookUp(ptr.lexeme);
                         SymTab.entry.var vPtr = ptr as SymTab.entry.var;

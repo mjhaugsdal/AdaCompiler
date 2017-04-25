@@ -247,12 +247,22 @@ namespace Assignment1
 
                 while (temp.Next != null)
                 {
+
+                    if (temp.typeOfEntry == SymTab.entryType.literalEntry)
+                    {
+                        SymTab.entry.literal lptr = temp as SymTab.entry.literal;
+                        emit(temp.lexeme + "\t" + "db\t" + lptr.lit + ",\"$\"");
+                    }
+
                     if (temp.depth == 1 )
                     {
-                        if (temp.typeOfEntry == SymTab.entryType.varEntry || temp.typeOfEntry == SymTab.entryType.constEntry)
+
+
+                        if (temp.typeOfEntry == SymTab.entryType.varEntry)
                         {
                             emit(temp.lexeme + "\t" + "dw\t" + "?");
                         }
+
 
                     }
                     if (temp.Next != null)
@@ -260,11 +270,21 @@ namespace Assignment1
                 }
                 if (temp.depth == 1)
                 {
-                    if (temp.typeOfEntry == SymTab.entryType.varEntry || temp.typeOfEntry == SymTab.entryType.constEntry)
+                    if (temp.typeOfEntry == SymTab.entryType.varEntry)
                     {
                         emit(temp.lexeme + "\t" + "dw\t" + "?");
                     }
+
                 }
+                else
+                {
+                    if (temp.typeOfEntry == SymTab.entryType.literalEntry)
+                    {
+                        SymTab.entry.literal lptr = temp as SymTab.entry.literal;
+                        emit(temp.lexeme + "\t" + "db\t" + lptr.lit + ",\"$\"");
+                    }
+                }
+
             }
         }//End build dataseg
 
@@ -584,9 +604,15 @@ namespace Assignment1
                             break;
                         case ("wrs"):
 
+                            token = getNextToken();
+                            mov("dx", " offset " + token);
+                            emit("\tcall writestr");
+                            
+                            token = getNextToken();
 
                             break;
                         case ("wrln"):
+                            emit("\tcall writeln");
                             token = getNextToken();
 
                             break;
