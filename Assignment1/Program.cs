@@ -96,21 +96,24 @@ namespace Assignment1
                         // st.writeTable(1);
 
                         if (rdp.error != true)
+                        {
                             Console.WriteLine("Program is Valid!");
-                        rdp.emit("start proc " + rdp.mainProc);
-                        Console.WriteLine();
-                        sw.Close(); // close writing .tac
+                            rdp.emit("start proc " + rdp.mainProc);
+                            Console.WriteLine();
+                            sw.Close(); // close writing .tac
 
 
-                       // StreamWriter asmSw = new StreamWriter(aPath, true); //Write to .asm
-                        StreamReader tacSr = new StreamReader(path);   //read from .tac
+                            // StreamWriter asmSw = new StreamWriter(aPath, true); //Write to .asm
+                            StreamReader tacSr = new StreamReader(path);   //read from .tac
 
-                        Assembler asm = new Assembler(path, rdp, tacSr, st);
+                            Assembler asm = new Assembler(path, rdp, tacSr, st);
 
-                        asm.buildDataSeg();
-                        asm.addCodeAndIncludes();
-                        
-                        asm.genAssembly();
+                            asm.buildDataSeg();
+                            asm.addCodeAndIncludes();
+
+                            asm.genAssembly();
+                        }
+
 
                         /* if(j > 20)
                          {

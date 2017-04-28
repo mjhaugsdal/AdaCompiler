@@ -634,13 +634,20 @@ namespace Assignment1
 
                             if (token[0] == '@')
                             {
+                                token = trim(token);
                                 if (token[0] == '_')
                                     token = trim(token);
 
-                                mov("dx", token);
+                                mov("dx", "[" + token + "]");
                             }
                             else
-                                mov("dx", token);
+                            {
+                                if (token[0] == '_')
+                                    token = trim(token);
+
+                                mov("dx", "[" + token + "]");
+                            }
+
 
 
                             token = getNextToken();

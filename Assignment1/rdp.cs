@@ -331,6 +331,8 @@ namespace Assignment1
         /// </summary>
         private void seqOfStatements(int offset)
         {
+            statTail(ref offset);
+            /*
             switch(token.token)
             {
                 case (lexicalScanner.SYMBOL.idt):
@@ -346,7 +348,7 @@ namespace Assignment1
                     //Lambda
                     break;
 
-            }
+            }*/
         
         }
         /// <summary>
@@ -610,7 +612,16 @@ namespace Assignment1
         {
             //Not yet implemented
 
-            emit("rdi " + token.lexeme);
+            string code = null;
+            code = code + "rdi ";
+            SymTab.entry tptr = st.lookUp(token.lexeme);
+            SymTab.entry.var vptr = tptr as SymTab.entry.var;
+
+            addCode(tptr, ref code);
+
+            emit(code + "\n");
+
+          //  emit("rdi " + token.lexeme);
 
             match(lexicalScanner.SYMBOL.idt);
             if (error != true)
@@ -627,11 +638,19 @@ namespace Assignment1
         }
         private void Id_List_Tail(ref int offset)
         {
-            switch(token.token)
+            string code = null;
+            switch (token.token)
             {
                 case (lexicalScanner.SYMBOL.commat):
                     match(lexicalScanner.SYMBOL.commat);
-                    emit("rdi " + token.lexeme);
+                   
+                    code = code + "rdi ";
+                    SymTab.entry tptr = st.lookUp(token.lexeme);
+                    SymTab.entry.var vptr = tptr as SymTab.entry.var;
+
+                    addCode(tptr, ref code);
+
+                    emit(code + "\n");
                     match(lexicalScanner.SYMBOL.idt);
                     if (error != true)
                         Id_List_Tail(ref  offset);
