@@ -432,16 +432,24 @@ namespace Assignment1
                     {
                         if (temp.Next.depth == depth) //found!
                         {
-                            if (temp.Next.Next != null) //If there is at least two elements
+                            if(temp.Next.typeOfEntry == entryType.functionEntry || temp.Next.typeOfEntry == entryType.literalEntry)
                             {
-                                temp.Next = temp.Next.Next; // Remove reference to middle node
-
+                                temp = temp.Next;
                             }
-                            else // only one element
+                            else
                             {
-                                temp.Next = null; // delete
+                                if (temp.Next.Next != null) //If there is at least two elements
+                                {
+                                    temp.Next = temp.Next.Next; // Remove reference to middle node
 
+                                }
+                                else // only one element
+                                {
+                                    temp.Next = null; // delete
+
+                                }
                             }
+
 
                         }
 

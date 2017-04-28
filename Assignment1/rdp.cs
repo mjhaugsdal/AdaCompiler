@@ -159,7 +159,8 @@ namespace Assignment1
             match(lexicalScanner.SYMBOL.idt);
             match(lexicalScanner.SYMBOL.semicolont);
            // st.writeTable(depth);
-            //st.deleteDepth(depth);
+           if(depth != 1)
+            st.deleteDepth(depth);
             depth--;
   
             return token;
