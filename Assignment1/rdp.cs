@@ -21,7 +21,7 @@ namespace Assignment1
 {
     class rdp
     {
-        bool visual = true;
+        bool visual = false;
         public string mainProc;
         bool procSet = false;
         public static bool error = false;
@@ -460,7 +460,7 @@ namespace Assignment1
                     if (error != true)
                         Write_List(ref offset);
                     match(lexicalScanner.SYMBOL.rparent);
-                    emit("wrln \n");
+                    //emit("wrln \n");
                     break;
                 default:
                     error = true; // Lambda not allowed
@@ -554,12 +554,12 @@ namespace Assignment1
 
             st.insert(temp.lexeme, lexicalScanner.SYMBOL.literalt, depth);
 
-            Console.WriteLine(temp.lexeme);
+            //Console.WriteLine(temp.lexeme);
 
             temp = st.lookUp(temp.lexeme);
 
 
-            Console.WriteLine(temp.depth);
+          //  Console.WriteLine(temp.depth);
 
             insertLit(temp, literal, len);
 
@@ -574,7 +574,7 @@ namespace Assignment1
 
             ptr = st.lookUp(ptr.lexeme);
 
-            Console.WriteLine(ptr.lexeme);
+            //Console.WriteLine(ptr.lexeme);
 
             ptr.typeOfEntry = SymTab.entryType.literalEntry;
 
@@ -897,7 +897,7 @@ namespace Assignment1
                     SymTab.paramNode node = ll.ElementAt(i);
                     i++;
 
-                    Console.WriteLine(token.lexeme);
+                    //WriteLine(token.lexeme);
                     string code = null;
                     SymTab.entry tmp = st.lookUp(token.lexeme);
 

@@ -370,6 +370,8 @@ namespace Assignment1
                     mov("bx", "[" + l + "]");
                     mov("[bx]", "ax");
 
+                    token = getNextToken(); // get R
+                    rTail();
                     break;
 
                 default:
@@ -378,7 +380,9 @@ namespace Assignment1
 
                     if(char.IsDigit(c))
                     {
-                        mov("heey", "lool");
+                        //Left side cant be number !
+                       // mov("heey", "lool");
+
 
                         break;
                     }
@@ -418,8 +422,9 @@ namespace Assignment1
                             //De-reference
 
                             token = trim(token);
-                            if (l[0] == '_')
-                                l = trim(l);
+                            //if (l[0] == '_')
+                                //l = trim(l);
+
                             mov("ax", "[" + trim(token) + "]");
                          
 
@@ -662,12 +667,19 @@ namespace Assignment1
                             {
                                 token = trim(token);
 
-
-
                                 if (token[0] == '_')
                                     token = trim(token);
-                                mov("ax", "offset " + token );
-                               // mov("ax", "offset " + token);
+
+                                if (token[0] == '_')
+                                {
+                                    mov("ax", "offset " + token);
+                                    // mov("ax", "offset " + token);
+
+                                }
+                                else
+                                    mov("ax",  token);
+                              
+
                                 emit("\tpush ax \n");
 
                             }
@@ -675,9 +687,14 @@ namespace Assignment1
                             {
 
                                 if (token[0] == '_')
+                                {
                                     token = trim(token);
+                                    mov("ax",   token);
+                                }
+                                else
+                                    mov("ax", "offset " + token);
 
-                                mov("ax", "offset " + token);
+
                                 emit("\tpush ax \n");
 
                                 //token = getNextToken();
