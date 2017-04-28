@@ -452,11 +452,13 @@ namespace Assignment1
                     match(lexicalScanner.SYMBOL.rparent);
                     break;
                 case (lexicalScanner.SYMBOL.putlt):
-                    match(lexicalScanner.SYMBOL.lparent);
+                    
                     match(lexicalScanner.SYMBOL.putlt);
+                    match(lexicalScanner.SYMBOL.lparent);
                     if (error != true)
                         Write_List(ref offset);
                     match(lexicalScanner.SYMBOL.rparent);
+                    emit("wrln \n");
                     break;
                 default:
                     error = true; // Lambda not allowed
@@ -504,7 +506,7 @@ namespace Assignment1
                     addCode(tptr, ref code);
                     
                     emit(code + "\n");
-                    emit("wrln \n");
+                    
 
                     match(lexicalScanner.SYMBOL.idt);
                     break;
@@ -690,9 +692,6 @@ namespace Assignment1
             if(error != true)
             {
 
-            
-
-
                 ptr.lexeme = ptr.lexeme.Trim();
             
                 if(ptr.lexeme[0] == '-')
@@ -741,9 +740,9 @@ namespace Assignment1
 
                         //THIS IS ALL IF LEFTPTR PASSING MODE IN/OUT/INOUT
                         if (Vptr.mode == lexicalScanner.SYMBOL.intt)
-                            code = code + Vptr.lexeme;
+                            code = code + "__"+ Vptr.lexeme;
                         else
-                            code = code + "@" + Vptr.lexeme;
+                            code = code + "@" +"__"+ Vptr.lexeme;
                     }
                     else
                     {
@@ -1251,7 +1250,7 @@ namespace Assignment1
             SymTab.entry temp = new SymTab.entry();
             
 
-            temp.lexeme = "_t" + tempVarNr;
+            temp.lexeme = "t" + tempVarNr;
             tempVarNr++;
 
             st.insert(temp.lexeme, lexicalScanner.SYMBOL.idt, depth);

@@ -260,7 +260,7 @@ namespace Assignment1
 
                         if (temp.typeOfEntry == SymTab.entryType.varEntry)
                         {
-                            emit(temp.lexeme + "\t" + "dw\t" + "?");
+                            emit("_" + temp.lexeme + "\t" + "dw\t" + "?");
                         }
 
 
@@ -272,7 +272,7 @@ namespace Assignment1
                 {
                     if (temp.typeOfEntry == SymTab.entryType.varEntry)
                     {
-                        emit(temp.lexeme + "\t" + "dw\t" + "?");
+                        emit("_" + temp.lexeme + "\t" + "dw\t" + "?");
                     }
 
                 }
@@ -365,8 +365,8 @@ namespace Assignment1
 
                     mov("ax", "[" + token + "]");
                    // l = trim(l);
-                    token = getNextToken();
-                    rTail();
+                    //token = getNextToken();
+                    
                     mov("bx", "[" + l + "]");
                     mov("[bx]", "ax");
 
@@ -398,7 +398,11 @@ namespace Assignment1
                             token = trim(token);
                             mov("ax", "[" + token + "]");
 
-                            if(l[0] == '_')
+
+                            token = getNextToken();
+                            rTail();
+
+                            if (l[0] == '_')
                             {
                                 l = trim(l);
 
@@ -406,12 +410,8 @@ namespace Assignment1
                             }
                             else
                             {
-                                mov( l , "ax");
+                                mov(l, "ax");
                             }
-                            token = getNextToken();
-                            rTail();
-                            //mov("[" + l + "]", " ax");
-
 
                             break;
                         case ('@'):
@@ -421,13 +421,15 @@ namespace Assignment1
                             if (l[0] == '_')
                                 l = trim(l);
                             mov("ax", "[" + trim(token) + "]");
-                           // l = trim(l);
+                         
+
+
                             token = getNextToken();
                             rTail();
                             mov("bx", "[" + l + "]");
                             mov("[ bx ]", "ax");
 
-                            //    mov("[" + l + "]", " ax");
+
 
                             break;
                         default:
@@ -435,8 +437,8 @@ namespace Assignment1
                             {
                                 mov("ax", token);
                                 l = trim(l);
+
                                 token = getNextToken();
-                                // token = getNextToken();
                                 rTail();
                                 mov("[" + l + "]", "ax");
 
@@ -446,9 +448,8 @@ namespace Assignment1
                                 if (l[0] == '_')
                                     l = trim(l);
                                 mov("ax ", token);
-                                //l = trim(l);
+
                                 token = getNextToken();
-                                // token = getNextToken();
                                 rTail();
                                 mov("[" + l + "]", "ax");
                                 //token = getNextToken();
@@ -482,9 +483,6 @@ namespace Assignment1
                    
 
                     token = getNextToken();
-                    //  token = getNextToken();
-                    // token = trim(token);
-                    //mov("bx ", "[" + trim(token) + "]");
 
                     SymTab.entry ptr = st.lookUp(token);
                     char c = token[0];
@@ -532,11 +530,10 @@ namespace Assignment1
                 case ('*'):
                     
                     token = getNextToken();
-                    token = getNextToken();
-                    token = trim(token);
+
                     mov("bx ", "[" + trim(token) + "]");
                     emit("\timul " + "bx");
-
+                    token = getNextToken();
                     break;
                 default:
                     break;
@@ -590,11 +587,24 @@ namespace Assignment1
                             //Else a variable
                             else
                             {
+                                //De ref
+                                if(token[0] == '@')
+                                {
+                                    token = trim(token);
 
-                                if (token[0] == '_')
-                                    mov("ax",  trim(token) );
+                                    if (token[0] == '_')
+                                        mov("bx", "[" + trim(token) + "]");
+                                    else
+                                        mov("bx", "[" + token + "]");
+                                }
                                 else
-                                    mov("ax",  token );
+                                {
+                                    if (token[0] == '_')
+                                        mov("ax", "[" + trim(token) + "]");
+                                    else
+                                        mov("ax", "[" + token + "]");
+                                }
+
 
                                 //emit("\tcall writeint");
                             }
@@ -644,6 +654,9 @@ namespace Assignment1
                             if (token[0] == '@') // De reference?   
                             {
                                 token = trim(token);
+
+
+
                                 if (token[0] == '_')
                                     token = trim(token);
                                 mov("ax", "offset " + token );
