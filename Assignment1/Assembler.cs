@@ -392,12 +392,12 @@ namespace Assignment1
                             if (l[0] == '_')
                             {
                                 l = trim(l);
-                                mov(l, "ax");
-                                
+
+                                mov("[" + l + "]", "ax");
                             }
                             else
                             {
-                                mov("[" + l + "]", "ax");
+                                mov(l, "ax");
                             }
 
                             break;
@@ -419,7 +419,27 @@ namespace Assignment1
                                 mov(l, "ax");
                             }
 
-  
+                            /*
+                            //De-reference
+
+                            token = trim(token);
+                            //if (l[0] == '_')
+                                //l = trim(l);
+
+                            mov("ax", "[" + trim(token) + "]");
+                         
+
+
+                            token = getNextToken();
+                            rTail();
+
+                            if (l[0] == '_')
+                                mov("bx", "[" + trim(l) + "]");
+                            else
+                                mov("bx", "[" + l + "]");
+                            mov("[ bx ]", "ax");
+                            */
+
 
                             break;
                         default:
@@ -666,6 +686,7 @@ namespace Assignment1
                                     else
                                         mov("ax", token);
                                 }
+
 
                               
 
