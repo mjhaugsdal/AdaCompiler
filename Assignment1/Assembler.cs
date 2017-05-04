@@ -367,7 +367,10 @@ namespace Assignment1
                    // l = trim(l);
                     //token = getNextToken();
                     
-                    mov("bx", "[" + l + "]");
+                    if(l[0] == '_')
+                        mov("bx", "[" + trim(l) + "]");
+                    else
+                        mov("bx", "[" + l + "]");
                     mov("[bx]", "ax");
 
                     token = getNextToken(); // get R
@@ -431,7 +434,11 @@ namespace Assignment1
 
                             token = getNextToken();
                             rTail();
-                            mov("bx", "[" + l + "]");
+
+                            if (l[0] == '_')
+                                mov("bx", "[" + trim(l) + "]");
+                            else
+                                mov("bx", "[" + l + "]");
                             mov("[ bx ]", "ax");
 
 
@@ -586,7 +593,7 @@ namespace Assignment1
                             //If pushing a number
                             if (char.IsDigit(token[0]))
                             {
-                                mov("ax", token);
+                                mov("dx", token);
                                // emit("\tcall writeint");
                             }
                             //Else a variable
@@ -605,9 +612,9 @@ namespace Assignment1
                                 else
                                 {
                                     if (token[0] == '_')
-                                        mov("ax", "[" + trim(token) + "]");
+                                        mov("dx", "[" + trim(token) + "]");
                                     else
-                                        mov("ax", "[" + token + "]");
+                                        mov("dx", "[" + token + "]");
                                 }
 
 
@@ -677,7 +684,7 @@ namespace Assignment1
 
                                 }
                                 else
-                                    mov("ax",  token);
+                                    mov("ax", "offset " + token);
                               
 
                                 emit("\tpush ax \n");

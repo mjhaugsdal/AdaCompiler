@@ -381,6 +381,7 @@ namespace Assignment1
                     if (error != true)
                         statement(ref offset);
                     match(lexicalScanner.SYMBOL.semicolont);
+                    emit("wrln \n");
                     if (error != true)
                         statTail(ref offset);
                     break;
