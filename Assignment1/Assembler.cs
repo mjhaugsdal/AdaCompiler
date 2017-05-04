@@ -6,10 +6,16 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Text.RegularExpressions;
 
+
+
+
+
+
 namespace Assignment1
 {
-
-    
+    /// <summary>
+    /// Assembler class. Builds an .asm file from the .tac from parser class.
+    /// </summary>
     class Assembler
     {
         bool visual = true;
@@ -24,6 +30,10 @@ namespace Assignment1
         private SymTab st;
 
 
+        /// <summary>
+        /// Constructor. Outputs some header information.
+        /// </summary>
+        /// <param name="path"></param>
         public Assembler(string path)
         {
             this.path = path;
@@ -71,6 +81,9 @@ namespace Assignment1
 
         }
 
+        /// <summary>
+        /// Reads .tac until EOF
+        /// </summary>
         public  void genAssembly()
         {
 
@@ -87,44 +100,8 @@ namespace Assignment1
             }
             
 
-
-
-            /* while (!tacSr.EndOfStream )
-            {
-
-                token = getNextToken();
-            }*/
-            //Read last line
-
-
-
-
-
-            //tacLine tl = getProc(sr.ReadLine());
-            //Need to tokenize
-
-            //Read first line from tac file
-            /* while (tl.adr1 != "start" && tl.adr2 != "proc" && tl.adr3 != rdp.mainProc )
-             {
-
-
-                 string line = sr.ReadLine();
-                 tl = tokenize(line);
-                // Console.WriteLine(line);
-             }*/
-
-            //while tac != start proc rdp.mainProc
-            //If proc, insert procedure
-            //Read next line from TAC file
-
-
-
         }
 
-        /* private tacLine getProc(string v)
-         {
-
-         }*/
         public char peekNextChar()
         {
             return (char)tacSr.Peek();
@@ -201,6 +178,9 @@ namespace Assignment1
         }
 
 
+        /// <summary>
+        /// Inserts a procedure with all necessary information 
+        /// </summary>
         private void insertProcedure()
         {
             
@@ -412,6 +392,25 @@ namespace Assignment1
                             if (l[0] == '_')
                             {
                                 l = trim(l);
+                                mov(l, "ax");
+                                
+                            }
+                            else
+                            {
+                                mov("[" + l + "]", "ax");
+                            }
+
+                            break;
+                        case ('@'):
+
+                            token = trim(token);
+                            mov("ax", "[" + trim(token) + "]");
+
+                            token = getNextToken();
+                            rTail();
+                            if (l[0] == '_')
+                            {
+                                l = trim(l);
 
                                 mov("[" + l + "]", "ax");
                             }
@@ -420,28 +419,7 @@ namespace Assignment1
                                 mov(l, "ax");
                             }
 
-                            break;
-                        case ('@'):
-                            //De-reference
-
-                            token = trim(token);
-                            //if (l[0] == '_')
-                                //l = trim(l);
-
-                            mov("ax", "[" + trim(token) + "]");
-                         
-
-
-                            token = getNextToken();
-                            rTail();
-
-                            if (l[0] == '_')
-                                mov("bx", "[" + trim(l) + "]");
-                            else
-                                mov("bx", "[" + l + "]");
-                            mov("[ bx ]", "ax");
-
-
+  
 
                             break;
                         default:
@@ -593,7 +571,7 @@ namespace Assignment1
                             //If pushing a number
                             if (char.IsDigit(token[0]))
                             {
-                                mov("dx", token);
+                                mov("ax", token);
                                // emit("\tcall writeint");
                             }
                             //Else a variable
@@ -612,9 +590,9 @@ namespace Assignment1
                                 else
                                 {
                                     if (token[0] == '_')
-                                        mov("dx", "[" + trim(token) + "]");
+                                        mov("ax", "[" + trim(token) + "]");
                                     else
-                                        mov("dx", "[" + token + "]");
+                                        mov("ax", "[" + token + "]");
                                 }
 
 
@@ -650,14 +628,15 @@ namespace Assignment1
                                 if (token[0] == '_')
                                     token = trim(token);
 
-                                mov("dx", "[" + token + "]");
+                                mov("[" + token + "]", "bx");
+                                //mov("dx", "[" + token + "]");
                             }
                             else
                             {
                                 if (token[0] == '_')
                                     token = trim(token);
 
-                                mov("dx", "[" + token + "]");
+                                mov("[" + token + "]", "bx");
                             }
 
 
@@ -675,16 +654,19 @@ namespace Assignment1
                                 token = trim(token);
 
                                 if (token[0] == '_')
-                                    token = trim(token);
 
-                                if (token[0] == '_')
                                 {
-                                    mov("ax", "offset " + token);
-                                    // mov("ax", "offset " + token);
+                                    token = trim(token);
+                                    if (token[0] == '_')
+                                    {
+                                        mov("ax", "offset " + token);
+                                        // mov("ax", "offset " + token);
 
+                                    }
+                                    else
+                                        mov("ax", token);
                                 }
-                                else
-                                    mov("ax", "offset " + token);
+
                               
 
                                 emit("\tpush ax \n");
