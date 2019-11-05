@@ -1,4 +1,4 @@
-# AdaCompilerV2
+# AdaCompiler
 
 Goto: https://github.com/mjhaugsdal/AdaCompilerV2
 
