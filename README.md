@@ -1,4 +1,7 @@
 # AdaCompilerV2
+
+Goto: https://github.com/mjhaugsdal/AdaCompilerV2
+
 Compiler for a subset of Ada. Written in C#.
 
 Scans and checks .ada files from args[] for syntax errors, giving an appropriate error message.
